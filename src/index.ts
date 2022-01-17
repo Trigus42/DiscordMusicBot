@@ -314,9 +314,8 @@ client.on("messageCreate", async message => {
             // Exit if there is only one page of guilds (no need for all of this)
             if (embeds.length < 1) return
 
-            // Collect button interactions (when a user clicks a button),
-            // but only when the button as clicked by the original message author
-            const collector = embedMessage.createMessageComponentCollector({filter: ({user}) => user.id === author.id})
+            // Collect button interactions
+            const collector = embedMessage.createMessageComponentCollector()
 
             let currentIndex = 0
             collector.on('collect', async (interaction: any) => {
