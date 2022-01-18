@@ -1,5 +1,11 @@
 {
     "token": "",
     "prefix": ".",
-    "action_messages": false
+    "action_messages": false,
+    "spotify": {
+        "client_id": "",
+        "client_secret": "",
+        "refresh_token": "",
+        "market": ""
+    }
 }

@@ -26,6 +26,7 @@ const Discord = __importStar(require("discord.js"));
 const DisTube = __importStar(require("distube"));
 const level = __importStar(require("level"));
 const process_1 = __importDefault(require("process"));
+const play_dl_1 = __importDefault(require("play-dl"));
 const Constants = __importStar(require("./constants"));
 const Buttons = Constants.Buttons;
 /////////////////
@@ -255,7 +256,35 @@ client.on("messageCreate", async (message) => {
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
-            await distube.play(message, args.join(" "));
+            var url_type = await play_dl_1.default.validate(args[0]);
+            if (url_type === 'sp_track' || url_type === 'sp_album' || url_type === 'sp_playlist') {
+                // Spotify authorization
+                try {
+                    await play_dl_1.default.setToken({ spotify: user_config.spotify });
+                    if (play_dl_1.default.is_expired())
+                        await play_dl_1.default.refreshToken(); // Refresh spotify access token if it has expired
+                }
+                catch (error) {
+                    embedbuilder_message(client, message, "RED", "SPOTIFY", `❌ Something went wrong while trying to authorize Spotify!`);
+                    return;
+                }
+                let sp_data = await play_dl_1.default.spotify(args[0]); // Get spotify data from url
+                // Search for song on YouTube
+                if (sp_data.type === 'track') {
+                    var search_string = sp_data.name + " - " + sp_data.artists.map((artist) => artist.name).join(" ");
+                    var yt_vid = (await distube.search(search_string, { limit: 1 }))[0].url;
+                    await distube.play(message, yt_vid);
+                }
+                else if (sp_data.type === 'playlist' || sp_data.type === 'album') {
+                    var tracks = sp_data.fetched_tracks.get('1');
+                    var search_strings = await Promise.all(tracks.map(async (track) => track.name + " - " + track.artists.map(artist => artist.name).join(" ")));
+                    var urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
+                    distube.playCustomPlaylist(message, urls);
+                }
+            }
+            else {
+                await distube.play(message, args.join(" "));
+            }
             message.react("✅");
             return;
         }
