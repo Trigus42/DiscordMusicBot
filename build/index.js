@@ -108,7 +108,7 @@ client.on("messageCreate", async (message) => {
             return;
         const args = message.content.slice(prefix.length).trim().split(/ +/g); // Remove prefix and split message into arguments
         const command = args.shift(); // Get command name (first argument)
-        // If message starts with prefix react with checkmark
+        // React if message starts with prefix 
         if (message.content.startsWith(prefix)) {
             message.react("🆗");
         }
@@ -152,7 +152,7 @@ client.on("messageCreate", async (message) => {
                 .addField(`\`${prefix}ping\``, `**Gives you the ping**`, true)
                 .addField(`\`${prefix}uptime\``, `**Shows you the Bot's Uptime**`, true)
                 .addField(`​`, `​`, true)
-                .addField("***FILTERS:***", Object.keys(filters).map(filter => `\`!${filter}\``).join(" "));
+                .addField("***FILTERS:***", Object.keys(filters).map(filter => `\`${prefix}${filter}\``).join(" "));
             message.channel.send({ embeds: [helpembed] });
             return;
         }
