@@ -577,7 +577,7 @@ function embedbuilder(client, user, channel, color, title, description, thumbnai
 /**
  *  this function is for playing the song
  */
-async function playsong(queue, song) {
+async function playsong(queue, song, status) {
     try {
         // Delete old playing message if there is one
         try {
@@ -585,7 +585,7 @@ async function playsong(queue, song) {
         }
         catch (error) { }
         // Send new playing message
-        let embedMessage = await send_playing_embed(queue, song);
+        let embedMessage = await send_playing_embed(queue, song, status);
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector();
         collector.on('collect', async (interaction) => {
@@ -601,14 +601,15 @@ async function playsong(queue, song) {
                         if (user_config.action_messages)
                             embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", `Paused the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+                        playsong(queue, song, "Paused");
                     }
                     else {
                         distube.resume(queue);
                         if (user_config.action_messages)
                             embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", `Resumed the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+                        playsong(queue, song);
                     }
-                    playsong(queue, song);
                     return;
                 case Buttons.next_Button.customId:
                     distube.skip(queue);
@@ -655,12 +656,12 @@ async function playsong(queue, song) {
 /**
  *  Generate playing message
  */
-async function send_playing_embed(queue, song) {
+async function send_playing_embed(queue, song, title) {
     // If no song is provided, use the first song in the queue
     song = song !== null && song !== void 0 ? song : queue.songs[0];
     let embed = new Discord.MessageEmbed()
         .setColor("#fffff0")
-        .setTitle("Playing Song")
+        .setTitle(title !== null && title !== void 0 ? title : "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
         .addField("Duration:", `\`${queue.formattedCurrentTime !== "00:00" ? queue.formattedCurrentTime + " / " + song.formattedDuration : song.formattedDuration}\``, true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)

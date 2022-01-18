@@ -575,7 +575,7 @@ function embedbuilder_message(client: Discord.Client, message: Discord.Message, 
 /**
  *  this function is for playing the song
  */
-async function playsong(queue: DisTube.Queue, song?: DisTube.Song) {
+async function playsong(queue: DisTube.Queue, song?: DisTube.Song, status?: string) {
     try {
         // Delete old playing message if there is one
         try {
@@ -583,7 +583,7 @@ async function playsong(queue: DisTube.Queue, song?: DisTube.Song) {
         } catch (error) {}
 
         // Send new playing message
-        let embedMessage = await send_playing_embed(queue, song)
+        let embedMessage = await send_playing_embed(queue, song, status)
 
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector()
@@ -602,15 +602,15 @@ async function playsong(queue: DisTube.Queue, song?: DisTube.Song) {
                         if (user_config.action_messages) 
                             embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "PAUSED", `Paused the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+                            playsong(queue, song, "Paused")
                     } else {
                         distube.resume(queue)
 
                         if (user_config.action_messages) 
                             embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "RESUMED", `Resumed the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                    }
-                    
-                    playsong(queue, song)
+                            playsong(queue, song)
+                    }           
                     return
 
                 case Buttons.next_Button.customId:
@@ -666,13 +666,13 @@ async function playsong(queue: DisTube.Queue, song?: DisTube.Song) {
 /**
  *  Generate playing message
  */
-async function send_playing_embed(queue: DisTube.Queue, song?: DisTube.Song) {
+async function send_playing_embed(queue: DisTube.Queue, song?: DisTube.Song, title?: string) {
     // If no song is provided, use the first song in the queue
     song = song ?? queue.songs[0]
 
     let embed = new Discord.MessageEmbed()
         .setColor("#fffff0")
-        .setTitle("Playing Song")
+        .setTitle(title ?? "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
         .addField("Duration:", `\`${queue.formattedCurrentTime !== "00:00" ? queue.formattedCurrentTime + " / " + song.formattedDuration: song.formattedDuration}\``, true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
