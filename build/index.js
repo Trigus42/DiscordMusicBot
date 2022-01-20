@@ -184,10 +184,10 @@ client.on("messageCreate", async (message) => {
             let searchresult = "";
             for (let i = 0; i <= result.length; i++) {
                 try {
-                    searchresult += await `**${i + 1}**. ${result[i].name} - \`${result[i].formattedDuration}\`\n`;
+                    searchresult += `**${i + 1}**. ${result[i].name} - \`${result[i].formattedDuration}\`\n`;
                 }
                 catch (error) {
-                    searchresult += await " ";
+                    searchresult += " ";
                 }
             }
             let searchembed = await embedbuilder_message(client, message, "#fffff0", "Current Queue", searchresult);
@@ -212,7 +212,12 @@ client.on("messageCreate", async (message) => {
         }
         else if (command == "status") {
             var queue = distube.getQueue(message.guild.id);
-            await playsong(queue, queue.songs[0]);
+            if (!queue) {
+                embedbuilder_message(client, message, "RED", "There is nothing playing")
+                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+                return;
+            }
+            await status_embed(queue, queue.songs[0]);
             message.react("✅");
             return;
         }
@@ -289,8 +294,10 @@ client.on("messageCreate", async (message) => {
             return;
         }
         else if (command === "skip" || command === "s") {
-            if (!distube.getQueue(message).autoplay && distube.getQueue(message).songs.length <= 1) {
-                distube.getQueue(message).stop();
+            let queue = distube.getQueue(message.guild.id);
+            if (!queue.autoplay && queue.songs.length <= 1) {
+                queue.stop();
+                queue.emit("finish", queue);
             }
             else {
                 await distube.skip(message);
@@ -423,7 +430,7 @@ client.on("messageCreate", async (message) => {
 distube
     .on('playSong', (queue, song) => {
     try {
-        playsong(queue, song);
+        status_embed(queue, song);
     }
     catch (error) {
         console.error(error);
@@ -494,7 +501,7 @@ distube
     try {
         // Delete old playing message
         try {
-            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`)));
+            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`))).delete();
         }
         catch (error) { }
         embedbuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
@@ -577,7 +584,7 @@ function embedbuilder(client, user, channel, color, title, description, thumbnai
 /**
  *  this function is for playing the song
  */
-async function playsong(queue, song, status) {
+async function status_embed(queue, song, status) {
     try {
         // Delete old playing message if there is one
         try {
@@ -585,7 +592,7 @@ async function playsong(queue, song, status) {
         }
         catch (error) { }
         // Send new playing message
-        let embedMessage = await send_playing_embed(queue, song, status);
+        let embedMessage = await send_status_embed(queue, song, status);
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector();
         collector.on('collect', async (interaction) => {
@@ -601,18 +608,24 @@ async function playsong(queue, song, status) {
                         if (user_config.action_messages)
                             embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", `Paused the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                        playsong(queue, song, "Paused");
+                        status_embed(queue, song, "Paused");
                     }
                     else {
                         distube.resume(queue);
                         if (user_config.action_messages)
                             embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", `Resumed the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                        playsong(queue, song);
+                        status_embed(queue, song);
                     }
                     return;
                 case Buttons.next_Button.customId:
-                    distube.skip(queue);
+                    if (!queue.autoplay && queue.songs.length <= 1) {
+                        queue.stop();
+                        queue.emit("finish", queue);
+                    }
+                    else {
+                        await distube.skip(queue);
+                    }
                     if (user_config.action_messages)
                         embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", `Skipped the song`)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
@@ -633,7 +646,7 @@ async function playsong(queue, song, status) {
                     if (user_config.action_messages)
                         embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`-10 seconds\``)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    playsong(queue, song);
+                    status_embed(queue, song);
                     return;
                 case Buttons.seek_forward_Button.customId:
                     var seektime = queue.currentTime + 10;
@@ -644,7 +657,7 @@ async function playsong(queue, song, status) {
                     if (user_config.action_messages)
                         embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`+10 seconds\``)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    playsong(queue, song);
+                    status_embed(queue, song);
                     return;
             }
         });
@@ -656,7 +669,7 @@ async function playsong(queue, song, status) {
 /**
  *  Generate playing message
  */
-async function send_playing_embed(queue, song, title) {
+async function send_status_embed(queue, song, title) {
     // If no song is provided, use the first song in the queue
     song = song !== null && song !== void 0 ? song : queue.songs[0];
     let embed = new Discord.MessageEmbed()
