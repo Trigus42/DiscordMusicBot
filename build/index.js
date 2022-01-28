@@ -24,29 +24,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Discord = __importStar(require("discord.js"));
 const DisTube = __importStar(require("distube"));
-const level = __importStar(require("level"));
-const process_1 = __importDefault(require("process"));
 const play_dl_1 = __importDefault(require("play-dl"));
+const fs = __importStar(require("fs"));
 const Constants = __importStar(require("./constants"));
+const db_1 = require("./db");
 const Buttons = Constants.Buttons;
 /////////////////
 /// Initialize //
 /////////////////
+let db = new db_1.DB("./config/db.sqlite");
 // Read config files into dict
-const user_config = require("../config/user_config.json");
-const filters = require("../config/filters.json");
-// Connect to database
-const db = level.default('./config/db');
-// Make sure db is always closed
-process_1.default.on('exit', (code) => {
-    db.close();
-});
-process_1.default.on('uncaughtException', (code) => {
-    db.close();
-});
-process_1.default.on('unhandledRejection', (code) => {
-    db.close();
-});
+const user_config = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8"));
+const filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"));
 // Create a new discord client
 // TODO: Remove unused intents and partials
 const client = new Discord.Client({
@@ -83,27 +72,22 @@ client.on("ready", () => {
 });
 // Log when reconnect
 client.on('reconnecting', () => {
-    console.log(' :: Reconnecting!');
+    console.log(' :: Reconnecting');
     client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 });
 // Log when disconnecting
 client.on('disconnect', () => {
-    console.log(' :: Disconnect!');
+    console.log(' :: Disconnect');
     client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 });
 client.on("messageCreate", async (message) => {
+    var _a;
     try {
         // Ignore non commands, messages from bots and DMs
         if (message.author.bot || !message.guild)
             return;
         // Get prefix for guild
-        let prefix;
-        try {
-            prefix = await db.get(`prefix_${message.guild.id}`); // Get prefix from database
-        }
-        catch (error) {
-            prefix = user_config.prefix; // If prefix is not set, use standard prefix from the user_config.json file
-        }
+        let prefix = (_a = await db.get(`prefix_${message.guild.id}`, 1)) !== null && _a !== void 0 ? _a : user_config.prefix; // Get prefix from database or default
         // Ignore messages that don't start with the prefix
         if (!message.content.startsWith(prefix))
             return;
@@ -165,7 +149,7 @@ client.on("messageCreate", async (message) => {
             }
             // If user is not owner, return error
             if (!message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                embedbuilder_message(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command!`);
+                embedbuilder_message(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command`);
                 return;
             }
             // If prefix includes spaces, return error
@@ -237,7 +221,7 @@ client.on("messageCreate", async (message) => {
             return;
         }
         else if (command == "autoplay" || command == "ap") {
-            await embedbuilder_message(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}!`)
+            await embedbuilder_message(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
             message.react("✅");
             return;
@@ -397,7 +381,7 @@ client.on("messageCreate", async (message) => {
             }
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
                 try {
-                    (await message.channel.messages.fetch(await db.get(`playingembed_${message.guild.id}`))).delete().catch(console.error);
+                    (await message.channel.messages.fetch(await db.get(`playingembed_${message.guild.id}`, 1))).delete().catch(console.error);
                 }
                 catch (error) {
                     console.error(error);
@@ -415,7 +399,7 @@ client.on("messageCreate", async (message) => {
             }
         }
         else if (message.content.startsWith(prefix)) {
-            embedbuilder_message(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands!`)
+            embedbuilder_message(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands`)
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
             return;
         }
@@ -501,7 +485,7 @@ distube
     try {
         // Delete old playing message
         try {
-            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`))).delete();
+            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
         }
         catch (error) { }
         embedbuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
@@ -588,7 +572,7 @@ async function status_embed(queue, song, status) {
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`))).delete();
+            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
         }
         catch (error) { }
         // Send new playing message

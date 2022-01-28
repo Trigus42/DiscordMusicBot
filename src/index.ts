@@ -1,35 +1,21 @@
 import * as Discord from "discord.js"
 import * as DisTube from "distube"
-import * as level from "level"
-import process from "process"
-import play, { SpotifyAlbum, SpotifyPlaylist, SpotifyTrack } from 'play-dl'
+import play, { SpotifyTrack } from 'play-dl'
+import * as fs from "fs"
 
 import * as Constants from "./constants"
-import { spawn } from "child_process"
-import { throws } from "assert"
+import {DB} from "./db"
 const Buttons = Constants.Buttons
 
 /////////////////
 /// Initialize //
 /////////////////
 
+let db = new DB("./config/db.sqlite")
+
 // Read config files into dict
-const user_config = require("../config/user_config.json")
-const filters = require("../config/filters.json")
-
-// Connect to database
-const db = level.default('./config/db')
-
-// Make sure db is always closed
-process.on('exit', (code) => {
-    db.close()
-})
-process.on('uncaughtException', (code) => {
-    db.close()
-})
-process.on('unhandledRejection', (code) => {
-    db.close()
-})
+const user_config = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8"))
+const filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"))
 
 // Create a new discord client
 // TODO: Remove unused intents and partials
@@ -58,8 +44,8 @@ client.login(user_config.token)
 
 // Log when ready and set presence
 client.on("ready", () => {
-    console.log(` :: Bot has started as :: ${client.user!.tag}`)
-    client.user!.setPresence({
+    console.log(` :: Bot has started as :: ${client.user.tag}`)
+    client.user.setPresence({
         status: "online",
         activities: [
             {
@@ -72,14 +58,14 @@ client.on("ready", () => {
 
 // Log when reconnect
 client.on('reconnecting', () => {
-    console.log(' :: Reconnecting!')
-    client.user!.setPresence({ status: "invisible" }); // Change discord presence to offline
+    console.log(' :: Reconnecting')
+    client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 })
 
 // Log when disconnecting
 client.on('disconnect', () => {
-    console.log(' :: Disconnect!'); 
-    client.user!.setPresence({ status: "invisible" }); // Change discord presence to offline
+    console.log(' :: Disconnect'); 
+    client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 })
 
 client.on("messageCreate", async message => {
@@ -88,12 +74,7 @@ client.on("messageCreate", async message => {
         if (message.author.bot || !message.guild) return
 
         // Get prefix for guild
-        let prefix: string
-        try {
-            prefix = await db.get(`prefix_${message.guild.id}`) // Get prefix from database
-        } catch (error) {
-            prefix = user_config.prefix; // If prefix is not set, use standard prefix from the user_config.json file
-        }
+        let prefix = await db.get(`prefix_${message.guild.id}`, 1) as string ?? user_config.prefix // Get prefix from database or default
 
         // Ignore messages that don't start with the prefix
         if (!message.content.startsWith(prefix)) return; 
@@ -106,7 +87,7 @@ client.on("messageCreate", async message => {
             message.react("🆗")
         }
         // React if message mentions bot
-        else if (message.mentions.has(client.user!)) {
+        else if (message.mentions.has(client.user)) {
             message.reply({ embeds: [new Discord.MessageEmbed().setColor("#fffff0").setAuthor(`${message.author.username}, My Prefix is ${prefix}, to get started; type ${prefix}help`, message.author.displayAvatarURL({ dynamic: true }))]})
             return
         }
@@ -119,15 +100,15 @@ client.on("messageCreate", async message => {
         /////COMMANDS//////
         ///////////////////
         if (command === "invite" || command === "add") {
-            embedbuilder_message(client, message, "#fffff0", "Invite me", `[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user!.id}&permissions=49572160&scope=bot)`)
+            embedbuilder_message(client, message, "#fffff0", "Invite me", `[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=49572160&scope=bot)`)
             return
         }
         else if (command === "help"  || command === "about" || command === "h" || command === "info") {
             let helpembed = new Discord.MessageEmbed()
                 .setColor("#fffff0")
                 .setTitle("***COMMANDS***\n")
-                .setAuthor(message.author.tag, message.member!.user.displayAvatarURL({dynamic:true}))
-                .setFooter(client.user!.username + " | Syntax:  <>...must    []...optional", client.user!.displayAvatarURL())
+                .setAuthor(message.author.tag, message.member.user.displayAvatarURL({dynamic:true}))
+                .setFooter(client.user.username + " | Syntax:  <>...must    []...optional", client.user.displayAvatarURL())
                 .addField(`\`${prefix}prefix <NEW PREFIX>\``, `**Change Prefix**`, true)
                 .addField(`\`${prefix}help\`  \`${prefix}h\``, `**List of all Commands**`, true)
                 .addField(`\`${prefix}play <URL/NAME>\` \`${prefix}p\``, `**Plays a song**`, true)
@@ -159,8 +140,8 @@ client.on("messageCreate", async message => {
             }
 
             // If user is not owner, return error
-            if (!message.member!.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                embedbuilder_message(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command!`)
+            if (!message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
+                embedbuilder_message(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command`)
                 return
             }
 
@@ -176,7 +157,7 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command === "search" ) {
-            embedbuilder_message(client, message, "#fffff0", "Searching", args.join(" "))!.then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+            embedbuilder_message(client, message, "#fffff0", "Searching", args.join(" ")).then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             
             let result = await distube.search(args.join(" "))
             let searchresult = ""
@@ -192,13 +173,13 @@ client.on("messageCreate", async message => {
 
             let filter = (m: Discord.Message) => !isNaN(Number(m.content)) && m.author.id === message.author.id
             let userinput: any; 
-            await searchembed!.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"] }).then(collected => {
-                let userinput = collected.first()!.content
+            await searchembed.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"] }).then(collected => {
+                let userinput = collected.first().content
                 if (Number(userinput) < 0 && Number(userinput) >= 15) {
                     embedbuilder_message(client, message, "RED", "Not a right number", "so i use number 1")
                     let userchoice = 1
                 }
-                setTimeout(() => searchembed!.delete().catch(console.error), Number(client.ws.ping))
+                setTimeout(() => searchembed.delete().catch(console.error), Number(client.ws.ping))
             })
             .catch(() => { console.log(console.error); userinput = 404 })
             if (userinput === 404) {
@@ -212,11 +193,11 @@ client.on("messageCreate", async message => {
         else if (command == "status") {
             var queue = distube.getQueue(message.guild.id)
             if (!queue) {
-                embedbuilder_message(client, message, "RED", "There is nothing playing")!
+                embedbuilder_message(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
-            await status_embed(queue!, queue!.songs[0])
+            await status_embed(queue, queue.songs[0])
             message.react("✅")
             return
         }
@@ -236,7 +217,7 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command == "autoplay" || command == "ap") {
-            await embedbuilder_message(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}!`)!
+            await embedbuilder_message(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             message.react("✅")
             return
@@ -246,17 +227,17 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command === "uptime") {
-            let days = Math.floor(client.uptime! / 86400000)
-            let hours = Math.floor(client.uptime! / 3600000) % 24
-            let minutes = Math.floor(client.uptime! / 60000) % 60
-            let seconds = Math.floor(client.uptime! / 1000) % 60
+            let days = Math.floor(client.uptime / 86400000)
+            let hours = Math.floor(client.uptime / 3600000) % 24
+            let minutes = Math.floor(client.uptime / 60000) % 60
+            let seconds = Math.floor(client.uptime / 1000) % 60
             embedbuilder_message(client, message, `#fffff0`, `UPTIME:`, `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\``)
             return
         }
         else if (command === "play" || command === "p") {
             // Check if user in voice channel or bot in voice channel
-            if (!message.member!.voice.channel) {
-                embedbuilder_message(client, message, "RED", "You are not in a voice channel")!
+            if (!message.member.voice.channel) {
+                embedbuilder_message(client, message, "RED", "You are not in a voice channel")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -293,9 +274,9 @@ client.on("messageCreate", async message => {
         }
         else if (command === "skip" || command === "s") {
             let queue = distube.getQueue(message.guild.id)
-            if (!queue!.autoplay && queue!.songs.length <= 1) {
-                queue!.stop()
-                queue!.emit("finish", queue)
+            if (!queue.autoplay && queue.songs.length <= 1) {
+                queue.stop()
+                queue.emit("finish", queue)
             } else {
                 await distube.skip(message)
             }
@@ -318,8 +299,8 @@ client.on("messageCreate", async message => {
             message.react("✅")
             return
         }
-        else if (Object.keys(filters).includes(command!)) {
-            await distube.setFilter(message, command!)
+        else if (Object.keys(filters).includes(command)) {
+            await distube.setFilter(message, command)
             message.react("✅")
             return
         }
@@ -332,7 +313,7 @@ client.on("messageCreate", async message => {
             var queue = distube.getQueue(message)
 
             if (!queue) {
-                embedbuilder_message(client, message, "RED", "There is nothing playing")!
+                embedbuilder_message(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -341,7 +322,7 @@ client.on("messageCreate", async message => {
             const embeds = QueueEmbed(queue)
             const guilds = [...client.guilds.cache.values()]
 
-            const embedMessage = await queue.textChannel!.send({
+            const embedMessage = await queue.textChannel.send({
                 embeds: [embeds[0]],
                 components: embeds.length < 1 ? [] : [new Discord.MessageActionRow({components: [
                     Buttons.next_Button
@@ -379,13 +360,13 @@ client.on("messageCreate", async message => {
         else if (command === "loop" || command === "repeat") {
             if (0 <= Number(args[0]) && Number(args[0]) <= 2) {
                 await distube.setRepeatMode(message, parseInt(args[0]))
-                await embedbuilder_message(client, message, "#fffff0", "Repeat mode set to:", `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`)!
+                await embedbuilder_message(client, message, "#fffff0", "Repeat mode set to:", `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`)
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 message.react("✅")
                 return
             }
             else {
-                embedbuilder_message(client, message, "RED", "ERROR", `Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)!
+                embedbuilder_message(client, message, "RED", "ERROR", `Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -393,14 +374,14 @@ client.on("messageCreate", async message => {
         else if (command === "jump") {
             let queue = distube.getQueue(message)
             if (!queue) {
-                embedbuilder_message(client, message, "RED", "There is nothing playing")!
+                embedbuilder_message(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
         
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
                 try {
-                    (await message.channel.messages.fetch(await db.get(`playingembed_${message.guild.id}`))).delete().catch(console.error)
+                    (await message.channel.messages.fetch(await db.get(`playingembed_${message.guild.id}`, 1) as string)).delete().catch(console.error)
                 } catch (error) {
                     console.error(error)
                 }
@@ -411,14 +392,14 @@ client.on("messageCreate", async message => {
                 return
             }
             else {
-                embedbuilder_message(client, message, "RED", "ERROR", `Please use a number between **0** and **${distube.getQueue(message)!.songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)!
+                embedbuilder_message(client, message, "RED", "ERROR", `Please use a number between **0** and **${distube.getQueue(message).songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
 
         }
         else if (message.content.startsWith(prefix)) {
-            embedbuilder_message(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands!`)!
+            embedbuilder_message(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands`)
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             return
         }
@@ -441,7 +422,7 @@ distube
     })
     .on("addSong", (queue, song) => {
         try {
-            embedbuilder(client, song.user!, queue.textChannel!, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail!)
+            embedbuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail)
             return
         } 
         catch (error) { 
@@ -450,7 +431,7 @@ distube
     })
     .on("addList", (queue, playlist) => {
         try {
-            embedbuilder(client, playlist.user!, queue.textChannel!, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
+            embedbuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
             return
         } catch (error) {
             console.error(error)
@@ -481,8 +462,8 @@ distube
     })
     .on("error", (channel, error) => {
         try {
-            channel.lastMessage!.reactions.removeAll()
-            channel.lastMessage!.react("❌")
+            channel.lastMessage.reactions.removeAll()
+            channel.lastMessage.react("❌")
         } catch (error) {
             console.error(error)
         }
@@ -490,7 +471,7 @@ distube
         console.log(error)
 
         try {
-            embedbuilder(client, channel.lastMessage!.member!.user, channel, "RED", "An error encountered:", "```"+error+"```")
+            embedbuilder(client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```"+error+"```")
             return
         } catch (error) {
             console.error(error)
@@ -500,10 +481,10 @@ distube
         try {
             // Delete old playing message
             try {
-                (await queue.textChannel!.messages.fetch(await db.get(`playingembed_${queue.textChannel!.guildId}`))).delete()
+                (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`, 1) as string)).delete()
             } catch (error) {}
 
-            embedbuilder(client, queue.textChannel!.lastMessage!.member!.user, queue.textChannel!, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            embedbuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -511,7 +492,7 @@ distube
     })
     .on("empty", queue => {
         try {
-            embedbuilder(client, queue.textChannel!.lastMessage!.member!.user, queue.textChannel!, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            embedbuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -519,7 +500,7 @@ distube
     })
     .on("noRelated", queue => {
         try {
-            embedbuilder(client, queue.textChannel!.lastMessage!.member!.user, queue.textChannel!, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            embedbuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -550,8 +531,8 @@ function embedbuilder_message(client: Discord.Client, message: Discord.Message, 
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
-            .setAuthor(message.author.tag, message.member!.user.displayAvatarURL({ dynamic: true }))
-            .setFooter(client.user!.username, client.user!.displayAvatarURL())
+            .setAuthor(message.author.tag, message.member.user.displayAvatarURL({ dynamic: true }))
+            .setFooter(client.user.username, client.user.displayAvatarURL())
 
         if (title) embed.setTitle(title)
         if (description) embed.setDescription(description)
@@ -570,7 +551,7 @@ function embedbuilder_message(client: Discord.Client, message: Discord.Message, 
     let embed = new Discord.MessageEmbed()
         .setColor(color)
         .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
-        .setFooter(client.user!.username, client.user!.displayAvatarURL())
+        .setFooter(client.user.username, client.user.displayAvatarURL())
 
     if (title) embed.setTitle(title)
     if (description) embed.setDescription(description)
@@ -586,7 +567,7 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel!.messages.fetch(await db.get(`playingembed_${queue.textChannel!.guildId}`))).delete()
+            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`, 1) as string)).delete()
         } catch (error) {}
 
         // Send new playing message
@@ -599,7 +580,7 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
             interaction.deferUpdate()
 
             // Check if user is in the voice channel
-            if (!queue.voiceChannel!.members.has(interaction.member.user.id)) return
+            if (!queue.voiceChannel.members.has(interaction.member.user.id)) return
 
             switch (interaction.customId) {
                 case Buttons.play_pause_Button.customId:
@@ -607,14 +588,14 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
                         distube.pause(queue)
 
                         if (user_config.action_messages) 
-                            embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "PAUSED", `Paused the song`)
+                            embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", `Paused the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                             status_embed(queue, song, "Paused")
                     } else {
                         distube.resume(queue)
 
                         if (user_config.action_messages) 
-                            embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "RESUMED", `Resumed the song`)
+                            embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", `Resumed the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                             status_embed(queue, song)
                     }           
@@ -629,7 +610,7 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
                     }
 
                     if (user_config.action_messages) 
-                        embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "SKIPPED", `Skipped the song`)
+                        embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", `Skipped the song`)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     // The Distube "playSong" event will call the "playsong" function again
@@ -639,7 +620,7 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
                     distube.previous(queue)
 
                     if (user_config.action_messages) 
-                        embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "PREVIOUS", `Playing previous song`)
+                        embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", `Playing previous song`)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     // The Distube "playSong" event will call the "playsong" function again
@@ -651,7 +632,7 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
                     await distube.seek(queue, Number(seektime))
 
                     if (user_config.action_messages) 
-                        embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "Seeked", `Seeked the song for \`-10 seconds\``)
+                        embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`-10 seconds\``)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     status_embed(queue, song)
@@ -663,7 +644,7 @@ async function status_embed(queue: DisTube.Queue, song?: DisTube.Song, status?: 
                     await distube.seek(queue, Number(seektime))
 
                     if (user_config.action_messages) 
-                        embedbuilder(client, interaction.member.user, queue.textChannel!, "#fffff0", "Seeked", `Seeked the song for \`+10 seconds\``)
+                        embedbuilder(client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`+10 seconds\``)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     status_embed(queue, song)
@@ -692,12 +673,12 @@ async function send_status_embed(queue: DisTube.Queue, song?: DisTube.Song, titl
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? ":ballot_box_with_check: Queue" : ":ballot_box_with_check: Song" : "❌"}\``, true)
         .addField("Autoplay:", `\`${queue.autoplay ? ":ballot_box_with_check:" : "❌"}\``, true)
         .addField("Filter:", `\`${queue.filters.length != 0 ? queue.filters : "❌"}\``, true)
-        .setFooter(client.user!.username, client.user!.displayAvatarURL())
+        .setFooter(client.user.username, client.user.displayAvatarURL())
     if (song.user) embed.setAuthor(song.user.tag, song.user.displayAvatarURL({ dynamic: true }))
-    if (song.thumbnail!) embed.setThumbnail(song.thumbnail!)
+    if (song.thumbnail) embed.setThumbnail(song.thumbnail)
 
     // Send new playing message
-    const embedMessage = await queue.textChannel!.send({
+    const embedMessage = await queue.textChannel.send({
         embeds: [embed],
         components: [new Discord.MessageActionRow({components: [
             Buttons.play_pause_Button,
@@ -709,7 +690,7 @@ async function send_status_embed(queue: DisTube.Queue, song?: DisTube.Song, titl
     })
 
     // Save the message id to db
-    db.put(`playingembed_${embedMessage.guild!.id}`, embedMessage.id)
+    db.put(`playingembed_${embedMessage.guild.id}`, embedMessage.id)
 
     // Return the message
     return embedMessage
@@ -741,7 +722,7 @@ function QueueEmbed(queue: DisTube.Queue): Discord.MessageEmbed[]  {
             .setTitle("Server Queue")
             .setColor("#fffff0")
             .setDescription(`**Current Song - [\`${queue.songs[0].name}\`](${queue.songs[0].url})**\n\n${info.join("\n")}`)
-            .setFooter(client.user!.username, client.user!.displayAvatarURL())
+            .setFooter(client.user.username, client.user.displayAvatarURL())
         embeds.push(embed)
     }
 
