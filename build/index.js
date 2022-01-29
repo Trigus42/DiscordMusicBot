@@ -26,8 +26,8 @@ const Discord = __importStar(require("discord.js"));
 const DisTube = __importStar(require("distube"));
 const play_dl_1 = __importDefault(require("play-dl"));
 const fs = __importStar(require("fs"));
-const Constants = __importStar(require("./constants"));
 const db_1 = require("./db");
+const Constants = __importStar(require("./constants"));
 const Buttons = Constants.Buttons;
 /////////////////
 /// Initialize //
@@ -87,7 +87,7 @@ client.on("messageCreate", async (message) => {
         if (message.author.bot || !message.guild)
             return;
         // Get prefix for guild
-        let prefix = (_a = await db.get(`prefix_${message.guild.id}`, 1)) !== null && _a !== void 0 ? _a : user_config.prefix; // Get prefix from database or default
+        let prefix = (_a = await db.guilds.get("prefix", message.guild.id)) !== null && _a !== void 0 ? _a : user_config.prefix; // Get prefix from database or default
         // Ignore messages that don't start with the prefix
         if (!message.content.startsWith(prefix))
             return;
@@ -158,7 +158,7 @@ client.on("messageCreate", async (message) => {
                 return;
             }
             // Set new prefix in database
-            db.put(`prefix_${message.guild.id}`, args[0]);
+            db.guilds.set("prefix", args[0], message.guild.id);
             embedbuilder_message(client, message, "#fffff0", "PREFIX", `:ballot_box_with_check: Successfully set new prefix to **\`${args[0]}\`**`);
             return;
         }
@@ -381,7 +381,7 @@ client.on("messageCreate", async (message) => {
             }
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
                 try {
-                    (await message.channel.messages.fetch(await db.get(`playingembed_${message.guild.id}`, 1))).delete().catch(console.error);
+                    (await message.channel.messages.fetch(await db.kvstore.get(`playingembed_${message.guild.id}`, 1))).delete().catch(console.error);
                 }
                 catch (error) {
                     console.error(error);
@@ -485,7 +485,7 @@ distube
     try {
         // Delete old playing message
         try {
-            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
+            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
         }
         catch (error) { }
         embedbuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
@@ -572,7 +572,7 @@ async function status_embed(queue, song, status) {
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
+            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
         }
         catch (error) { }
         // Send new playing message
@@ -683,7 +683,7 @@ async function send_status_embed(queue, song, title) {
                 ] })]
     });
     // Save the message id to db
-    db.put(`playingembed_${embedMessage.guild.id}`, embedMessage.id);
+    db.kvstore.put(`playingembed_${embedMessage.guild.id}`, embedMessage.id);
     // Return the message
     return embedMessage;
 }

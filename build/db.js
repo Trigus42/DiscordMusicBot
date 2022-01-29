@@ -22,41 +22,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DB = void 0;
 const sql = __importStar(require("sqlite3"));
 class DB {
-    constructor(filename) {
-        this.path = filename;
-        this.init();
-    }
     /*
     * Constructor function to initialize database connection
     */
-    init() {
-        // Connect to database; create if not exists
-        this.db = new sql.Database(this.path, (err) => {
+    constructor(filename) {
+        this.path = filename;
+        this.db_connection = new sql.Database(this.path, (err) => {
             if (err) {
                 console.log(err);
             }
-            else {
-                // Create kvstore table if not exists
-                this.db.run("CREATE TABLE IF NOT EXISTS kvstore (key TEXT UNIQUE, value TEXT)", (err) => {
-                    if (err) {
-                        console.log(err);
-                    }
-                });
-            }
         });
+        this.guilds = new Guilds(this);
+        this.kvstore = new KVStore(this);
     }
     /*
     * Close database connection
     */
     close() {
-        return this.db.close();
+        return this.db_connection.close();
     }
     /**
     * Run SQL query, return promise with results or reject with error
     */
     async run(sql, params, results) {
         return new Promise((resolve, reject) => {
-            this.db.get(sql, params !== null && params !== void 0 ? params : [], (err, row) => {
+            this.db_connection.get(sql, params !== null && params !== void 0 ? params : [], (err, row) => {
                 if (err) {
                     reject(err);
                 }
@@ -73,32 +63,70 @@ class DB {
             });
         });
     }
+}
+exports.DB = DB;
+class KVStore {
+    constructor(db) {
+        this.db = db;
+        // Create kvstore table if not exists
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS kvstore (
+                key TEXT UNIQUE,
+                value TEXT
+                )
+        `);
+    }
     /**
     * Insert key-value pair in database kvstore
     */
     async put(key, value) {
         // Check if key already exists
-        var exists = await this.run(`SELECT value FROM kvstore WHERE key = ?`, [key]);
+        var exists = await this.db.run(`SELECT value FROM kvstore WHERE key = ?`, [key]);
         // Create new key-value pair if key does not exist
         if (!exists) {
-            return this.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
+            return this.db.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
             // Update key-value pair if key already exists and value is different
         }
         else if (exists != value) {
-            return this.run("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]);
+            return this.db.run("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]);
         }
     }
     /**
     * Get value from key-value store from database
     * */
     async get(key, results) {
-        return this.run('SELECT value FROM kvstore WHERE key = ?', [key], results);
+        return this.db.run('SELECT value FROM kvstore WHERE key = ?', [key], results);
     }
     /**
     * Delete key-value pair from database
     * */
     async del(key) {
-        return this.run('DELETE FROM kvstore WHERE key = ?', [key]);
+        return this.db.run('DELETE FROM kvstore WHERE key = ?', [key]);
     }
 }
-exports.DB = DB;
+class Guilds {
+    constructor(db) {
+        this.db = db;
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS guilds (
+                id TEXT UNIQUE,
+                prefix TEXT,
+                playing_message TEXT,
+                status_message TEXT
+                )
+            `);
+    }
+    async add(id) {
+        return this.db.run("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]);
+    }
+    async get(type, id) {
+        return this.db.run(`SELECT ${type} from guilds WHERE id = ?`, [id], 1);
+    }
+    async set(type, value, id) {
+        await this.add(id);
+        return this.db.run(`UPDATE guilds SET ${type} = ? WHERE id = ?`, [value, id]);
+    }
+    async del(id) {
+        return this.db.run("DELETE FROM guilds WHERE id = ?", [id]);
+    }
+}
