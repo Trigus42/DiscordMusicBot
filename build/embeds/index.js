@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.status_embed = exports.queue_embed = exports.embed_builder_message = exports.embed_builder = void 0;
+exports.statusEmbed = exports.queueEmbed = exports.embedBuilderMessage = exports.embedBuilder = void 0;
 var embed_builder_1 = require("./embed_builder");
-Object.defineProperty(exports, "embed_builder", { enumerable: true, get: function () { return embed_builder_1.embed_builder; } });
-Object.defineProperty(exports, "embed_builder_message", { enumerable: true, get: function () { return embed_builder_1.embed_builder_message; } });
+Object.defineProperty(exports, "embedBuilder", { enumerable: true, get: function () { return embed_builder_1.embedBuilder; } });
+Object.defineProperty(exports, "embedBuilderMessage", { enumerable: true, get: function () { return embed_builder_1.embedBuilderMessage; } });
 var queue_embed_1 = require("./queue_embed");
-Object.defineProperty(exports, "queue_embed", { enumerable: true, get: function () { return queue_embed_1.queue_embed; } });
+Object.defineProperty(exports, "queueEmbed", { enumerable: true, get: function () { return queue_embed_1.queueEmbed; } });
 var status_embed_1 = require("./status_embed");
-Object.defineProperty(exports, "status_embed", { enumerable: true, get: function () { return status_embed_1.status_embed; } });
+Object.defineProperty(exports, "statusEmbed", { enumerable: true, get: function () { return status_embed_1.statusEmbed; } });

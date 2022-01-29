@@ -29,7 +29,7 @@ class DB {
     constructor(filename, user_config, filters) {
         // Connect to database
         this.path = filename !== null && filename !== void 0 ? filename : "./config/db.sqlite";
-        this.db_connection = new sql.Database(this.path);
+        this.connection = new sql.Database(this.path);
         // Create guilds and kvstore
         this.guilds = new Guilds(this);
         this.kvstore = new KVStore(this);
@@ -62,26 +62,51 @@ class DB {
     * Close database connection
     */
     close() {
-        return this.db_connection.close();
+        return this.connection.close();
     }
     /**
     * Run SQL query, return promise with results or reject with error
+    * @param sql SQL query
+    * @param params Parameters for SQL query
+    * @returns Promise with string[] or null
     */
-    async run(sql, params, results) {
+    async get(sql, params) {
         return new Promise((resolve, reject) => {
-            this.db_connection.get(sql, params !== null && params !== void 0 ? params : [], (err, row) => {
+            this.connection.get(sql, params !== null && params !== void 0 ? params : [], (err, row) => {
                 if (err) {
                     reject(err);
                 }
                 else {
                     if (row) {
-                        var res_slice = Object.values(row).slice(0, results !== null && results !== void 0 ? results : undefined);
-                        // Return string if res_slice has only one element else array of strings; if res_slice is empty, return null
-                        resolve((res_slice.length > 1 ? res_slice : res_slice[0]));
+                        resolve(Object.values(row));
                     }
                     else {
                         resolve(null);
                     }
+                }
+            });
+        });
+    }
+    async run(sql, params) {
+        return new Promise((resolve, reject) => {
+            this.connection.run(sql, params !== null && params !== void 0 ? params : [], (err) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(null);
+                }
+            });
+        });
+    }
+    async all(sql, params) {
+        return new Promise((resolve, reject) => {
+            this.connection.all(sql, params !== null && params !== void 0 ? params : [], (err, rows) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(rows);
                 }
             });
         });
@@ -92,7 +117,7 @@ class KVStore {
     constructor(db) {
         this.db = db;
         // Create kvstore table if not exists
-        this.db.run(`
+        this.db.get(`
             CREATE TABLE IF NOT EXISTS kvstore (
                 key TEXT UNIQUE,
                 value TEXT
@@ -104,33 +129,35 @@ class KVStore {
     */
     async put(key, value) {
         // Check if key already exists
-        var exists = await this.db.run(`SELECT value FROM kvstore WHERE key = ?`, [key]);
+        var res = (await this.db.get(`SELECT value FROM kvstore WHERE key = ?`, [key]));
+        var exists = res ? res[0] : false;
         // Create new key-value pair if key does not exist
         if (!exists) {
-            return this.db.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
+            return this.db.get("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
             // Update key-value pair if key already exists and value is different
         }
         else if (exists != value) {
-            return this.db.run("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]);
+            return this.db.get("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]);
         }
     }
     /**
     * Get value from key-value store from database
     * */
-    async get(key, results) {
-        return this.db.run('SELECT value FROM kvstore WHERE key = ?', [key], results);
+    async get(key) {
+        var res = await this.db.get('SELECT value FROM kvstore WHERE key = ?', [key]);
+        return res ? res[0] : null;
     }
     /**
     * Delete key-value pair from database
     * */
     async del(key) {
-        return this.db.run('DELETE FROM kvstore WHERE key = ?', [key]);
+        return this.db.get('DELETE FROM kvstore WHERE key = ?', [key]);
     }
 }
 class Guilds {
     constructor(db) {
         this.db = db;
-        this.db.run(`
+        this.db.get(`
             CREATE TABLE IF NOT EXISTS guilds (
                 id TEXT UNIQUE,
                 prefix TEXT,
@@ -140,20 +167,45 @@ class Guilds {
             `);
     }
     async add(id) {
-        return this.db.run("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]);
+        return this.db.get("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]);
     }
     async get(type, id) {
-        return this.db.run(`SELECT ${type} from guilds WHERE id = ?`, [id], 1);
+        var res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id]);
+        return res ? res[0] : null;
     }
     async set(type, value, id) {
         await this.add(id);
-        return this.db.run(`UPDATE guilds SET ${type} = ? WHERE id = ?`, [value, id]);
+        await this.db.run(`UPDATE guilds SET ${type} = ? WHERE id = ?`, [value, id]);
     }
     async del(id) {
-        return this.db.run("DELETE FROM guilds WHERE id = ?", [id]);
+        await this.db.run("DELETE FROM guilds WHERE id = ?", [id]);
     }
-    async getPrefix(id) {
-        var _a;
-        return (_a = (await this.get("prefix", id))) !== null && _a !== void 0 ? _a : this.db.user_config.prefix;
+    async setFilters(id, filters) {
+        await this.db.run(`CREATE TABLE IF NOT EXISTS filters_${id} (name TEXT UNIQUE, value TEXT)`);
+        for (const [name, value] of Object.entries(filters)) {
+            await this.db.run(`INSERT OR REPLACE INTO filters_${id} (name, value) VALUES (?, ?)`, [name, value]);
+        }
+    }
+    async getFilters(id) {
+        // Get custom filters from database
+        let db_filters = {};
+        let res_rows = await this.db.all(`SELECT * FROM filters_${id}`);
+        if (res_rows) {
+            for (const row of Object.values(res_rows)) {
+                db_filters[row["name"]] = row["value"];
+            }
+        }
+        else {
+            db_filters = {};
+        }
+        // Get default filters, merge with custom filters, overwriting default filters in case of a conflict
+        let filters = this.db.filters;
+        for (const [name, value] of Object.entries(db_filters)) {
+            filters[name] = value;
+        }
+        return filters;
+    }
+    async delFilter(id, name) {
+        await this.db.run(`DELETE FROM filters_${id} WHERE name = ?`, [name]);
     }
 }

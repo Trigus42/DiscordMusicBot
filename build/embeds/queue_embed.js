@@ -19,12 +19,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queue_embed = void 0;
+exports.queueEmbed = void 0;
 const Discord = __importStar(require("discord.js"));
 /**
  *  Build and return array of embeds for the queue
  */
-function queue_embed(queue, client) {
+function queueEmbed(queue, client) {
     let embeds = [];
     // Create embeds (one per 10 songs)
     for (let i = 0; i < queue.songs.length; i += 10) {
@@ -51,4 +51,4 @@ function queue_embed(queue, client) {
     // Return the embeds
     return embeds;
 }
-exports.queue_embed = queue_embed;
+exports.queueEmbed = queueEmbed;

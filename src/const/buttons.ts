@@ -1,6 +1,6 @@
 import * as Discord from "discord.js"
 
-export const Buttons : { [name: string]: Discord.MessageButton } = {
+export const BUTTONS : { [name: string]: Discord.MessageButton } = {
     next_Button: new Discord.MessageButton({
         style: 'SECONDARY',
         emoji: '⏭',

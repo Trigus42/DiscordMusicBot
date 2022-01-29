@@ -4,7 +4,7 @@ import * as DisTube from "distube"
 /**
  *  Build and return array of embeds for the queue
  */
-export function queue_embed(queue: DisTube.Queue, client: Discord.Client): Discord.MessageEmbed[]  {
+export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discord.MessageEmbed[]  {
     let embeds = []
 
     // Create embeds (one per 10 songs)

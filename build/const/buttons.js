@@ -19,9 +19,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Buttons = void 0;
+exports.BUTTONS = void 0;
 const Discord = __importStar(require("discord.js"));
-exports.Buttons = {
+exports.BUTTONS = {
     next_Button: new Discord.MessageButton({
         style: 'SECONDARY',
         emoji: '⏭',

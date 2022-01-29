@@ -19,22 +19,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.status_embed = void 0;
+exports.statusEmbed = void 0;
 const Discord = __importStar(require("discord.js"));
 const buttons_1 = require("../const/buttons");
 const embeds = __importStar(require("../embeds/index"));
 /**
  *  Send and watch the status embed
  */
-async function status_embed(queue, db, song, status) {
+async function statusEmbed(queue, db, song, status) {
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`, 1))).delete();
+            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`))).delete();
         }
         catch (error) { }
         // Send new playing message
-        let embedMessage = await send_status_embed(queue, db, song, status);
+        let embedMessage = await sendStatusEmbed(queue, db, song, status);
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector();
         collector.on('collect', async (interaction) => {
@@ -44,23 +44,23 @@ async function status_embed(queue, db, song, status) {
             if (!queue.voiceChannel.members.has(interaction.member.user.id))
                 return;
             switch (interaction.customId) {
-                case buttons_1.Buttons.play_pause_Button.customId:
+                case buttons_1.BUTTONS.play_pause_Button.customId:
                     if (queue.playing) {
                         queue.pause();
                         if (db.user_config.action_messages)
-                            embeds.embed_builder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", `Paused the song`)
+                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", `Paused the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                        status_embed(queue, db, song, "Paused");
+                        statusEmbed(queue, db, song, "Paused");
                     }
                     else {
                         queue.resume();
                         if (db.user_config.action_messages)
-                            embeds.embed_builder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", `Resumed the song`)
+                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", `Resumed the song`)
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                        status_embed(queue, db, song);
+                        statusEmbed(queue, db, song);
                     }
                     return;
-                case buttons_1.Buttons.next_Button.customId:
+                case buttons_1.BUTTONS.next_Button.customId:
                     if (!queue.autoplay && queue.songs.length <= 1) {
                         queue.stop();
                         queue.emit("finish", queue);
@@ -69,37 +69,37 @@ async function status_embed(queue, db, song, status) {
                         await queue.skip();
                     }
                     if (db.user_config.action_messages)
-                        embeds.embed_builder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", `Skipped the song`)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", `Skipped the song`)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     // The Distube "playSong" event will call the "playsong" function again
                     return;
-                case buttons_1.Buttons.back_Button.customId:
+                case buttons_1.BUTTONS.back_Button.customId:
                     queue.previous();
                     if (db.user_config.action_messages)
-                        embeds.embed_builder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", `Playing previous song`)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", `Playing previous song`)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     // The Distube "playSong" event will call the "playsong" function again
                     return;
-                case buttons_1.Buttons.seek_backward_Button.customId:
+                case buttons_1.BUTTONS.seek_backward_Button.customId:
                     var seektime = queue.currentTime - 10;
                     if (seektime < 0)
                         seektime = 0;
                     queue.seek(Number(seektime));
                     if (db.user_config.action_messages)
-                        embeds.embed_builder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`-10 seconds\``)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`-10 seconds\``)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    status_embed(queue, db, song);
+                    statusEmbed(queue, db, song);
                     return;
-                case buttons_1.Buttons.seek_forward_Button.customId:
+                case buttons_1.BUTTONS.seek_forward_Button.customId:
                     var seektime = queue.currentTime + 10;
                     if (seektime >= queue.songs[0].duration) {
                         seektime = queue.songs[0].duration - 1;
                     }
                     queue.seek(Number(seektime));
                     if (db.user_config.action_messages)
-                        embeds.embed_builder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`+10 seconds\``)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`+10 seconds\``)
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    status_embed(queue, db, song);
+                    statusEmbed(queue, db, song);
                     return;
             }
         });
@@ -108,11 +108,11 @@ async function status_embed(queue, db, song, status) {
         console.error(error);
     }
 }
-exports.status_embed = status_embed;
+exports.statusEmbed = statusEmbed;
 /**
  *  Generate and send status embed
  */
-async function send_status_embed(queue, db, song, title) {
+async function sendStatusEmbed(queue, db, song, title) {
     // If no song is provided, use the first song in the queue
     song = song !== null && song !== void 0 ? song : queue.songs[0];
     let embed = new Discord.MessageEmbed()
@@ -134,11 +134,11 @@ async function send_status_embed(queue, db, song, title) {
     const embedMessage = await queue.textChannel.send({
         embeds: [embed],
         components: [new Discord.MessageActionRow({ components: [
-                    buttons_1.Buttons.play_pause_Button,
-                    buttons_1.Buttons.back_Button,
-                    buttons_1.Buttons.next_Button,
-                    buttons_1.Buttons.seek_backward_Button,
-                    buttons_1.Buttons.seek_forward_Button,
+                    buttons_1.BUTTONS.play_pause_Button,
+                    buttons_1.BUTTONS.back_Button,
+                    buttons_1.BUTTONS.next_Button,
+                    buttons_1.BUTTONS.seek_backward_Button,
+                    buttons_1.BUTTONS.seek_forward_Button,
                 ] })]
     });
     // Save the message id to db

@@ -3,7 +3,7 @@ import * as Discord from "discord.js"
 /**
  *  Build and send embed in the channel of the message
  */
-export function embed_builder_message(client: Discord.Client, message: Discord.Message, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
+export function embedBuilderMessage(client: Discord.Client, message: Discord.Message, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
@@ -23,7 +23,7 @@ export function embed_builder_message(client: Discord.Client, message: Discord.M
 /**
  *  Build and send embed in the channel of the queue
  */
-export function embed_builder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
+export function embedBuilder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
     let embed = new Discord.MessageEmbed()
         .setColor(color)
         .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))

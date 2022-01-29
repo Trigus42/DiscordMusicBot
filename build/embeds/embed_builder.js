@@ -19,12 +19,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.embed_builder = exports.embed_builder_message = void 0;
+exports.embedBuilder = exports.embedBuilderMessage = void 0;
 const Discord = __importStar(require("discord.js"));
 /**
  *  Build and send embed in the channel of the message
  */
-function embed_builder_message(client, message, color, title, description, thumbnail) {
+function embedBuilderMessage(client, message, color, title, description, thumbnail) {
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
@@ -42,11 +42,11 @@ function embed_builder_message(client, message, color, title, description, thumb
         console.error(error);
     }
 }
-exports.embed_builder_message = embed_builder_message;
+exports.embedBuilderMessage = embedBuilderMessage;
 /**
  *  Build and send embed in the channel of the queue
  */
-function embed_builder(client, user, channel, color, title, description, thumbnail) {
+function embedBuilder(client, user, channel, color, title, description, thumbnail) {
     let embed = new Discord.MessageEmbed()
         .setColor(color)
         .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))
@@ -59,4 +59,4 @@ function embed_builder(client, user, channel, color, title, description, thumbna
         embed.setThumbnail(thumbnail);
     return channel.send({ embeds: [embed] });
 }
-exports.embed_builder = embed_builder;
+exports.embedBuilder = embedBuilder;

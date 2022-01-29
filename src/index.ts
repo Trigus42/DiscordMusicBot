@@ -2,8 +2,8 @@ import * as Discord from "discord.js"
 import * as DisTube from "distube"
 import play, { SpotifyTrack } from 'play-dl'
 
-import {DB} from "./db"
-import {Buttons} from "./const/buttons"
+import { DB } from "./db"
+import { BUTTONS } from "./const/buttons"
 import * as Commands from "./commands/index"
 import * as Embeds from "./embeds/index"
 
@@ -70,7 +70,7 @@ client.on("messageCreate", async message => {
         if (message.author.bot || !message.guild) return
 
         // Get prefix for guild
-        let prefix = await db.guilds.getPrefix(message.guild.id)
+        let prefix = await db.guilds.get("prefix", message.guild.id) ?? db.user_config.prefix
 
         // Ignore messages that don't start with the prefix
         if (!message.content.startsWith(prefix)) return; 
@@ -96,38 +96,38 @@ client.on("messageCreate", async message => {
         //// COMMANDS /////
         ///////////////////
         if (command === "invite" || command === "add") {
-            Embeds.embed_builder_message(client, message, "#fffff0", "Invite me", `[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=49572160&scope=bot)`)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "Invite me", `[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=49572160&scope=bot)`)
             return
         }
         else if (command === "help"  || command === "about" || command === "h" || command === "info") {
-            await Commands.help(message, prefix, db.filters) 
+            await Commands.help(message, prefix, await db.guilds.getFilters(message.guild.id)) 
         }
         else if (command === "prefix") {
             // If no arguments are given, return current prefix
             if (!args[0]){
-                Embeds.embed_builder_message(client, message, "RED", `Current Prefix: \`${prefix}\``, `Please provide a new prefix`)
+                Embeds.embedBuilderMessage(client, message, "RED", `Current Prefix: \`${prefix}\``, `Please provide a new prefix`)
                 return
             }
 
             // If user is not owner, return error
             if (!message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                Embeds.embed_builder_message(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command`)
+                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command`)
                 return
             }
 
             // If prefix includes spaces, return error
             if (args[1]) {
-                Embeds.embed_builder_message(client, message, "RED", "PREFIX", `'❌ The prefix can\'t have whitespaces'`)
+                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", `'❌ The prefix can\'t have whitespaces'`)
                 return
             }
 
             // Set new prefix in database
             db.guilds.set("prefix", args[0], message.guild.id)
-            Embeds.embed_builder_message(client, message, "#fffff0", "PREFIX", `:ballot_box_with_check: Successfully set new prefix to **\`${args[0]}\`**`)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "PREFIX", `:ballot_box_with_check: Successfully set new prefix to **\`${args[0]}\`**`)
             return
         }
         else if (command === "search" ) {
-            Embeds.embed_builder_message(client, message, "#fffff0", "Searching", args.join(" ")).then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "Searching", args.join(" ")).then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             
             let result = await distube.search(args.join(" "))
             let searchresult = ""
@@ -139,45 +139,45 @@ client.on("messageCreate", async message => {
                 }
             }
 
-            let searchembed = await Embeds.embed_builder_message(client, message, "#fffff0", "Current Queue", searchresult)
+            let searchembed = await Embeds.embedBuilderMessage(client, message, "#fffff0", "Current Queue", searchresult)
 
             let filter = (m: Discord.Message) => !isNaN(Number(m.content)) && m.author.id === message.author.id
             let userinput: any; 
             await searchembed.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"] }).then(collected => {
                 let userinput = collected.first().content
                 if (Number(userinput) < 0 && Number(userinput) >= 15) {
-                    Embeds.embed_builder_message(client, message, "RED", "Not a right number", "so i use number 1")
+                    Embeds.embedBuilderMessage(client, message, "RED", "Not a right number", "so i use number 1")
                     let userchoice = 1
                 }
                 setTimeout(() => searchembed.delete().catch(console.error), Number(client.ws.ping))
             })
             .catch(() => { console.log(console.error); userinput = 404 })
             if (userinput === 404) {
-                Embeds.embed_builder_message(client, message, "RED", "Something went wrong")
+                Embeds.embedBuilderMessage(client, message, "RED", "Something went wrong")
                 return
             }
-            Embeds.embed_builder_message(client, message, "#fffff0", "Searching", `[${result[userinput - 1].name}](${result[userinput - 1].url})`, result[userinput - 1].thumbnail)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "Searching", `[${result[userinput - 1].name}](${result[userinput - 1].url})`, result[userinput - 1].thumbnail)
             distube.play(message, result[userinput - 1].url)
             return
         }
         else if (command == "status") {
             var queue = distube.getQueue(message.guild.id)
             if (!queue) {
-                Embeds.embed_builder_message(client, message, "RED", "There is nothing playing")
+                Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
-            await Embeds.status_embed(queue, db, queue.songs[0])
+            await Embeds.statusEmbed(queue, db, queue.songs[0])
             message.react("✅")
             return
         }
         else if (command == "pause") {
-            await distube.pause(message)
+            distube.pause(message)
             message.react("✅")
             return
         }
         else if (command == "resume" || command == "r") {
-            await distube.resume(message)
+            distube.resume(message)
             message.react("✅")
             return
         }
@@ -187,13 +187,13 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command == "autoplay" || command == "ap") {
-            await Embeds.embed_builder_message(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
+            await Embeds.embedBuilderMessage(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             message.react("✅")
             return
         }
         else if (command === "ping") {
-            Embeds.embed_builder_message(client, message, `#fffff0`, `PING:`, `\`${client.ws.ping} ms\``)
+            Embeds.embedBuilderMessage(client, message, `#fffff0`, `PING:`, `\`${client.ws.ping} ms\``)
             return
         }
         else if (command === "uptime") {
@@ -201,13 +201,13 @@ client.on("messageCreate", async message => {
             let hours = Math.floor(client.uptime / 3600000) % 24
             let minutes = Math.floor(client.uptime / 60000) % 60
             let seconds = Math.floor(client.uptime / 1000) % 60
-            Embeds.embed_builder_message(client, message, `#fffff0`, `UPTIME:`, `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\``)
+            Embeds.embedBuilderMessage(client, message, `#fffff0`, `UPTIME:`, `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\``)
             return
         }
         else if (command === "play" || command === "p") {
             // Check if user in voice channel or bot in voice channel
             if (!message.member.voice.channel) {
-                Embeds.embed_builder_message(client, message, "RED", "You are not in a voice channel")
+                Embeds.embedBuilderMessage(client, message, "RED", "You are not in a voice channel")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -219,7 +219,7 @@ client.on("messageCreate", async message => {
                     await play.setToken({spotify : db.user_config.spotify})
                     if (play.is_expired()) await play.refreshToken() // Refresh spotify access token if it has expired
                 } catch (error) {
-                    Embeds.embed_builder_message(client, message, "RED", "SPOTIFY", `❌ Something went wrong while trying to authorize Spotify!`)
+                    Embeds.embedBuilderMessage(client, message, "RED", "SPOTIFY", `❌ Something went wrong while trying to authorize Spotify!`)
                     return
                 }
 
@@ -265,17 +265,29 @@ client.on("messageCreate", async message => {
             for (var i = 0; i < time_array.length; i++) {
                 time_seconds += parseInt(time_array[i]) * Math.pow(60, (time_array.length - 1) - i)
             }
-            await distube.seek(message, time_seconds)
+            distube.seek(message, time_seconds)
             message.react("✅")
             return
         }
-        else if (Object.keys(db.filters).includes(command)) {
-            await distube.setFilter(message, command)
+        else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
+            let queue:any = distube.getQueue(message.guild.id)
+            var filters = await db.guilds.getFilters(message.guild.id)
+            queue.customFilters[command] = filters[command]
+            queue.setFilter(command)
+            message.react("✅")
+            return
+        }
+        else if (command === "filter") {
+            if (args[0] === "add") { 
+                await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
+            } else if (args[0] === "del") {
+                await db.guilds.delFilter(message.guild.id, args[1])
+            }
             message.react("✅")
             return
         }
         else if (command === "volume" || command === "vol") {
-            await distube.setVolume(message, Number(args[0]))
+            distube.setVolume(message, Number(args[0]))
             message.react("✅")
             return
         }
@@ -283,19 +295,19 @@ client.on("messageCreate", async message => {
             var queue = distube.getQueue(message)
 
             if (!queue) {
-                Embeds.embed_builder_message(client, message, "RED", "There is nothing playing")
+                Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
 
             const {author, channel} = message
-            const queue_embeds = Embeds.queue_embed(queue, client)
+            const queue_embeds = Embeds.queueEmbed(queue, client)
             const guilds = [...client.guilds.cache.values()]
 
             const embedMessage = await queue.textChannel.send({
                 embeds: [queue_embeds[0]],
                 components: queue_embeds.length < 1 ? [] : [new Discord.MessageActionRow({components: [
-                    Buttons.next_Button
+                    BUTTONS.next_Button
                 ]})]
             })
 
@@ -310,7 +322,7 @@ client.on("messageCreate", async message => {
                 // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
                 interaction.deferUpdate()
                 // Increase/decrease index
-                interaction.customId === Buttons.back_Button.customId ? (currentIndex -= 1) : (currentIndex += 1)
+                interaction.customId === BUTTONS.back_Button.customId ? (currentIndex -= 1) : (currentIndex += 1)
                 // Respond to interaction by updating message with new embed
                 embedMessage.edit({
                     embeds: [queue_embeds[currentIndex]],
@@ -318,9 +330,9 @@ client.on("messageCreate", async message => {
                         new Discord.MessageActionRow({
                             components: [
                                 // back button if it isn't the start
-                                ...(currentIndex ? [Buttons.back_Button] : []),
+                                ...(currentIndex ? [BUTTONS.back_Button] : []),
                                 // forward button if it isn't the end
-                                ...(currentIndex + 1 < queue_embeds.length ? [Buttons.next_Button] : [])
+                                ...(currentIndex + 1 < queue_embeds.length ? [BUTTONS.next_Button] : [])
                             ]
                         })
                     ]
@@ -329,14 +341,14 @@ client.on("messageCreate", async message => {
         }
         else if (command === "loop" || command === "repeat") {
             if (0 <= Number(args[0]) && Number(args[0]) <= 2) {
-                await distube.setRepeatMode(message, parseInt(args[0]))
-                await Embeds.embed_builder_message(client, message, "#fffff0", "Repeat mode set to:", `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`)
+                distube.setRepeatMode(message, parseInt(args[0]))
+                await Embeds.embedBuilderMessage(client, message, "#fffff0", "Repeat mode set to:", `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`)
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 message.react("✅")
                 return
             }
             else {
-                Embeds.embed_builder_message(client, message, "RED", "ERROR", `Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
+                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", `Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -344,14 +356,14 @@ client.on("messageCreate", async message => {
         else if (command === "jump") {
             let queue = distube.getQueue(message)
             if (!queue) {
-                Embeds.embed_builder_message(client, message, "RED", "There is nothing playing")
+                Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
         
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
                 try {
-                    (await message.channel.messages.fetch(await db.kvstore.get(`playingembed_${message.guild.id}`, 1) as string)).delete().catch(console.error)
+                    (await message.channel.messages.fetch(await db.kvstore.get(`playingembed_${message.guild.id}`) as string)).delete().catch(console.error)
                 } catch (error) {
                     console.error(error)
                 }
@@ -362,14 +374,14 @@ client.on("messageCreate", async message => {
                 return
             }
             else {
-                Embeds.embed_builder_message(client, message, "RED", "ERROR", `Please use a number between **0** and **${distube.getQueue(message).songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
+                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", `Please use a number between **0** and **${distube.getQueue(message).songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
 
         }
         else if (message.content.startsWith(prefix)) {
-            Embeds.embed_builder_message(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands`)
+            Embeds.embedBuilderMessage(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands`)
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             return
         }
@@ -385,14 +397,14 @@ client.on("messageCreate", async message => {
 distube
     .on('playSong', (queue, song) => {
         try {
-            Embeds.status_embed(queue, db, song)
+            Embeds.statusEmbed(queue, db, song)
         } catch (error) {
             console.error(error)
         }
     })
     .on("addSong", (queue, song) => {
         try {
-            Embeds.embed_builder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail)
+            Embeds.embedBuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail)
             return
         } 
         catch (error) { 
@@ -401,7 +413,7 @@ distube
     })
     .on("addList", (queue, playlist) => {
         try {
-            Embeds.embed_builder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
+            Embeds.embedBuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
             return
         } catch (error) {
             console.error(error)
@@ -410,7 +422,7 @@ distube
     .on("searchResult", (message, results) => {
         try {
             let i = 0
-            Embeds.embed_builder_message(client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`)
             return
         } catch (error) {
             console.error(error)
@@ -424,7 +436,7 @@ distube
             console.error(error)
         }
         try {
-            Embeds.embed_builder_message(client, message, "RED", `Searching canceled`, "")
+            Embeds.embedBuilderMessage(client, message, "RED", `Searching canceled`, "")
             return
         } catch (error) {
             console.error(error)
@@ -441,7 +453,7 @@ distube
         console.log(error)
 
         try {
-            Embeds.embed_builder(client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```"+error+"```")
+            Embeds.embedBuilder(client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```"+error+"```")
             return
         } catch (error) {
             console.error(error)
@@ -451,10 +463,10 @@ distube
         try {
             // Delete old playing message
             try {
-                (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`, 1) as string)).delete()
+                (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`) as string)).delete()
             } catch (error) {}
 
-            Embeds.embed_builder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -462,7 +474,7 @@ distube
     })
     .on("empty", queue => {
         try {
-            Embeds.embed_builder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -470,7 +482,7 @@ distube
     })
     .on("noRelated", queue => {
         try {
-            Embeds.embed_builder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
