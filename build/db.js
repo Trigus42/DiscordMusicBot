@@ -21,19 +21,42 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DB = void 0;
 const sql = __importStar(require("sqlite3"));
+const fs = __importStar(require("fs"));
 class DB {
     /*
     * Constructor function to initialize database connection
     */
-    constructor(filename) {
-        this.path = filename;
-        this.db_connection = new sql.Database(this.path, (err) => {
-            if (err) {
-                console.log(err);
-            }
-        });
+    constructor(filename, user_config, filters) {
+        // Connect to database
+        this.path = filename !== null && filename !== void 0 ? filename : "./config/db.sqlite";
+        this.db_connection = new sql.Database(this.path);
+        // Create guilds and kvstore
         this.guilds = new Guilds(this);
         this.kvstore = new KVStore(this);
+        // Load user config
+        if (user_config) {
+            if (typeof user_config === "string") {
+                this.user_config = JSON.parse(fs.readFileSync(user_config, "utf8"));
+            }
+            else {
+                this.user_config = user_config;
+            }
+        }
+        else {
+            this.user_config = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8"));
+        }
+        // Load filters
+        if (filters) {
+            if (typeof filters === "string") {
+                this.filters = JSON.parse(fs.readFileSync(filters, "utf8"));
+            }
+            else {
+                this.filters = filters;
+            }
+        }
+        else {
+            this.filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"));
+        }
     }
     /*
     * Close database connection
@@ -128,5 +151,9 @@ class Guilds {
     }
     async del(id) {
         return this.db.run("DELETE FROM guilds WHERE id = ?", [id]);
+    }
+    async getPrefix(id) {
+        var _a;
+        return (_a = (await this.get("prefix", id))) !== null && _a !== void 0 ? _a : this.db.user_config.prefix;
     }
 }

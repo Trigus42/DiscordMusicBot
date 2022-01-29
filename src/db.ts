@@ -1,4 +1,20 @@
 import * as sql from "sqlite3"
+import * as fs from "fs"
+
+interface UserConfig {
+    token: string,
+    prefix: string,
+    action_messages: boolean,
+    spotify: {
+        client_id: string,
+        client_secret: string,
+        market: string,
+        refresh_token: string
+    }
+    youtube_cookie: string,
+}
+
+interface Filters {[key: string]: string}
 
 export class DB {
     path: string
@@ -6,18 +22,42 @@ export class DB {
     guilds: Guilds
     kvstore: KVStore
 
+    user_config: UserConfig
+    filters: Filters
+
     /*
     * Constructor function to initialize database connection
     */
-    constructor (filename: string) {
-        this.path = filename
-        this.db_connection = new sql.Database(this.path, (err) => {
-            if (err) {
-                console.log(err);
-            }
-        })
+    constructor (filename?: string, user_config?: UserConfig|string, filters?: Filters|string) {
+        // Connect to database
+        this.path = filename ?? "./config/db.sqlite"
+        this.db_connection = new sql.Database(this.path)
+
+        // Create guilds and kvstore
         this.guilds = new Guilds(this)
         this.kvstore = new KVStore(this)
+
+        // Load user config
+        if (user_config) {
+            if (typeof user_config === "string") {
+                this.user_config = JSON.parse(fs.readFileSync(user_config, "utf8"))
+            } else {
+                this.user_config = user_config
+            }
+        } else {
+            this.user_config = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8"))
+        }
+
+        // Load filters
+        if (filters) {
+            if (typeof filters === "string") {
+                this.filters = JSON.parse(fs.readFileSync(filters, "utf8"))
+            } else {
+                this.filters = filters
+            }
+        } else {
+            this.filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"))
+        }
     }
 
     /*
@@ -124,5 +164,9 @@ class Guilds {
 
     async del(id: string): Promise<null> {
         return this.db.run("DELETE FROM guilds WHERE id = ?", [id])  as Promise<null>
+    }
+
+    async getPrefix(id: string): Promise<string|null> {
+        return (await this.get("prefix", id)) ?? this.db.user_config.prefix
     }
 }
