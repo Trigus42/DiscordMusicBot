@@ -65,8 +65,8 @@ class Deezer {
      * Return array of songs from url containing the title and artist.
     */
     async tracks(url, limit = 500) {
-        let type = url.split("/")[-2];
-        let id = url.split("/")[-1];
+        let type = url.split("/").slice(-2, -1)[0];
+        let id = url.split("/").slice(-1)[0];
         switch (type) {
             case "track": {
                 const res = await axios_1.default.get(`https://api.deezer.com/track/${id}`);

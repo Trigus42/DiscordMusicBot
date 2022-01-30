@@ -53,8 +53,8 @@ export default class Deezer {
    * Return array of songs from url containing the title and artist.
   */
   async tracks(url: string, limit=500): Promise<Array<Array<string>>> {
-    let type = url.split("/")[-2]
-    let id = url.split("/")[-1]
+    let type = url.split("/").slice(-2,-1)[0]
+    let id = url.split("/").slice(-1)[0]
 
     switch (type) {
       case "track": {

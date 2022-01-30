@@ -223,11 +223,18 @@ client.on("messageCreate", async (message) => {
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
-            if (args[0].includes("deezer.com") && ["track", "album", "playlist", "artist"].includes(args[0].split("/")[-2])) {
-                let tracks = await deezer.tracks(args[0]);
-                var search_strings = await Promise.all(tracks.map(async (track) => track[0] + " - " + track[1]));
-                var urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
-                distube.play(message, await distube.createCustomPlaylist(urls, { member: message.member, properties: {} }));
+            if (args[0].includes("deezer.com")) {
+                let type = args[0].split("/").slice(-2, -1)[0];
+                if (["track", "album", "playlist", "artist"].includes(type)) {
+                    let tracks = await deezer.tracks(args[0]);
+                    var search_strings = await Promise.all(tracks.map(async (track) => track[0] + " - " + track[1]));
+                    var urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
+                    distube.play(message, await distube.createCustomPlaylist(urls, { member: message.member, properties: {} }));
+                }
+                else {
+                    Embeds.embedBuilderMessage(client, message, "RED", "Can only play tracks, albums, playlists and artists from Deezer")
+                        .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+                }
             }
             else {
                 await distube.play(message, args.join(" "));
