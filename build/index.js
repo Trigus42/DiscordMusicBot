@@ -272,8 +272,8 @@ client.on("messageCreate", async (message) => {
             return;
         }
         else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
+            let queue = distube.getQueue(message.guild.id);
             // Not implemented (https://github.com/skick1234/DisTube/pull/233)
-            // let queue = distube.getQueue(message.guild.id)
             // let filters = await db.guilds.getFilters(message.guild.id)
             // queue.customFilters[command] = filters[command]
             queue.setFilter(command);
@@ -360,12 +360,6 @@ client.on("messageCreate", async (message) => {
                 return;
             }
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
-                try {
-                    (await message.channel.messages.fetch(await db.kvstore.get(`playingembed_${message.guild.id}`))).delete().catch(console.error);
-                }
-                catch (error) {
-                    console.error(error);
-                }
                 await distube.jump(message, parseInt(args[0]))
                     .catch(err => message.channel.send("Invalid song number.")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000)));

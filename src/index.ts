@@ -359,11 +359,6 @@ client.on("messageCreate", async message => {
             }
         
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
-                try {
-                    (await message.channel.messages.fetch(await db.kvstore.get(`playingembed_${message.guild.id}`) as string)).delete().catch(console.error)
-                } catch (error) {
-                    console.error(error)
-                }
                 await distube.jump(message, parseInt(args[0]))
                     .catch(err => message.channel.send("Invalid song number.")
                         .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000)))

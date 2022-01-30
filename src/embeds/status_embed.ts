@@ -13,7 +13,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`) as string)).delete()
+            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`))).delete()
         } catch (error) {}
 
         // Send new playing message
