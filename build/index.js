@@ -223,7 +223,7 @@ client.on("messageCreate", async (message) => {
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
-            if (args[0].includes("deezer.com")) {
+            if (args[0].includes("deezer.com") && ["track", "album", "playlist", "artist"].includes(args[0].split("/")[-2])) {
                 let tracks = await deezer.tracks(args[0]);
                 var search_strings = await Promise.all(tracks.map(async (track) => track[0] + " - " + track[1]));
                 var urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
@@ -248,7 +248,8 @@ client.on("messageCreate", async (message) => {
             return;
         }
         else if (command === "stop" || command === "leave") {
-            await distube.stop(message);
+            if (queue)
+                await distube.stop(message);
             message.react("✅");
             return;
         }

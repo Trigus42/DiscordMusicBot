@@ -61,15 +61,31 @@ class Deezer {
         this.accessToken = res.data.split('=')[1].split('&')[0];
         console.log(this.accessToken);
     }
-    uiToApiUrl(url) {
-        return "https://" + "api.deezer.com" + "/" + url.split("deezer.com")[1].split("/").slice(-2).join("/");
-    }
     /**
-     * Return array of songs from url containing the title, artist, and album.
+     * Return array of songs from url containing the title and artist.
     */
-    async tracks(url) {
-        const res = await axios_1.default.get(this.uiToApiUrl(url));
-        return res.data.tracks.data.map((track) => [track.title, track.artist.name, track.album.title]);
+    async tracks(url, limit = 500) {
+        let type = url.split("/")[-2];
+        let id = url.split("/")[-1];
+        switch (type) {
+            case "track": {
+                const res = await axios_1.default.get(`https://api.deezer.com/track/${id}`);
+                return [[res.data.title, res.data.artist.name]];
+            }
+            case "album": {
+                const res = await axios_1.default.get(`https://api.deezer.com/album/${id}?limit=${limit}`);
+                return res.data.tracks.data.map((track) => [track.title, track.artist.name]);
+            }
+            case "playlist": {
+                const res = await axios_1.default.get(`https://api.deezer.com/playlist/${id}?limit=${limit}`);
+                return res.data.tracks.data.map((track) => [track.title, track.artist.name]);
+            }
+            case "artist": {
+                const res = await axios_1.default.get(`https://api.deezer.com/artist/${id}/top?limit=${limit}`);
+                return res.data.data.map((track) => [track.title, track.artist.name]);
+            }
+            default: throw new Error("Type not supported");
+        }
     }
 }
 exports.default = Deezer;
