@@ -36,7 +36,7 @@ async function help(message, prefix, filters) {
         .addField(`\`${prefix}shuffle\`  \`${prefix}mix\``, `**Shuffles the queue**`, true)
         .addField(`\`${prefix}autoplay\`  \`${prefix}ap\``, `**Enables autoplay - random similar songs**`, true)
         .addField(`\`${prefix}skip\`  \`${prefix}s\``, `**Skips current song**`, true)
-        .addField(`\`${prefix}stop\`  \`${prefix}leave\``, `**Stops playing and leaves the channel**`, true)
+        .addField(`\`${prefix}stop\`  \`${prefix}leave\``, `**Stops playing**`, true)
         .addField(`\`${prefix}seek <HH:MM:SS>\``, `**Moves in the song to HH:MM:SS**`, true)
         .addField(`\`${prefix}volume <VOLUME>\`  \`${prefix}vol\``, `**Changes volume**`, true)
         .addField(`\`${prefix}queue\`  \`${prefix}qu\``, `**Shows current Queue**`, true)
