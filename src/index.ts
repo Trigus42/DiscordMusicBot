@@ -265,8 +265,8 @@ client.on("messageCreate", async message => {
             return
         }
         else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
+            let queue = distube.getQueue(message.guild.id)
             // Not implemented (https://github.com/skick1234/DisTube/pull/233)
-            // let queue = distube.getQueue(message.guild.id)
             // let filters = await db.guilds.getFilters(message.guild.id)
             // queue.customFilters[command] = filters[command]
             queue.setFilter(command)
