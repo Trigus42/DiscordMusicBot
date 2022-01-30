@@ -146,20 +146,20 @@ client.on("messageCreate", async (message) => {
             let searchresult = "";
             for (let i = 0; i <= result.length; i++) {
                 try {
-                    searchresult += `**${i + 1}**. ${result[i].name} - \`${result[i].formattedDuration}\`\n`;
+                    searchresult += `**${i + 1}**. [${result[i].name}](${result[i].url}) - \`${result[i].formattedDuration}\`\n`;
                 }
                 catch (error) {
                     searchresult += " ";
                 }
             }
-            let searchembed = await Embeds.embedBuilderMessage(client, message, "#fffff0", "Current Queue", searchresult);
+            let searchembed = await Embeds.embedBuilderMessage(client, message, "#fffff0", "Choose an option from below", searchresult);
             let filter = (m) => !isNaN(Number(m.content)) && m.author.id === message.author.id;
             let userinput;
             await searchembed.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"] }).then(collected => {
-                let userinput = collected.first().content;
+                userinput = collected.first().content;
                 if (Number(userinput) < 0 && Number(userinput) >= 15) {
                     Embeds.embedBuilderMessage(client, message, "RED", "Not a right number", "so i use number 1");
-                    let userchoice = 1;
+                    userinput = 1;
                 }
                 setTimeout(() => searchembed.delete().catch(console.error), Number(client.ws.ping));
             })
@@ -255,8 +255,9 @@ client.on("messageCreate", async (message) => {
             return;
         }
         else if (command === "stop" || command === "leave") {
+            let queue = distube.getQueue(message.guild.id);
             if (queue)
-                await distube.stop(message);
+                await queue.stop();
             message.react("✅");
             return;
         }
@@ -276,7 +277,8 @@ client.on("messageCreate", async (message) => {
             // Not implemented (https://github.com/skick1234/DisTube/pull/233)
             // let filters = await db.guilds.getFilters(message.guild.id)
             // queue.customFilters[command] = filters[command]
-            queue.setFilter(command);
+            if (queue)
+                queue.setFilter(command);
             message.react("✅");
             return;
         }
@@ -457,11 +459,6 @@ distube
 })
     .on("finish", async (queue) => {
     try {
-        // Delete old playing message
-        try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`))).delete();
-        }
-        catch (error) { }
         Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
         return;
     }
