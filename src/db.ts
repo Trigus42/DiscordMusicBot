@@ -207,13 +207,12 @@ class Guilds {
     async getFilters(id: string) {
         // Get custom filters from database
         let db_filters: Filters = {}
-        let res_rows = await this.db.all(`SELECT * FROM filters_${id}`)
-        
-        if (res_rows) {
+        try {
+            let res_rows = await this.db.all(`SELECT * FROM filters_${id}`)
             for (const row of Object.values(res_rows)) {
                 db_filters[row["name"]] = row["value"]
             }
-        } else {
+        } catch {
             db_filters = {}
         }
 

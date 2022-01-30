@@ -189,13 +189,13 @@ class Guilds {
     async getFilters(id) {
         // Get custom filters from database
         let db_filters = {};
-        let res_rows = await this.db.all(`SELECT * FROM filters_${id}`);
-        if (res_rows) {
+        try {
+            let res_rows = await this.db.all(`SELECT * FROM filters_${id}`);
             for (const row of Object.values(res_rows)) {
                 db_filters[row["name"]] = row["value"];
             }
         }
-        else {
+        catch (_a) {
             db_filters = {};
         }
         // Get default filters, merge with custom filters, overwriting default filters in case of a conflict
