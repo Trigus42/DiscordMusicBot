@@ -24,15 +24,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Discord = __importStar(require("discord.js"));
 const DisTube = __importStar(require("distube"));
-const play_dl_1 = __importDefault(require("play-dl"));
+const spotify_1 = require("@distube/spotify");
 const db_1 = require("./db");
 const buttons_1 = require("./const/buttons");
 const Commands = __importStar(require("./commands/index"));
 const Embeds = __importStar(require("./embeds/index"));
+const deezer_1 = __importDefault(require("./apis/deezer"));
 /////////////////
 /// Initialize //
 /////////////////
 let db = new db_1.DB("./config/db.sqlite");
+let deezer = new deezer_1.default();
 // Create a new discord client
 // TODO: Remove unused intents and partials
 const client = new Discord.Client({
@@ -47,7 +49,11 @@ const distube = new DisTube.DisTube(client, {
     searchSongs: 5,
     emitNewSongOnly: true,
     leaveOnStop: false,
-    customFilters: db.filters
+    customFilters: db.filters,
+    plugins: [new spotify_1.SpotifyPlugin({ api: {
+                clientId: db.user_config.spotify.client_id,
+                clientSecret: db.user_config.spotify.client_secret
+            } })]
 });
 // Login to discord
 client.login(db.user_config.token);
@@ -217,31 +223,11 @@ client.on("messageCreate", async (message) => {
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
-            var url_type = await play_dl_1.default.validate(args[0]);
-            if (url_type === 'sp_track' || url_type === 'sp_album' || url_type === 'sp_playlist') {
-                // Spotify authorization
-                try {
-                    await play_dl_1.default.setToken({ spotify: db.user_config.spotify });
-                    if (play_dl_1.default.is_expired())
-                        await play_dl_1.default.refreshToken(); // Refresh spotify access token if it has expired
-                }
-                catch (error) {
-                    Embeds.embedBuilderMessage(client, message, "RED", "SPOTIFY", `❌ Something went wrong while trying to authorize Spotify!`);
-                    return;
-                }
-                let sp_data = await play_dl_1.default.spotify(args[0]); // Get spotify data from url
-                // Search for song on YouTube
-                if (sp_data.type === 'track') {
-                    var search_string = sp_data.name + " - " + sp_data.artists.map((artist) => artist.name).join(" ");
-                    var yt_vid = (await distube.search(search_string, { limit: 1 }))[0].url;
-                    await distube.play(message, yt_vid);
-                }
-                else if (sp_data.type === 'playlist' || sp_data.type === 'album') {
-                    var tracks = sp_data.fetched_tracks.get('1');
-                    var search_strings = await Promise.all(tracks.map(async (track) => track.name + " - " + track.artists.map(artist => artist.name).join(" ")));
-                    var urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
-                    distube.playCustomPlaylist(message, urls);
-                }
+            if (args[0].includes("deezer.com")) {
+                let tracks = await deezer.tracks(args[0]);
+                var search_strings = await Promise.all(tracks.map(async (track) => track[0] + " - " + track[1]));
+                var urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
+                distube.play(message, await distube.createCustomPlaylist(urls, { member: message.member, properties: {} }));
             }
             else {
                 await distube.play(message, args.join(" "));
@@ -278,23 +264,24 @@ client.on("messageCreate", async (message) => {
             return;
         }
         else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
-            let queue = distube.getQueue(message.guild.id);
-            var filters = await db.guilds.getFilters(message.guild.id);
-            queue.customFilters[command] = filters[command];
+            // Not implemented (https://github.com/skick1234/DisTube/pull/233)
+            // let queue = distube.getQueue(message.guild.id)
+            // let filters = await db.guilds.getFilters(message.guild.id)
+            // queue.customFilters[command] = filters[command]
             queue.setFilter(command);
             message.react("✅");
             return;
         }
-        else if (command === "filter") {
-            if (args[0] === "add") {
-                await db.guilds.setFilters(message.guild.id, { [args[1]]: args[2] });
-            }
-            else if (args[0] === "del") {
-                await db.guilds.delFilter(message.guild.id, args[1]);
-            }
-            message.react("✅");
-            return;
-        }
+        // Not implemented (https://github.com/skick1234/DisTube/pull/233)
+        // else if (command === "filter") {
+        //     if (args[0] === "add") { 
+        //         await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
+        //     } else if (args[0] === "del") {
+        //         await db.guilds.delFilter(message.guild.id, args[1])
+        //     }
+        //     message.react("✅")
+        //     return
+        // }
         else if (command === "volume" || command === "vol") {
             distube.setVolume(message, Number(args[0]));
             message.react("✅");

@@ -1,0 +1,75 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const axios_1 = __importDefault(require("axios"));
+const http = __importStar(require("http"));
+class Deezer {
+    /**
+     * Listen for get requests on the redirect url port
+     * in order to attain the oauth code.
+    */
+    async listenForCode() {
+        return new Promise((resolve, reject) => {
+            const server = http.createServer((req, res) => {
+                if (req.method === 'GET') {
+                    res.writeHead(200, { 'Content-Type': 'text/plain' });
+                    res.end('Authentication complete! Please return to the app.');
+                    resolve(req.url.replace('/?code=', ''));
+                }
+                else {
+                    res.writeHead(405, { 'Content-Type': 'text/plain' });
+                    res.end('Method Not Allowed\n');
+                    reject(new Error('Method not allowed'));
+                }
+            });
+            server.listen(this.port);
+        });
+    }
+    /**
+     * Sets the access token.
+     * Requires user interaction.
+    */
+    async authenticate(appId, appSecret, redirectUrl) {
+        this.appId = appId;
+        this.appSecret = appSecret;
+        this.redirectUrl = redirectUrl;
+        this.port = this.redirectUrl.split(':')[2].split('/')[0];
+        console.log("Please visit:", `https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.redirectUrl}&perms=offline_access`);
+        let code = await this.listenForCode();
+        const res = await axios_1.default.get(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.appSecret}&code=${code}`);
+        this.accessToken = res.data.split('=')[1].split('&')[0];
+        console.log(this.accessToken);
+    }
+    uiToApiUrl(url) {
+        return "https://" + "api.deezer.com" + "/" + url.split("deezer.com")[1].split("/").slice(-2).join("/");
+    }
+    /**
+     * Return array of songs from url containing the title, artist, and album.
+    */
+    async tracks(url) {
+        const res = await axios_1.default.get(this.uiToApiUrl(url));
+        return res.data.tracks.data.map((track) => [track.title, track.artist.name, track.album.title]);
+    }
+}
+exports.default = Deezer;

@@ -1,4 +1,5 @@
 import * as Discord from "discord.js"
+import DisTube from "distube"
 
 /**
  *  Build and send embed in the channel of the message
@@ -23,7 +24,7 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
 /**
  *  Build and send embed in the channel of the queue
  */
-export function embedBuilder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
+export function embedBuilder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel|Discord.GuildTextBasedChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
     let embed = new Discord.MessageEmbed()
         .setColor(color)
         .setAuthor(user.tag, user.displayAvatarURL({ dynamic: true }))

@@ -1,17 +1,20 @@
 import * as Discord from "discord.js"
 import * as DisTube from "distube"
 import play, { SpotifyTrack } from 'play-dl'
+import { SpotifyPlugin } from "@distube/spotify"
 
 import { DB } from "./db"
 import { BUTTONS } from "./const/buttons"
 import * as Commands from "./commands/index"
 import * as Embeds from "./embeds/index"
+import { default as Deezer } from "./apis/deezer"
 
 /////////////////
 /// Initialize //
 /////////////////
 
 let db = new DB("./config/db.sqlite")
+let deezer = new Deezer()
 
 // Create a new discord client
 // TODO: Remove unused intents and partials
@@ -28,7 +31,11 @@ const distube = new DisTube.DisTube(client, {
     searchSongs: 5, 
     emitNewSongOnly: true,
     leaveOnStop: false,
-    customFilters: db.filters
+    customFilters: db.filters,
+    plugins: [new SpotifyPlugin({api: {
+        clientId: db.user_config.spotify.client_id,
+        clientSecret: db.user_config.spotify.client_secret
+    }})]
 })
 
 // Login to discord
@@ -212,29 +219,11 @@ client.on("messageCreate", async message => {
                 return
             }
 
-            var url_type = await play.validate(args[0])
-            if (url_type === 'sp_track' || url_type === 'sp_album' || url_type === 'sp_playlist') {
-                // Spotify authorization
-                try {
-                    await play.setToken({spotify : db.user_config.spotify})
-                    if (play.is_expired()) await play.refreshToken() // Refresh spotify access token if it has expired
-                } catch (error) {
-                    Embeds.embedBuilderMessage(client, message, "RED", "SPOTIFY", `❌ Something went wrong while trying to authorize Spotify!`)
-                    return
-                }
-
-                let sp_data: any = await play.spotify(args[0]) // Get spotify data from url
-                // Search for song on YouTube
-                if (sp_data.type === 'track') {
-                    var search_string = sp_data.name + " - " + sp_data.artists.map((artist: any) => artist.name).join(" ")
-                    var yt_vid = (await distube.search(search_string, {limit: 1}))[0].url
-                    await distube.play(message, yt_vid)
-                } else if (sp_data.type === 'playlist' || sp_data.type === 'album') {
-                    var tracks: SpotifyTrack[] = sp_data.fetched_tracks.get('1')
-                    var search_strings = await Promise.all(tracks.map(async track => track.name + " - " + track.artists.map(artist => artist.name).join(" ")))
+            if (args[0].includes("deezer.com")) {
+                    let tracks = await deezer.tracks(args[0])
+                    var search_strings = await Promise.all(tracks.map(async track => track[0] + " - " + track[1]))
                     var urls = await Promise.all(search_strings.map(async search_string => (await distube.search(search_string, {limit: 1}))[0].url))
-                    distube.playCustomPlaylist(message, urls)
-                }
+                    distube.play(message, await distube.createCustomPlaylist(urls, {member: message.member, properties: {}}))
             } else {
                 await distube.play(message, args.join(" "))
             }
@@ -270,22 +259,24 @@ client.on("messageCreate", async message => {
             return
         }
         else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
-            let queue:any = distube.getQueue(message.guild.id)
-            var filters = await db.guilds.getFilters(message.guild.id)
-            queue.customFilters[command] = filters[command]
+            // Not implemented (https://github.com/skick1234/DisTube/pull/233)
+            // let queue = distube.getQueue(message.guild.id)
+            // let filters = await db.guilds.getFilters(message.guild.id)
+            // queue.customFilters[command] = filters[command]
             queue.setFilter(command)
             message.react("✅")
             return
         }
-        else if (command === "filter") {
-            if (args[0] === "add") { 
-                await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
-            } else if (args[0] === "del") {
-                await db.guilds.delFilter(message.guild.id, args[1])
-            }
-            message.react("✅")
-            return
-        }
+        // Not implemented (https://github.com/skick1234/DisTube/pull/233)
+        // else if (command === "filter") {
+        //     if (args[0] === "add") { 
+        //         await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
+        //     } else if (args[0] === "del") {
+        //         await db.guilds.delFilter(message.guild.id, args[1])
+        //     }
+        //     message.react("✅")
+        //     return
+        // }
         else if (command === "volume" || command === "vol") {
             distube.setVolume(message, Number(args[0]))
             message.react("✅")

@@ -16,4 +16,4 @@ COPY ./package-lock.json /app/package-lock.json
 
 RUN npm install
 
-CMD ["node", "build/index.js"]
+CMD ["node", "--no-deprecation", "build/index.js"]

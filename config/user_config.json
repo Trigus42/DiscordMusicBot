@@ -4,8 +4,6 @@
     "action_messages": false,
     "spotify": {
         "client_id": "",
-        "client_secret": "",
-        "refresh_token": "",
-        "market": ""
+        "client_secret": ""
     }
 }

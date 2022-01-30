@@ -1,13 +1,15 @@
 {
   "dependencies": {
+    "@discordjs/opus": "^0.7.0",
+    "@distube/spotify": "^1.1.0",
+    "axios": "^0.25.0",
     "discord.js": "13.3.1",
-    "distube": "3.0.3",
+    "distube": "^3.0.3",
     "play-dl": "^1.7.9",
     "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master"
   },
   "devDependencies": {
     "@distube/ytdl-core": "^4.9.4",
-    "@types/level": "^6.0.0",
     "@types/node": "^17.0.8",
     "@types/sqlite3": "^3.1.8",
     "ts-node": "^10.4.0",
