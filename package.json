@@ -5,7 +5,6 @@
     "axios": "^0.25.0",
     "discord.js": "13.3.1",
     "distube": "^3.0.3",
-    "play-dl": "^1.7.9",
     "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master"
   },
   "devDependencies": {

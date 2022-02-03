@@ -1,6 +1,5 @@
 import * as Discord from "discord.js"
 import * as DisTube from "distube"
-import play, { SpotifyTrack } from 'play-dl'
 import { SpotifyPlugin } from "@distube/spotify"
 
 import { DB } from "./db"
@@ -219,21 +218,29 @@ client.on("messageCreate", async message => {
                 return
             }
 
+            let insert: number
+            // Insert song at position args[0] in queue if args[0] is a number
+            if (!isNaN(Number(args[0]))) {
+                insert = Number(args.shift())
+            }
+
+            let customPlaylist: DisTube.Playlist
             if (args[0].includes("deezer.com")) {
                 let type = args[0].split("/").slice(-2,-1)[0]
                 if (["track", "album", "playlist", "artist"].includes(type)) {
                     let tracks = await deezer.tracks(args[0])
-                    var search_strings = await Promise.all(tracks.map(async track => track[0] + " - " + track[1]))
-                    var urls = await Promise.all(search_strings.map(async search_string => (await distube.search(search_string, {limit: 1}))[0].url))
-                    distube.play(message, await distube.createCustomPlaylist(urls, {member: message.member, properties: {}}))
+                    let search_strings = await Promise.all(tracks.map(async track => track[0] + " - " + track[1]))
+                    let urls = await Promise.all(search_strings.map(async search_string => (await distube.search(search_string, {limit: 1}))[0].url))
+                    customPlaylist = await distube.createCustomPlaylist(urls, {member: message.member, properties: {}})
                 } else {
                     Embeds.embedBuilderMessage(client, message, "RED", "Can only play tracks, albums, playlists and artists from Deezer")
                         .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+                    return
                 }
-            } else {
-                await distube.play(message, args.join(" "))
             }
 
+            // Use deprecated unshift cause position: 1 is not working
+            await distube.play(message, customPlaylist ?? args.join(" "), {unshift: insert == 1 ? true : false})
             message.react("✅")
             return
         }
