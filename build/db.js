@@ -65,10 +65,9 @@ class DB {
         return this.connection.close();
     }
     /**
-    * Run SQL query, return promise with results or reject with error
+    * Run SQL query, return promise with first result or reject with error
     * @param sql SQL query
     * @param params Parameters for SQL query
-    * @returns Promise with string[] or null
     */
     async get(sql, params) {
         return new Promise((resolve, reject) => {
@@ -87,6 +86,12 @@ class DB {
             });
         });
     }
+    /**
+    * Run SQL query, return promise when finished or reject with error.
+    * Results are discarded
+    * @param sql SQL query
+    * @param params Parameters for SQL query
+    */
     async run(sql, params) {
         return new Promise((resolve, reject) => {
             this.connection.run(sql, params !== null && params !== void 0 ? params : [], (err) => {
@@ -99,6 +104,11 @@ class DB {
             });
         });
     }
+    /**
+    * Run SQL query, return promise with all results or reject with error.
+    * @param sql SQL query
+    * @param params Parameters for SQL query
+    */
     async all(sql, params) {
         return new Promise((resolve, reject) => {
             this.connection.all(sql, params !== null && params !== void 0 ? params : [], (err, rows) => {
@@ -133,11 +143,11 @@ class KVStore {
         var exists = res ? res[0] : false;
         // Create new key-value pair if key does not exist
         if (!exists) {
-            return this.db.get("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
+            return this.db.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
             // Update key-value pair if key already exists and value is different
         }
         else if (exists != value) {
-            return this.db.get("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]);
+            return this.db.run("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]);
         }
     }
     /**
@@ -151,7 +161,7 @@ class KVStore {
     * Delete key-value pair from database
     * */
     async del(key) {
-        return this.db.get('DELETE FROM kvstore WHERE key = ?', [key]);
+        return this.db.run('DELETE FROM kvstore WHERE key = ?', [key]);
     }
 }
 class Guilds {
@@ -167,7 +177,7 @@ class Guilds {
             `);
     }
     async add(id) {
-        return this.db.get("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]);
+        await this.db.run("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]);
     }
     async get(type, id) {
         var res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id]);

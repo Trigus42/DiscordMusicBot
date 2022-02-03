@@ -1,6 +1,5 @@
 import * as sql from "sqlite3"
 import * as fs from "fs"
-import { Filter } from "@distube/ytdl-core"
 
 interface UserConfig {
     token: string,
@@ -15,7 +14,7 @@ interface UserConfig {
     youtube_cookie: string,
 }
 
-interface Filters { 
+interface Dict { 
     [key: string] : string
 }
 
@@ -26,12 +25,12 @@ export class DB {
     kvstore: KVStore
 
     user_config: UserConfig
-    filters: Filters
+    filters: Dict
 
     /*
     * Constructor function to initialize database connection
     */
-    constructor (filename?: string, user_config?: UserConfig|string, filters?: Filters|string) {
+    constructor (filename?: string, user_config?: UserConfig|string, filters?: Dict|string) {
         // Connect to database
         this.path = filename ?? "./config/db.sqlite"
         this.connection = new sql.Database(this.path)
@@ -71,10 +70,9 @@ export class DB {
     }
 
     /**
-    * Run SQL query, return promise with results or reject with error
+    * Run SQL query, return promise with first result or reject with error
     * @param sql SQL query
     * @param params Parameters for SQL query
-    * @returns Promise with string[] or null
     */
     async get (sql: string, params?: any[]): Promise<string[]|null> {
         return new Promise((resolve, reject) => {
@@ -92,7 +90,13 @@ export class DB {
         })
     }
 
-    async run (sql: string, params?: any[]) {
+    /**
+    * Run SQL query, return promise when finished or reject with error.  
+    * Results are discarded
+    * @param sql SQL query
+    * @param params Parameters for SQL query
+    */
+    async run (sql: string, params?: any[]): Promise<null> {
         return new Promise((resolve, reject) => {
             this.connection.run(sql, params ?? [], (err) => {
                 if (err) {
@@ -104,7 +108,12 @@ export class DB {
         })
     }
 
-    async all (sql: string, params?: any[]) {
+    /**
+    * Run SQL query, return promise with all results or reject with error.  
+    * @param sql SQL query
+    * @param params Parameters for SQL query
+    */
+    async all (sql: string, params?: any[]): Promise<Array<Dict>|null> {
         return new Promise((resolve, reject) => {
             this.connection.all(sql, params ?? [], (err, rows) => {
                 if (err) {
@@ -141,10 +150,10 @@ class KVStore {
         
         // Create new key-value pair if key does not exist
         if (!exists) {
-            return this.db.get("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]) as Promise<null>
+            return this.db.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value])
         // Update key-value pair if key already exists and value is different
         } else if (exists != value) {
-            return this.db.get("UPDATE kvstore SET value = ? WHERE key = ?", [value, key]) as Promise<null>
+            return this.db.run("UPDATE kvstore SET value = ? WHERE key = ?", [value, key])
         }
     }
 
@@ -160,7 +169,7 @@ class KVStore {
     * Delete key-value pair from database
     * */
     async del (key: string): Promise<null> {
-        return this.db.get('DELETE FROM kvstore WHERE key = ?', [key]) as Promise<null>
+        return this.db.run('DELETE FROM kvstore WHERE key = ?', [key])
     }
 }
 
@@ -179,8 +188,8 @@ class Guilds {
             `)
     }
 
-    async add(id: string): Promise<null> {
-        return this.db.get("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]) as Promise<null>
+    async add(id: string): Promise<void> {
+        await this.db.run("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id])
     }
 
     async get(type: "prefix"|"playing_message"|"status_message", id: string): Promise<string|null> {
@@ -188,16 +197,16 @@ class Guilds {
         return res ? res[0] : null
     }
 
-    async set(type: "prefix"|"playing_message"|"status_message", value: string, id: string) {
+    async set(type: "prefix"|"playing_message"|"status_message", value: string, id: string): Promise<void> {
         await this.add(id)
         await this.db.run(`UPDATE guilds SET ${type} = ? WHERE id = ?`, [value, id])
     }
 
-    async del(id: string) {
+    async del(id: string): Promise<void> {
         await this.db.run("DELETE FROM guilds WHERE id = ?", [id])
     }
 
-    async setFilters(id: string, filters: Filters) {
+    async setFilters(id: string, filters: Dict): Promise<void> {
         await this.db.run(`CREATE TABLE IF NOT EXISTS filters_${id} (name TEXT UNIQUE, value TEXT)`)
         for (const [name, value] of Object.entries(filters)) {
             await this.db.run(`INSERT OR REPLACE INTO filters_${id} (name, value) VALUES (?, ?)`, [name, value])
@@ -206,7 +215,7 @@ class Guilds {
 
     async getFilters(id: string) {
         // Get custom filters from database
-        let db_filters: Filters = {}
+        let db_filters: Dict = {}
         try {
             let res_rows = await this.db.all(`SELECT * FROM filters_${id}`)
             for (const row of Object.values(res_rows)) {
