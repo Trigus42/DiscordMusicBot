@@ -17,6 +17,7 @@ export async function help(message: Discord.Message, prefix: string, filters: Ob
         .addField(`\`${prefix}skip\`  \`${prefix}s\``, `**Skips current song**`, true)
         .addField(`\`${prefix}stop\`  \`${prefix}leave\``, `**Stops playing**`, true)
         .addField(`\`${prefix}seek <HH:MM:SS>\``, `**Moves in the song to HH:MM:SS**`, true)
+        .addField(`\`${prefix}move <FROM> <TO>\` \`${prefix}mv\``, `**Moves a song from one position to another**`, true)
         .addField(`\`${prefix}volume <VOLUME>\`  \`${prefix}vol\``, `**Changes volume**`, true)
         .addField(`\`${prefix}queue\`  \`${prefix}qu\``, `**Shows current Queue**`, true)
         .addField(`\`${prefix}loop <0/1/2>\`  \`${prefix}mix\``, `**Loop (off / song / queue)**`, true)
