@@ -248,6 +248,16 @@ client.on("messageCreate", async (message) => {
             message.react("✅");
             return;
         }
+        else if (command === "move" || command === "mv") {
+            if (!isNaN(Number(args[0])) && !isNaN(Number(args[1]))) {
+                let queue = distube.getQueue(message);
+                // Move song from position args[0] to position args[1]
+                queue.songs.splice(Number(args[1]), 0, queue.songs.splice(Number(args[0]), 1)[0]);
+                message.react("✅");
+                queue = distube.getQueue(message);
+                return;
+            }
+        }
         else if (command === "skip" || command === "s") {
             let queue = distube.getQueue(message.guild.id);
             if (!queue.autoplay && queue.songs.length <= 1) {
