@@ -74,7 +74,7 @@ export class DB {
     * @param sql SQL query
     * @param params Parameters for SQL query
     */
-    async get (sql: string, params?: any[]): Promise<string[]|null> {
+    get (sql: string, params?: any[]): Promise<string[]|null> {
         return new Promise((resolve, reject) => {
             this.connection.get(sql, params ?? [], (err, row: Object|undefined) => {
                 if (err) {
@@ -96,7 +96,7 @@ export class DB {
     * @param sql SQL query
     * @param params Parameters for SQL query
     */
-    async run (sql: string, params?: any[]): Promise<null> {
+    run (sql: string, params?: any[]): Promise<null> {
         return new Promise((resolve, reject) => {
             this.connection.run(sql, params ?? [], (err) => {
                 if (err) {
@@ -113,7 +113,7 @@ export class DB {
     * @param sql SQL query
     * @param params Parameters for SQL query
     */
-    async all (sql: string, params?: any[]): Promise<Array<Dict>|null> {
+    all (sql: string, params?: any[]): Promise<Array<Dict>|null> {
         return new Promise((resolve, reject) => {
             this.connection.all(sql, params ?? [], (err, rows) => {
                 if (err) {
@@ -145,8 +145,8 @@ class KVStore {
     */
      async put (key: string, value: string): Promise<null> {
         // Check if key already exists
-        var res = (await this.db.get(`SELECT value FROM kvstore WHERE key = ?`, [key]))
-        var exists = res ? res[0] : false
+        let res = (await this.db.get(`SELECT value FROM kvstore WHERE key = ?`, [key]))
+        let exists = res ? res[0] : false
         
         // Create new key-value pair if key does not exist
         if (!exists) {
@@ -161,7 +161,7 @@ class KVStore {
     * Get value from key-value store from database
     * */
     async get (key: string): Promise<string|null> {
-        var res = await this.db.get('SELECT value FROM kvstore WHERE key = ?', [key])
+        let res = await this.db.get('SELECT value FROM kvstore WHERE key = ?', [key])
         return res ? res[0] : null
     }
 
@@ -193,7 +193,7 @@ class Guilds {
     }
 
     async get(type: "prefix"|"playing_message"|"status_message", id: string): Promise<string|null> {
-        var res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id])
+        let res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id])
         return res ? res[0] : null
     }
 

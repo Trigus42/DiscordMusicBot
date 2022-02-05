@@ -24,7 +24,6 @@ export async function help(message: Discord.Message, prefix: string, filters: Ob
         .addField(`\`${prefix}jump <Queue index>\``, `**Jumps to a queue song**`, true)
         .addField(`\`${prefix}ping\``, `**Gives you the ping**`, true)
         .addField(`\`${prefix}uptime\``, `**Shows you the Bot's Uptime**`, true)
-        .addField(`​`, `​`, true)
         .addField("***FILTERS:***", Object.keys(filters).map(filter => `\`${prefix}${filter}\``).join(" "))
 
     return message.channel.send({ embeds: [helpembed] })

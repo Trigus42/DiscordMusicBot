@@ -69,7 +69,7 @@ class DB {
     * @param sql SQL query
     * @param params Parameters for SQL query
     */
-    async get(sql, params) {
+    get(sql, params) {
         return new Promise((resolve, reject) => {
             this.connection.get(sql, params !== null && params !== void 0 ? params : [], (err, row) => {
                 if (err) {
@@ -92,7 +92,7 @@ class DB {
     * @param sql SQL query
     * @param params Parameters for SQL query
     */
-    async run(sql, params) {
+    run(sql, params) {
         return new Promise((resolve, reject) => {
             this.connection.run(sql, params !== null && params !== void 0 ? params : [], (err) => {
                 if (err) {
@@ -109,7 +109,7 @@ class DB {
     * @param sql SQL query
     * @param params Parameters for SQL query
     */
-    async all(sql, params) {
+    all(sql, params) {
         return new Promise((resolve, reject) => {
             this.connection.all(sql, params !== null && params !== void 0 ? params : [], (err, rows) => {
                 if (err) {
@@ -139,8 +139,8 @@ class KVStore {
     */
     async put(key, value) {
         // Check if key already exists
-        var res = (await this.db.get(`SELECT value FROM kvstore WHERE key = ?`, [key]));
-        var exists = res ? res[0] : false;
+        let res = (await this.db.get(`SELECT value FROM kvstore WHERE key = ?`, [key]));
+        let exists = res ? res[0] : false;
         // Create new key-value pair if key does not exist
         if (!exists) {
             return this.db.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value]);
@@ -154,7 +154,7 @@ class KVStore {
     * Get value from key-value store from database
     * */
     async get(key) {
-        var res = await this.db.get('SELECT value FROM kvstore WHERE key = ?', [key]);
+        let res = await this.db.get('SELECT value FROM kvstore WHERE key = ?', [key]);
         return res ? res[0] : null;
     }
     /**
@@ -180,7 +180,7 @@ class Guilds {
         await this.db.run("INSERT OR IGNORE INTO guilds (id) VALUES (?)", [id]);
     }
     async get(type, id) {
-        var res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id]);
+        let res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id]);
         return res ? res[0] : null;
     }
     async set(type, value, id) {

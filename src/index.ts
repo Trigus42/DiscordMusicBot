@@ -167,7 +167,7 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command == "status") {
-            var queue = distube.getQueue(message.guild.id)
+            let queue = distube.getQueue(message.guild.id)
             if (!queue) {
                 Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
@@ -275,9 +275,9 @@ client.on("messageCreate", async message => {
         }
         else if (command === "seek") {
             // Get time in seconds from HH:MM:SS time_string
-            var time_array = args[0].split(":")
-            var time_seconds = 0
-            for (var i = 0; i < time_array.length; i++) {
+            let time_array = args[0].split(":")
+            let time_seconds = 0
+            for (let i = 0; i < time_array.length; i++) {
                 time_seconds += parseInt(time_array[i]) * Math.pow(60, (time_array.length - 1) - i)
             }
             distube.seek(message, time_seconds)
@@ -309,7 +309,7 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command === "queue" || command === "qu") {          
-            var queue = distube.getQueue(message)
+            let queue = distube.getQueue(message)
 
             if (!queue) {
                 Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
