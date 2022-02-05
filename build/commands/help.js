@@ -41,8 +41,8 @@ async function help(message, prefix, filters) {
         .addField(`\`${prefix}move <FROM> <TO>\` \`${prefix}mv\``, `**Moves a song from one position to another**`, true)
         .addField(`\`${prefix}volume <VOLUME>\`  \`${prefix}vol\``, `**Changes volume**`, true)
         .addField(`\`${prefix}queue\`  \`${prefix}qu\``, `**Shows current Queue**`, true)
-        .addField(`\`${prefix}loop <0/1/2>\`  \`${prefix}mix\``, `**Loop (off / song / queue)**`, true)
-        .addField(`\`${prefix}jump <Queue index>\``, `**Jumps to a queue song**`, true)
+        .addField(`\`${prefix}loop <0/1/2>\``, `**Loop (off / song / queue)**`, true)
+        .addField(`\`${prefix}jump <POSITION>\``, `**Jumps to a queue song**`, true)
         .addField(`\`${prefix}ping\``, `**Gives you the ping**`, true)
         .addField(`\`${prefix}uptime\``, `**Shows you the Bot's Uptime**`, true)
         .addField("***FILTERS:***", Object.keys(filters).map(filter => `\`${prefix}${filter}\``).join(" "));
