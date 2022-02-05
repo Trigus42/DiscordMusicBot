@@ -8,7 +8,7 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
-            .setAuthor(message.author.tag, message.member.user.displayAvatarURL({ dynamic: true }))
+            .setAuthor(message.author.tag.split('#')[0], message.member.user.displayAvatarURL({ dynamic: true }))
             .setFooter(client.user.username, client.user.displayAvatarURL())
 
         if (title) embed.setTitle(title)

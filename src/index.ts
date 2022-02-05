@@ -267,7 +267,7 @@ client.on("messageCreate", async message => {
             message.react("✅")
             return
         }
-        else if (command === "stop" || command === "leave") {
+        else if (command === "stop") {
             let queue = distube.getQueue(message.guild.id)
             if (queue) await queue.stop()
             message.react("✅")
