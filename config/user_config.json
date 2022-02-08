@@ -1,9 +1,5 @@
 {
     "token": "",
     "prefix": ".",
-    "action_messages": false,
-    "spotify": {
-        "client_id": "",
-        "client_secret": ""
-    }
+    "action_messages": false
 }
