@@ -48,7 +48,7 @@ const distube = new DisTube.DisTube(client, {
     youtubeIdentityToken: (_b = db.user_config.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
     nsfw: (_c = db.user_config.nsfw) !== null && _c !== void 0 ? _c : false,
     customFilters: db.filters,
-    searchSongs: 5,
+    searchSongs: 10,
     leaveOnStop: true,
     leaveOnFinish: false,
     leaveOnEmpty: true,
@@ -142,38 +142,6 @@ client.on("messageCreate", async (message) => {
             Embeds.embedBuilderMessage(client, message, "#fffff0", "PREFIX", `:ballot_box_with_check: Successfully set new prefix to **\`${args[0]}\`**`);
             return;
         }
-        else if (command === "search") {
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "Searching", args.join(" ")).then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-            let result = await distube.search(args.join(" "));
-            let searchresult = "";
-            for (let i = 0; i <= result.length; i++) {
-                try {
-                    searchresult += `**${i + 1}**. [${result[i].name}](${result[i].url}) - \`${result[i].formattedDuration}\`\n`;
-                }
-                catch (error) {
-                    searchresult += " ";
-                }
-            }
-            let searchembed = await Embeds.embedBuilderMessage(client, message, "#fffff0", "Choose an option from below", searchresult);
-            let filter = (m) => !isNaN(Number(m.content)) && m.author.id === message.author.id;
-            let userinput;
-            await searchembed.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ["time"] }).then(collected => {
-                userinput = collected.first().content;
-                if (Number(userinput) < 0 && Number(userinput) >= 15) {
-                    Embeds.embedBuilderMessage(client, message, "RED", "Not a right number", "so i use number 1");
-                    userinput = 1;
-                }
-                setTimeout(() => searchembed.delete().catch(console.error), Number(client.ws.ping));
-            })
-                .catch(() => { console.log(console.error); userinput = 404; });
-            if (userinput === 404) {
-                Embeds.embedBuilderMessage(client, message, "RED", "Something went wrong");
-                return;
-            }
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "Searching", `[${result[userinput - 1].name}](${result[userinput - 1].url})`, result[userinput - 1].thumbnail);
-            distube.play(message.member.voice.channel, result[userinput - 1].url, { textChannel: message.channel });
-            return;
-        }
         else if (command == "status") {
             let queue = distube.getQueue(message.guild.id);
             if (!queue) {
@@ -240,7 +208,7 @@ client.on("messageCreate", async (message) => {
                     return;
                 }
             }
-            await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), { position: (_b = Number(args[1])) !== null && _b !== void 0 ? _b : -1, textChannel: message.channel });
+            await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), { position: (_b = Number(args[1])) !== null && _b !== void 0 ? _b : -1, textChannel: message.channel, message: message });
             message.react("✅");
             return;
         }
