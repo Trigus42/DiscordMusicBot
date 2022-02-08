@@ -5,13 +5,13 @@ interface UserConfig {
     token: string,
     prefix: string,
     action_messages: boolean,
-    spotify: {
+    spotify?: {
         client_id: string,
-        client_secret: string,
-        market: string,
-        refresh_token: string
-    }
-    youtube_cookie: string,
+        client_secret: string
+    },
+    nsfw?: boolean,
+    youtubeIdentityToken?: string,
+    youtubeCookie?: string,
 }
 
 interface Dict { 
@@ -225,11 +225,8 @@ class Guilds {
             db_filters = {}
         }
 
-        // Get default filters, merge with custom filters, overwriting default filters in case of a conflict
-        let filters = this.db.filters
-        for (const [name, value] of Object.entries(db_filters)) {
-            filters[name] = value
-        }
+        // Merge default filters with custom filters, overwriting default filters in case of a conflict
+        let filters = Object.assign(this.db.filters, db_filters)
 
         return filters
     }

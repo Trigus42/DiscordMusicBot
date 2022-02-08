@@ -16,25 +16,26 @@ let db = new DB("./config/db.sqlite")
 let deezer = new Deezer()
 
 // Create a new discord client
-// TODO: Remove unused intents and partials
 const client = new Discord.Client({
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
     messageCacheLifetime: 0,
     messageSweepInterval: 0,
-    intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'GUILD_BANS', 'GUILD_INTEGRATIONS', 'GUILD_WEBHOOKS', 'GUILD_INVITES', 'GUILD_VOICE_STATES', 'GUILD_PRESENCES']
+    intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES']
 })
 
 // Create a new distube instance
 const distube = new DisTube.DisTube(client, {
-    youtubeCookie: db.user_config.youtube_cookie,
-    searchSongs: 5, 
-    emitNewSongOnly: true,
-    leaveOnStop: false,
+    youtubeCookie: db.user_config.youtubeCookie ?? undefined,
+    youtubeIdentityToken: db.user_config.youtubeIdentityToken ?? undefined,
+    nsfw: db.user_config.nsfw ?? false,
     customFilters: db.filters,
-    plugins: [new SpotifyPlugin({api: {
+    searchSongs: 5, 
+    leaveOnStop: true,
+    leaveOnFinish: false,
+    leaveOnEmpty: true,
+    plugins: db.user_config.spotify ? [new SpotifyPlugin({api: {
         clientId: db.user_config.spotify.client_id,
         clientSecret: db.user_config.spotify.client_secret
-    }})]
+    }})] : undefined
 })
 
 // Login to discord
@@ -163,7 +164,7 @@ client.on("messageCreate", async message => {
                 return
             }
             Embeds.embedBuilderMessage(client, message, "#fffff0", "Searching", `[${result[userinput - 1].name}](${result[userinput - 1].url})`, result[userinput - 1].thumbnail)
-            distube.play(message, result[userinput - 1].url)
+            distube.play(message.member.voice.channel, result[userinput - 1].url, {textChannel: message.channel as Discord.GuildTextBasedChannel})
             return
         }
         else if (command == "status") {
@@ -218,12 +219,6 @@ client.on("messageCreate", async message => {
                 return
             }
 
-            let insert: number
-            // Insert song at position args[0] in queue if args[0] is a number
-            if (!isNaN(Number(args[0]))) {
-                insert = Number(args.shift())
-            }
-
             let customPlaylist: DisTube.Playlist
             if (args[0].includes("deezer.com")) {
                 let type = args[0].split("/").slice(-2,-1)[0]
@@ -239,8 +234,7 @@ client.on("messageCreate", async message => {
                 }
             }
 
-            // Use deprecated unshift cause position: 1 is not working
-            await distube.play(message, customPlaylist ?? args.join(" "), {unshift: insert == 1 ? true : false})
+            await distube.play(message.member.voice.channel, customPlaylist ?? args.join(" "), {position: Number(args[1]) ?? -1, textChannel: message.channel as Discord.GuildTextBasedChannel})
             message.react("✅")
             return
         }

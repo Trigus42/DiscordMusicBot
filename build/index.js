@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
 const Discord = __importStar(require("discord.js"));
 const DisTube = __importStar(require("distube"));
@@ -36,24 +37,25 @@ const deezer_1 = __importDefault(require("./apis/deezer"));
 let db = new db_1.DB("./config/db.sqlite");
 let deezer = new deezer_1.default();
 // Create a new discord client
-// TODO: Remove unused intents and partials
 const client = new Discord.Client({
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
     messageCacheLifetime: 0,
     messageSweepInterval: 0,
-    intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_MEMBERS', 'GUILD_BANS', 'GUILD_INTEGRATIONS', 'GUILD_WEBHOOKS', 'GUILD_INVITES', 'GUILD_VOICE_STATES', 'GUILD_PRESENCES']
+    intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES']
 });
 // Create a new distube instance
 const distube = new DisTube.DisTube(client, {
-    youtubeCookie: db.user_config.youtube_cookie,
-    searchSongs: 5,
-    emitNewSongOnly: true,
-    leaveOnStop: false,
+    youtubeCookie: (_a = db.user_config.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
+    youtubeIdentityToken: (_b = db.user_config.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
+    nsfw: (_c = db.user_config.nsfw) !== null && _c !== void 0 ? _c : false,
     customFilters: db.filters,
-    plugins: [new spotify_1.SpotifyPlugin({ api: {
+    searchSongs: 5,
+    leaveOnStop: true,
+    leaveOnFinish: false,
+    leaveOnEmpty: true,
+    plugins: db.user_config.spotify ? [new spotify_1.SpotifyPlugin({ api: {
                 clientId: db.user_config.spotify.client_id,
                 clientSecret: db.user_config.spotify.client_secret
-            } })]
+            } })] : undefined
 });
 // Login to discord
 client.login(db.user_config.token);
@@ -84,7 +86,7 @@ client.on('disconnect', () => {
     client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 });
 client.on("messageCreate", async (message) => {
-    var _a;
+    var _a, _b;
     try {
         // Ignore non commands, messages from bots and DMs
         if (message.author.bot || !message.guild)
@@ -169,7 +171,7 @@ client.on("messageCreate", async (message) => {
                 return;
             }
             Embeds.embedBuilderMessage(client, message, "#fffff0", "Searching", `[${result[userinput - 1].name}](${result[userinput - 1].url})`, result[userinput - 1].thumbnail);
-            distube.play(message, result[userinput - 1].url);
+            distube.play(message.member.voice.channel, result[userinput - 1].url, { textChannel: message.channel });
             return;
         }
         else if (command == "status") {
@@ -223,11 +225,6 @@ client.on("messageCreate", async (message) => {
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
-            let insert;
-            // Insert song at position args[0] in queue if args[0] is a number
-            if (!isNaN(Number(args[0]))) {
-                insert = Number(args.shift());
-            }
             let customPlaylist;
             if (args[0].includes("deezer.com")) {
                 let type = args[0].split("/").slice(-2, -1)[0];
@@ -243,8 +240,7 @@ client.on("messageCreate", async (message) => {
                     return;
                 }
             }
-            // Use deprecated unshift cause position: 1 is not working
-            await distube.play(message, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), { unshift: insert == 1 ? true : false });
+            await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), { position: (_b = Number(args[1])) !== null && _b !== void 0 ? _b : -1, textChannel: message.channel });
             message.react("✅");
             return;
         }

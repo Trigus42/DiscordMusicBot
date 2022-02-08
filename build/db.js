@@ -208,11 +208,8 @@ class Guilds {
         catch (_a) {
             db_filters = {};
         }
-        // Get default filters, merge with custom filters, overwriting default filters in case of a conflict
-        let filters = this.db.filters;
-        for (const [name, value] of Object.entries(db_filters)) {
-            filters[name] = value;
-        }
+        // Merge default filters with custom filters, overwriting default filters in case of a conflict
+        let filters = Object.assign(this.db.filters, db_filters);
         return filters;
     }
     async delFilter(id, name) {

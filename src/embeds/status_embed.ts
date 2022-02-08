@@ -120,7 +120,7 @@ async function sendStatusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song
         .addField("Autoplay:", `\`${queue.autoplay ? ":ballot_box_with_check:" : "❌"}\``, true)
         .addField("Filter:", `\`${queue.filters.length != 0 ? queue.filters : "❌"}\``, true)
         .setFooter(queue.client.user.username, queue.client.user.displayAvatarURL())
-    if (song.user) embed.setAuthor(song.user.tag, song.user.displayAvatarURL({ dynamic: true }))
+    if (song.user) embed.setAuthor(song.user.tag.split('#')[0], song.user.displayAvatarURL({ dynamic: true }))
     if (song.thumbnail) embed.setThumbnail(song.thumbnail)
 
     // Send new playing message
