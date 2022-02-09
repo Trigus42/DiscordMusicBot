@@ -42,8 +42,7 @@ const client = new Discord.Client({
     messageSweepInterval: 0,
     intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES']
 });
-// Create a new distube instance
-const distube = new DisTube.DisTube(client, {
+let distube_options = Object.assign({
     youtubeCookie: (_a = db.user_config.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
     youtubeIdentityToken: (_b = db.user_config.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
     nsfw: (_c = db.user_config.nsfw) !== null && _c !== void 0 ? _c : false,
@@ -52,11 +51,12 @@ const distube = new DisTube.DisTube(client, {
     leaveOnStop: true,
     leaveOnFinish: false,
     leaveOnEmpty: true,
-    plugins: db.user_config.spotify ? [new spotify_1.SpotifyPlugin({ api: {
+}, db.user_config.spotify ? { plugins: [new spotify_1.SpotifyPlugin({ api: {
                 clientId: db.user_config.spotify.client_id,
                 clientSecret: db.user_config.spotify.client_secret
-            } })] : undefined
-});
+            } })] } : undefined);
+// Create a new distube instance
+const distube = new DisTube.DisTube(client, distube_options);
 // Login to discord
 client.login(db.user_config.token);
 /////////////////
@@ -252,26 +252,6 @@ client.on("messageCreate", async (message) => {
             message.react("✅");
             return;
         }
-        else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
-            let queue = distube.getQueue(message.guild.id);
-            // Not implemented (https://github.com/skick1234/DisTube/pull/233)
-            // let filters = await db.guilds.getFilters(message.guild.id)
-            // queue.customFilters[command] = filters[command]
-            if (queue)
-                queue.setFilter(command);
-            message.react("✅");
-            return;
-        }
-        // Not implemented (https://github.com/skick1234/DisTube/pull/233)
-        // else if (command === "filter") {
-        //     if (args[0] === "add") { 
-        //         await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
-        //     } else if (args[0] === "del") {
-        //         await db.guilds.delFilter(message.guild.id, args[1])
-        //     }
-        //     message.react("✅")
-        //     return
-        // }
         else if (command === "volume" || command === "vol") {
             distube.setVolume(message, Number(args[0]));
             message.react("✅");
@@ -353,6 +333,26 @@ client.on("messageCreate", async (message) => {
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
+        }
+        else if (command === "filter") {
+            if (args[0] === "add") {
+                await db.guilds.setFilters(message.guild.id, { [args[1]]: args[2] });
+                distube.filters[message.guildId + args[1]] = args[2];
+            }
+            else if (args[0] === "del") {
+                await db.guilds.delFilter(message.guild.id, args[1]);
+                distube.filters[message.guild.id + args[1]] = undefined;
+            }
+            message.react("✅");
+            return;
+        }
+        // Position of the last two is important
+        else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
+            let queue = distube.getQueue(message.guild.id);
+            if (queue)
+                queue.setFilter(message.guild.id + command);
+            message.react("✅");
+            return;
         }
         else if (message.content.startsWith(prefix)) {
             Embeds.embedBuilderMessage(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands`)
