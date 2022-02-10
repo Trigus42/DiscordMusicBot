@@ -200,7 +200,7 @@ client.on("messageCreate", async (message) => {
                     let tracks = await deezer.tracks(args[0]);
                     let search_strings = await Promise.all(tracks.map(async (track) => track[0] + " - " + track[1]));
                     let urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
-                    customPlaylist = await distube.createCustomPlaylist(urls, { member: message.member, properties: {} });
+                    customPlaylist = await distube.createCustomPlaylist(urls, { member: message.member, properties: { message: message } });
                 }
                 else {
                     Embeds.embedBuilderMessage(client, message, "RED", "Can only play tracks, albums, playlists and artists from Deezer")
@@ -208,7 +208,12 @@ client.on("messageCreate", async (message) => {
                     return;
                 }
             }
-            await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), { position: (_b = Number(args[1])) !== null && _b !== void 0 ? _b : -1, textChannel: message.channel, message: message });
+            await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), {
+                position: (_b = Number(args[1])) !== null && _b !== void 0 ? _b : -1,
+                textChannel: message.channel,
+                message: message,
+                member: message.member
+            });
             message.react("✅");
             return;
         }

@@ -196,7 +196,7 @@ client.on("messageCreate", async message => {
                     let tracks = await deezer.tracks(args[0])
                     let search_strings = await Promise.all(tracks.map(async track => track[0] + " - " + track[1]))
                     let urls = await Promise.all(search_strings.map(async search_string => (await distube.search(search_string, {limit: 1}))[0].url))
-                    customPlaylist = await distube.createCustomPlaylist(urls, {member: message.member, properties: {}})
+                    customPlaylist = await distube.createCustomPlaylist(urls, {member: message.member, properties: {message: message}})
                 } else {
                     Embeds.embedBuilderMessage(client, message, "RED", "Can only play tracks, albums, playlists and artists from Deezer")
                         .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
@@ -204,7 +204,12 @@ client.on("messageCreate", async message => {
                 }
             }
 
-            await distube.play(message.member.voice.channel, customPlaylist ?? args.join(" "), {position: Number(args[1]) ?? -1, textChannel: message.channel as Discord.GuildTextBasedChannel, message: message})
+            await distube.play(message.member.voice.channel, customPlaylist ?? args.join(" "), {
+                position: Number(args[1]) ?? -1, 
+                textChannel: message.channel as Discord.GuildTextBasedChannel, 
+                message: message, 
+                member: message.member
+            })
             message.react("✅")
             return
         }

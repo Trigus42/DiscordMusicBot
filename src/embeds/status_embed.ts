@@ -109,6 +109,8 @@ async function sendStatusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song
     // If no song is provided, use the first song in the queue
     song = song ?? queue.songs[0]
 
+    let filters = queue.filters.map(filter => {return filter.includes(queue.textChannel.guildId) ? filter.split(queue.textChannel.guildId)[1] : filter})
+
     let embed = new Discord.MessageEmbed()
         .setColor("#fffff0")
         .setTitle(title ?? "Playing Song")
@@ -118,7 +120,7 @@ async function sendStatusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song
         .addField("Volume:", `\`${queue.volume} %\``, true)
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? ":ballot_box_with_check: Queue" : ":ballot_box_with_check: Song" : "❌"}\``, true)
         .addField("Autoplay:", `\`${queue.autoplay ? ":ballot_box_with_check:" : "❌"}\``, true)
-        .addField("Filter:", `\`${queue.filters.length != 0 ? queue.filters : "❌"}\``, true)
+        .addField("Filter:", `\`${filters.length != 0 ? filters : "❌"}\``, true)
         .setFooter(queue.client.user.username, queue.client.user.displayAvatarURL())
     if (song.user) embed.setAuthor(song.user.tag.split('#')[0], song.user.displayAvatarURL({ dynamic: true }))
     if (song.thumbnail) embed.setThumbnail(song.thumbnail)
