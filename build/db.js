@@ -57,6 +57,9 @@ class DB {
         else {
             this.filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"));
         }
+        // Don't allow modification of user config
+        Object.freeze(this.user_config);
+        Object.freeze(this.filters);
     }
     /*
     * Close database connection
@@ -209,7 +212,7 @@ class Guilds {
             db_filters = {};
         }
         // Merge default filters with custom filters, overwriting default filters in case of a conflict
-        let filters = Object.assign(this.db.filters, db_filters);
+        let filters = Object.assign(Object.assign({}, this.db.filters), db_filters);
         return filters;
     }
     async delFilter(id, name) {

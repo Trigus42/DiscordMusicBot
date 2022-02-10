@@ -340,10 +340,8 @@ client.on("messageCreate", async message => {
         else if (command === "filter") {
             if (args[0] === "add") { 
                 await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
-                distube.filters[message.guildId + args[1]] = args[2]
             } else if (args[0] === "del") {
                 await db.guilds.delFilter(message.guild.id, args[1])
-                distube.filters[message.guild.id + args[1]] = undefined
             }
             message.react("✅")
             return
@@ -351,7 +349,14 @@ client.on("messageCreate", async message => {
         // Position of the last two is important
         else if (Object.keys(await db.guilds.getFilters(message.guild.id)).includes(command)) {
             let queue = distube.getQueue(message.guild.id)
-            if (queue) queue.setFilter(message.guild.id + command)
+            if (queue) {
+                if (queue.filters.includes(message.guildId + command)) {
+                    queue.setFilter(message.guild.id + command)
+                } else {
+                    distube.filters[message.guild.id + command] = (await db.guilds.getFilters(message.guild.id))[command]
+                    queue.setFilter(message.guild.id + command)
+                }
+            }
             message.react("✅")
             return
         }
