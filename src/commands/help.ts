@@ -20,7 +20,7 @@ export async function help(message: Discord.Message, prefix: string, filters: Ob
         .addField(`\`${prefix}resume\` **/** \`${prefix}r\``, `Resume the song`, true)
         .addField(`\`${prefix}seek <HH:MM:SS>\``, `Moves in the song to HH:MM:SS`, true)
         .addField(`\`${prefix}shuffle\` **/** \`${prefix}mix\``, `Shuffles the queue`, true)
-        .addField(`\`${prefix}skip\` **/** \`${prefix}s\``, `Skips current song`, true)
+        .addField(`\`${prefix}skip [POSITION]\` **/** \`${prefix}s\``, `Skips current song or song at POSITION`, true)
         .addField(`\`${prefix}status\``, `Update playing message`, true)
         .addField(`\`${prefix}stop\``, `Stops playing`, true)
         .addField(`\`${prefix}uptime\``, `Shows you the bot's uptime`, true)
