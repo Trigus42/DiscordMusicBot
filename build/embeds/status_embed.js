@@ -123,7 +123,7 @@ async function sendStatusEmbed(queue, db, song, title) {
         .addField("Duration:", `\`${queue.formattedCurrentTime !== "00:00" ? queue.formattedCurrentTime + " / " + song.formattedDuration : song.formattedDuration}\``, true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
         .addField("Volume:", `\`${queue.volume} %\``, true)
-        .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? ": Queue" : "✅ Song" : "❌"}\``, true)
+        .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
         .addField("Autoplay:", `\`${queue.autoplay ? "✅" : "❌"}\``, true)
         .addField("Filter:", `\`${filters.length != 0 ? filters : "❌"}\``, true)
         .setFooter(queue.client.user.username, queue.client.user.displayAvatarURL());
