@@ -288,7 +288,7 @@ client.on("messageCreate", async message => {
 
             const embedMessage = await queue.textChannel.send({
                 embeds: [queue_embeds[0]],
-                components: queue_embeds.length < 1 ? [] : [new Discord.MessageActionRow({components: [
+                components: queue_embeds.length < 2 ? [] : [new Discord.MessageActionRow({components: [
                     BUTTONS.next_Button
                 ]})]
             })
@@ -301,24 +301,28 @@ client.on("messageCreate", async message => {
 
             let currentIndex = 0
             collector.on('collect', async (interaction: any) => {
-                // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
-                interaction.deferUpdate()
-                // Increase/decrease index
-                interaction.customId === BUTTONS.back_Button.customId ? (currentIndex -= 1) : (currentIndex += 1)
-                // Respond to interaction by updating message with new embed
-                embedMessage.edit({
-                    embeds: [queue_embeds[currentIndex]],
-                    components: [
-                        new Discord.MessageActionRow({
-                            components: [
-                                // back button if it isn't the start
-                                ...(currentIndex ? [BUTTONS.back_Button] : []),
-                                // forward button if it isn't the end
-                                ...(currentIndex + 1 < queue_embeds.length ? [BUTTONS.next_Button] : [])
-                            ]
-                        })
-                    ]
-                })
+                try {
+                    // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
+                    interaction.deferUpdate()
+                    // Increase/decrease index
+                    interaction.customId === BUTTONS.back_Button.customId ? (currentIndex -= 1) : (currentIndex += 1)
+                    // Respond to interaction by updating message with new embed
+                    embedMessage.edit({
+                        embeds: [queue_embeds[currentIndex]],
+                        components: [
+                            new Discord.MessageActionRow({
+                                components: [
+                                    // back button if it isn't the start
+                                    ...(currentIndex ? [BUTTONS.back_Button] : []),
+                                    // forward button if it isn't the end
+                                    ...(currentIndex + 1 < queue_embeds.length ? [BUTTONS.next_Button] : [])
+                                ]
+                            })
+                        ]
+                    })
+                } catch (error) {
+                    console.error(error)
+                }
             })
         }
         else if (command === "loop" || command === "repeat") {
