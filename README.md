@@ -9,6 +9,10 @@
 * Control playback using buttons
 * Jump in queue and seek in a song
 
+## Commands
+
+![Screenshot_20220217_085702](https://user-images.githubusercontent.com/59501676/154431086-d05dfbb9-7adb-4f90-be3c-3cce9c7efd70.png)
+
 ## Setup
 
 #### Edit user_config.json:
