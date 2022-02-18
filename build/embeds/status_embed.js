@@ -59,7 +59,7 @@ async function sendStatusEmbed(queue, db, song, title) {
                 ] })]
     });
     // Save the message id to db
-    db.kvstore.put("playingembed_${embedMessage.guild.id}", embedMessage.id);
+    db.kvstore.put(`playingembed_${embedMessage.guild.id}`, embedMessage.id);
     // Return the message
     return embedMessage;
 }
@@ -70,7 +70,7 @@ async function statusEmbed(queue, db, song, status) {
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get("playingembed_${queue.textChannel.guildId}"))).delete();
+            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`))).delete();
             /* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
         }
         catch (error) { }
