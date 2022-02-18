@@ -47,19 +47,25 @@ class Deezer {
         });
     }
     /**
-     * Sets the access token.
-     * Requires user interaction.
+     * Wait for the user to authorize the app set the access token for this instance.
     */
-    async authenticate(appId, appSecret, redirectUrl) {
+    async auth() {
+        let code = await this.listenForCode();
+        const res = await axios_1.default.get(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.appSecret}&code=${code}`);
+        this.accessToken = res.data.split('=')[1].split('&')[0];
+    }
+    /**
+     * Creates listener for the redirect url.
+     * User is required to visit the returned url in order to obtain the oauth code.
+    */
+    async start_auth(appId, appSecret, redirectUrl) {
         this.appId = appId;
         this.appSecret = appSecret;
         this.redirectUrl = redirectUrl;
         this.port = this.redirectUrl.split(':')[2].split('/')[0];
-        console.log("Please visit:", `https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.redirectUrl}&perms=offline_access`);
-        let code = await this.listenForCode();
-        const res = await axios_1.default.get(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.appSecret}&code=${code}`);
-        this.accessToken = res.data.split('=')[1].split('&')[0];
-        console.log(this.accessToken);
+        // Start listner
+        this.auth();
+        return `https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.redirectUrl}&perms=offline_access`;
     }
     /**
      * Return array of songs from url containing the title and artist.
