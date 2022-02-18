@@ -86,7 +86,7 @@ client.on("disconnect", () => {
     client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 });
 client.on("messageCreate", async (message) => {
-    var _a, _b;
+    var _a;
     try {
         // Ignore non commands, messages from bots and DMs
         if (message.author.bot || !message.guild)
@@ -209,7 +209,7 @@ client.on("messageCreate", async (message) => {
                 }
             }
             await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), {
-                position: (_b = Number(args[1])) !== null && _b !== void 0 ? _b : -1,
+                position: Number.isInteger(Number(args[1])) ? Number(args[1]) : -1,
                 textChannel: message.channel,
                 message: message,
                 member: message.member

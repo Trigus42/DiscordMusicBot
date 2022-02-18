@@ -205,7 +205,7 @@ client.on("messageCreate", async message => {
             }
 
             await distube.play(message.member.voice.channel, customPlaylist ?? args.join(" "), {
-                position: Number(args[1]) ?? -1, 
+                position: Number.isInteger(Number(args[1])) ? Number(args[1]) : -1, 
                 textChannel: message.channel as Discord.GuildTextBasedChannel, 
                 message: message, 
                 member: message.member

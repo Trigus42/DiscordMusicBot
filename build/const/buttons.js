@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BUTTONS = void 0;
 const Discord = __importStar(require("discord.js"));
 exports.BUTTONS = {
-    next_Button: new Discord.MessageButton({
+    nextButton: new Discord.MessageButton({
         style: "SECONDARY",
         emoji: "⏭",
         customId: "tracknext"

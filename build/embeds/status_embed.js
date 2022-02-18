@@ -51,11 +51,11 @@ async function sendStatusEmbed(queue, db, song, title) {
     const embedMessage = await queue.textChannel.send({
         embeds: [embed],
         components: [new Discord.MessageActionRow({ components: [
-                    buttons_1.BUTTONS.play_pause_Button,
-                    buttons_1.BUTTONS.back_Button,
-                    buttons_1.BUTTONS.next_Button,
-                    buttons_1.BUTTONS.seek_backward_Button,
-                    buttons_1.BUTTONS.seek_forward_Button,
+                    buttons_1.BUTTONS.playPauseButton,
+                    buttons_1.BUTTONS.backButton,
+                    buttons_1.BUTTONS.nextButton,
+                    buttons_1.BUTTONS.seekBackwardButton,
+                    buttons_1.BUTTONS.seekForwardButton,
                 ] })]
     });
     // Save the message id to db
@@ -86,7 +86,7 @@ async function statusEmbed(queue, db, song, status) {
                 return;
             }
             switch (interaction.customId) {
-                case buttons_1.BUTTONS.play_pause_Button.customId:
+                case buttons_1.BUTTONS.playPauseButton.customId:
                     if (queue.playing) {
                         queue.pause();
                         if (db.userConfig.actionMessages) {
@@ -104,7 +104,7 @@ async function statusEmbed(queue, db, song, status) {
                         }
                     }
                     return;
-                case buttons_1.BUTTONS.next_Button.customId:
+                case buttons_1.BUTTONS.nextButton.customId:
                     if (!queue.autoplay && queue.songs.length <= 1) {
                         queue.stop();
                         queue.emit("finish", queue);
@@ -118,7 +118,7 @@ async function statusEmbed(queue, db, song, status) {
                     }
                     // The Distube "playSong" event will call the "playsong" function again
                     return;
-                case buttons_1.BUTTONS.back_Button.customId:
+                case buttons_1.BUTTONS.backButton.customId:
                     queue.previous();
                     if (db.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", "Playing previous song")
@@ -126,7 +126,7 @@ async function statusEmbed(queue, db, song, status) {
                     }
                     // The Distube "playSong" event will call the "playsong" function again
                     return;
-                case buttons_1.BUTTONS.seek_backward_Button.customId:
+                case buttons_1.BUTTONS.seekBackwardButton.customId:
                     var seektime = queue.currentTime - 10;
                     if (seektime < 0) {
                         seektime = 0;
@@ -138,7 +138,7 @@ async function statusEmbed(queue, db, song, status) {
                     }
                     statusEmbed(queue, db, song);
                     return;
-                case buttons_1.BUTTONS.seek_forward_Button.customId:
+                case buttons_1.BUTTONS.seekForwardButton.customId:
                     var seektime = queue.currentTime + 10;
                     if (seektime >= queue.songs[0].duration) {
                         seektime = queue.songs[0].duration - 1;

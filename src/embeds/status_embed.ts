@@ -33,11 +33,11 @@ import { DB } from "../db"
     const embedMessage = await queue.textChannel.send({
         embeds: [embed],
         components: [new Discord.MessageActionRow({components: [
-            BUTTONS.play_pause_Button,
-            BUTTONS.back_Button,
-            BUTTONS.next_Button,
-            BUTTONS.seek_backward_Button,
-            BUTTONS.seek_forward_Button,
+            BUTTONS.playPauseButton,
+            BUTTONS.backButton,
+            BUTTONS.nextButton,
+            BUTTONS.seekBackwardButton,
+            BUTTONS.seekForwardButton,
         ]})]
     })
 
@@ -72,7 +72,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
             if (!queue.voiceChannel.members.has(interaction.member.user.id)) {return}
 
             switch (interaction.customId) {
-                case BUTTONS.play_pause_Button.customId:
+                case BUTTONS.playPauseButton.customId:
                     if (queue.playing) {
                         queue.pause()
 
@@ -92,7 +92,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     }           
                     return
 
-                case BUTTONS.next_Button.customId:
+                case BUTTONS.nextButton.customId:
                     if (!queue.autoplay && queue.songs.length <= 1) {
                         queue.stop()
                         queue.emit("finish", queue)
@@ -107,7 +107,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     // The Distube "playSong" event will call the "playsong" function again
                     return
 
-                case BUTTONS.back_Button.customId:
+                case BUTTONS.backButton.customId:
                     queue.previous()
 
                     if (db.userConfig.actionMessages) {
@@ -117,7 +117,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     // The Distube "playSong" event will call the "playsong" function again
                     return
 
-                case BUTTONS.seek_backward_Button.customId:
+                case BUTTONS.seekBackwardButton.customId:
                     var seektime = queue.currentTime - 10
                     if (seektime < 0) {seektime = 0}
                     queue.seek(Number(seektime))
@@ -129,7 +129,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     statusEmbed(queue, db, song)
                     return
 
-                case BUTTONS.seek_forward_Button.customId:
+                case BUTTONS.seekForwardButton.customId:
                     var seektime = queue.currentTime + 10
                     if (seektime >= queue.songs[0].duration) { seektime = queue.songs[0].duration - 1 }
                     queue.seek(Number(seektime))
