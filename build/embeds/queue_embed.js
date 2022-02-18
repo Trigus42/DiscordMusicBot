@@ -34,10 +34,10 @@ function queueEmbed(queue, client) {
         let info = [];
         for (let j = 0; j < current.length; j++) {
             try {
-                info[j] = `**${j + i}** - [${current[j].name}](${current[j].url})`;
+                info.push(`**${j + i}** - [${current[j].name}](${current[j].url})`);
             }
             catch (error) {
-                info[j] = `**${j + i}** - ${current[j].url}`;
+                info.push(`**${j + i}** - ${current[j].url}`);
             }
         }
         // Create and add embed

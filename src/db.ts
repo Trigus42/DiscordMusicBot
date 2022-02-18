@@ -4,10 +4,10 @@ import * as fs from "fs"
 interface UserConfig {
     token: string,
     prefix: string,
-    action_messages: boolean,
+    actionMessages: boolean,
     spotify?: {
-        client_id: string,
-        client_secret: string
+        clientId: string,
+        clientSecret: string
     },
     nsfw?: boolean,
     youtubeIdentityToken?: string,
@@ -24,7 +24,7 @@ export class DB {
     guilds: Guilds
     kvstore: KVStore
 
-    user_config: UserConfig
+    userConfig: UserConfig
     filters: Dict
 
     /*
@@ -42,17 +42,19 @@ export class DB {
         // Load user config
         if (user_config) {
             if (typeof user_config === "string") {
-                this.user_config = JSON.parse(fs.readFileSync(user_config, "utf8"))
+                // eslint-disable-next-line detect-non-literal-fs-filename
+                this.userConfig = JSON.parse(fs.readFileSync(user_config, "utf8"))
             } else {
-                this.user_config = user_config
+                this.userConfig = user_config
             }
         } else {
-            this.user_config = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8"))
+            this.userConfig = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8"))
         }
 
         // Load filters
         if (filters) {
             if (typeof filters === "string") {
+                // eslint-disable-next-line detect-non-literal-fs-filename
                 this.filters = JSON.parse(fs.readFileSync(filters, "utf8"))
             } else {
                 this.filters = filters
@@ -62,7 +64,7 @@ export class DB {
         }
 
         // Don't allow modification of user config
-        Object.freeze(this.user_config)
+        Object.freeze(this.userConfig)
         Object.freeze(this.filters)
     }
 
@@ -156,7 +158,7 @@ class KVStore {
         if (!exists) {
             return this.db.run("INSERT INTO kvstore (key, value) VALUES (?, ?)", [key, value])
         // Update key-value pair if key already exists and value is different
-        } else if (exists != value) {
+        } else if (exists !== value) {
             return this.db.run("UPDATE kvstore SET value = ? WHERE key = ?", [value, key])
         }
     }
@@ -219,18 +221,18 @@ class Guilds {
 
     async getFilters(id: string) {
         // Get custom filters from database
-        let db_filters: Dict = {}
+        let dbFilters: Dict = {}
         try {
-            let res_rows = await this.db.all("SELECT * FROM filters_${id}")
-            for (const row of Object.values(res_rows)) {
-                db_filters[row["name"]] = row["value"]
+            let resRows = await this.db.all("SELECT * FROM filters_${id}")
+            for (const row of Object.values(resRows)) {
+                dbFilters[row["name"]] = row["value"]
             }
         } catch {
-            db_filters = {}
+            dbFilters = {}
         }
 
         // Merge default filters with custom filters, overwriting default filters in case of a conflict
-        let filters = Object.assign(Object.assign({}, this.db.filters), db_filters)
+        let filters = Object.assign(Object.assign({}, this.db.filters), dbFilters)
 
         return filters
     }

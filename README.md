@@ -15,7 +15,7 @@
 
 ## Setup
 
-#### Edit user_config.json:
+#### Edit `user_config.json`
 
 | Variable                                 | Function                                                                                                                                                                | Required | Default   |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------- |
@@ -27,6 +27,6 @@
 | `youtubeIdentityToken`                   | If not given; ytdl-core will try to find it. You can find this by going to a video's watch page; viewing the source; and searching for "ID_TOKEN".                      | no       | undefined |
 | `nsfw`                                   | Whether or not playing age-restricted content and disabling safe search in non-NSFW channel.                                                                            | no       | false     |
 
-#### Start:
+#### Start
 
 Run `docker-compose up -d --build`

@@ -43,22 +43,22 @@ const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]
 });
 let distube_options = Object.assign({
-    youtubeCookie: (_a = db.user_config.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
-    youtubeIdentityToken: (_b = db.user_config.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
-    nsfw: (_c = db.user_config.nsfw) !== null && _c !== void 0 ? _c : false,
+    youtubeCookie: (_a = db.userConfig.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
+    youtubeIdentityToken: (_b = db.userConfig.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
+    nsfw: (_c = db.userConfig.nsfw) !== null && _c !== void 0 ? _c : false,
     customFilters: db.filters,
     searchSongs: 10,
     leaveOnStop: true,
     leaveOnFinish: false,
     leaveOnEmpty: true,
-}, db.user_config.spotify ? { plugins: [new spotify_1.SpotifyPlugin({ api: {
-                clientId: db.user_config.spotify.client_id,
-                clientSecret: db.user_config.spotify.client_secret
+}, db.userConfig.spotify ? { plugins: [new spotify_1.SpotifyPlugin({ api: {
+                clientId: db.userConfig.spotify.clientId,
+                clientSecret: db.userConfig.spotify.clientSecret
             } })] } : undefined);
 // Create a new distube instance
 const distube = new DisTube.DisTube(client, distube_options);
 // Login to discord
-client.login(db.user_config.token);
+client.login(db.userConfig.token);
 /////////////////
 ///// Events ////
 /////////////////
@@ -92,7 +92,7 @@ client.on("messageCreate", async (message) => {
         if (message.author.bot || !message.guild)
             return;
         // Get prefix for guild
-        let prefix = (_a = await db.guilds.get("prefix", message.guild.id)) !== null && _a !== void 0 ? _a : db.user_config.prefix;
+        let prefix = (_a = await db.guilds.get("prefix", message.guild.id)) !== null && _a !== void 0 ? _a : db.userConfig.prefix;
         // Ignore messages that don't start with the prefix
         if (!message.content.startsWith(prefix))
             return;

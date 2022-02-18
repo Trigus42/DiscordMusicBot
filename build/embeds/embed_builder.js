@@ -30,12 +30,15 @@ function embedBuilderMessage(client, message, color, title, description, thumbna
             .setColor(color)
             .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({ dynamic: true }))
             .setFooter(client.user.username, client.user.displayAvatarURL());
-        if (title)
+        if (title) {
             embed.setTitle(title);
-        if (description)
+        }
+        if (description) {
             embed.setDescription(description);
-        if (thumbnail)
+        }
+        if (thumbnail) {
             embed.setThumbnail(thumbnail);
+        }
         return message.channel.send({ embeds: [embed] });
     }
     catch (error) {

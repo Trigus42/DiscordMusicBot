@@ -11,9 +11,9 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
             .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({ dynamic: true }))
             .setFooter(client.user.username, client.user.displayAvatarURL())
 
-        if (title) embed.setTitle(title)
-        if (description) embed.setDescription(description)
-        if (thumbnail) embed.setThumbnail(thumbnail)
+        if (title) {embed.setTitle(title)}
+        if (description) {embed.setDescription(description)}
+        if (thumbnail) {embed.setThumbnail(thumbnail)}
 
         return message.channel.send({ embeds: [embed] })
     } catch (error) {

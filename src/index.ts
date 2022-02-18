@@ -24,18 +24,18 @@ const client = new Discord.Client({
 
 let distube_options = Object.assign(
     {
-        youtubeCookie: db.user_config.youtubeCookie ?? undefined,
-        youtubeIdentityToken: db.user_config.youtubeIdentityToken ?? undefined,
-        nsfw: db.user_config.nsfw ?? false,
+        youtubeCookie: db.userConfig.youtubeCookie ?? undefined,
+        youtubeIdentityToken: db.userConfig.youtubeIdentityToken ?? undefined,
+        nsfw: db.userConfig.nsfw ?? false,
         customFilters: db.filters,
         searchSongs: 10, 
         leaveOnStop: true,
         leaveOnFinish: false,
         leaveOnEmpty: true,
     },    
-    db.user_config.spotify ? {plugins: [new SpotifyPlugin({api: {
-        clientId: db.user_config.spotify.client_id,
-        clientSecret: db.user_config.spotify.client_secret
+    db.userConfig.spotify ? {plugins: [new SpotifyPlugin({api: {
+        clientId: db.userConfig.spotify.clientId,
+        clientSecret: db.userConfig.spotify.clientSecret
     }})]} : undefined
 )
 
@@ -43,7 +43,7 @@ let distube_options = Object.assign(
 const distube = new DisTube.DisTube(client, distube_options)
 
 // Login to discord
-client.login(db.user_config.token)
+client.login(db.userConfig.token)
 
 /////////////////
 ///// Events ////
@@ -81,7 +81,7 @@ client.on("messageCreate", async message => {
         if (message.author.bot || !message.guild) return
 
         // Get prefix for guild
-        let prefix = await db.guilds.get("prefix", message.guild.id) ?? db.user_config.prefix
+        let prefix = await db.guilds.get("prefix", message.guild.id) ?? db.userConfig.prefix
 
         // Ignore messages that don't start with the prefix
         if (!message.content.startsWith(prefix)) return; 

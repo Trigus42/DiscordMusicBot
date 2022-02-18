@@ -16,9 +16,9 @@ export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discor
         let info: string[] = []
         for (let j = 0; j < current.length; j++) {
             try {
-                info[j] = `**${j+i}** - [${current[j].name}](${current[j].url})`
+                info.push(`**${j+i}** - [${current[j].name}](${current[j].url})`)
             } catch (error) {
-                info[j] = `**${j+i}** - ${current[j].url}`
+                info.push(`**${j+i}** - ${current[j].url}`)
             }
         }
 

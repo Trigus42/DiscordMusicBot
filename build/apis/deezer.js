@@ -58,7 +58,7 @@ class Deezer {
      * Creates listener for the redirect url.
      * User is required to visit the returned url in order to obtain the oauth code.
     */
-    async start_auth(appId, appSecret, redirectUrl) {
+    async startAuth(appId, appSecret, redirectUrl) {
         this.appId = appId;
         this.appSecret = appSecret;
         this.redirectUrl = redirectUrl;
