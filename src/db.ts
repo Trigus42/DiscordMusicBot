@@ -149,7 +149,7 @@ class KVStore {
     */
      async put (key: string, value: string): Promise<null> {
         // Check if key already exists
-        let res = (await this.db.get(`SELECT value FROM kvstore WHERE key = ?`, [key]))
+        let res = (await this.db.get("SELECT value FROM kvstore WHERE key = ?", [key]))
         let exists = res ? res[0] : false
         
         // Create new key-value pair if key does not exist
@@ -165,7 +165,7 @@ class KVStore {
     * Get value from key-value store from database
     * */
     async get (key: string): Promise<string|null> {
-        let res = await this.db.get('SELECT value FROM kvstore WHERE key = ?', [key])
+        let res = await this.db.get("SELECT value FROM kvstore WHERE key = ?", [key])
         return res ? res[0] : null
     }
 
@@ -173,7 +173,7 @@ class KVStore {
     * Delete key-value pair from database
     * */
     async del (key: string): Promise<null> {
-        return this.db.run('DELETE FROM kvstore WHERE key = ?', [key])
+        return this.db.run("DELETE FROM kvstore WHERE key = ?", [key])
     }
 }
 
@@ -197,13 +197,13 @@ class Guilds {
     }
 
     async get(type: "prefix"|"playing_message"|"status_message", id: string): Promise<string|null> {
-        let res = await this.db.get(`SELECT ${type} from guilds WHERE id = ?`, [id])
+        let res = await this.db.get("SELECT ${type} from guilds WHERE id = ?", [id])
         return res ? res[0] : null
     }
 
     async set(type: "prefix"|"playing_message"|"status_message", value: string, id: string): Promise<void> {
         await this.add(id)
-        await this.db.run(`UPDATE guilds SET ${type} = ? WHERE id = ?`, [value, id])
+        await this.db.run("UPDATE guilds SET ${type} = ? WHERE id = ?", [value, id])
     }
 
     async del(id: string): Promise<void> {
@@ -211,9 +211,9 @@ class Guilds {
     }
 
     async setFilters(id: string, filters: Dict): Promise<void> {
-        await this.db.run(`CREATE TABLE IF NOT EXISTS filters_${id} (name TEXT UNIQUE, value TEXT)`)
+        await this.db.run("CREATE TABLE IF NOT EXISTS filters_${id} (name TEXT UNIQUE, value TEXT)")
         for (const [name, value] of Object.entries(filters)) {
-            await this.db.run(`INSERT OR REPLACE INTO filters_${id} (name, value) VALUES (?, ?)`, [name, value])
+            await this.db.run("INSERT OR REPLACE INTO filters_${id} (name, value) VALUES (?, ?)", [name, value])
         }
     }
 
@@ -221,7 +221,7 @@ class Guilds {
         // Get custom filters from database
         let db_filters: Dict = {}
         try {
-            let res_rows = await this.db.all(`SELECT * FROM filters_${id}`)
+            let res_rows = await this.db.all("SELECT * FROM filters_${id}")
             for (const row of Object.values(res_rows)) {
                 db_filters[row["name"]] = row["value"]
             }
@@ -236,6 +236,6 @@ class Guilds {
     }
 
     async delFilter(id: string, name: string) {
-        await this.db.run(`DELETE FROM filters_${id} WHERE name = ?`, [name])
+        await this.db.run("DELETE FROM filters_${id} WHERE name = ?", [name])
     }
 }

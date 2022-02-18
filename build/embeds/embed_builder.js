@@ -28,7 +28,7 @@ function embedBuilderMessage(client, message, color, title, description, thumbna
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
-            .setAuthor(message.author.tag.split('#')[0], message.member.user.displayAvatarURL({ dynamic: true }))
+            .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({ dynamic: true }))
             .setFooter(client.user.username, client.user.displayAvatarURL());
         if (title)
             embed.setTitle(title);
@@ -49,7 +49,7 @@ exports.embedBuilderMessage = embedBuilderMessage;
 function embedBuilder(client, user, channel, color, title, description, thumbnail) {
     let embed = new Discord.MessageEmbed()
         .setColor(color)
-        .setAuthor(user.tag.split('#')[0], user.displayAvatarURL({ dynamic: true }))
+        .setAuthor(user.tag.split("#")[0], user.displayAvatarURL({ dynamic: true }))
         .setFooter(client.user.username, client.user.displayAvatarURL());
     if (title)
         embed.setTitle(title);

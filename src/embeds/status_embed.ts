@@ -13,7 +13,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.textChannel.guildId}`))).delete()
+            (await queue.textChannel.messages.fetch(await db.kvstore.get("playingembed_${queue.textChannel.guildId}"))).delete()
         } catch (error) {}
 
         // Send new playing message
@@ -21,7 +21,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
 
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector()
-        collector.on('collect', async (interaction: any) => {
+        collector.on("collect", async (interaction: any) => {
             // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
             interaction.deferUpdate()
 
@@ -34,14 +34,14 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                         queue.pause()
 
                         if (db.user_config.action_messages) 
-                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", `Paused the song`)
+                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", "Paused the song")
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                             statusEmbed(queue, db, song, "Paused")
                     } else {
                         queue.resume()
 
                         if (db.user_config.action_messages) 
-                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", `Resumed the song`)
+                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", "Resumed the song")
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                             statusEmbed(queue, db, song)
                     }           
@@ -56,7 +56,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     }
 
                     if (db.user_config.action_messages) 
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", `Skipped the song`)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", "Skipped the song")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     // The Distube "playSong" event will call the "playsong" function again
@@ -66,7 +66,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     queue.previous()
 
                     if (db.user_config.action_messages) 
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", `Playing previous song`)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", "Playing previous song")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     // The Distube "playSong" event will call the "playsong" function again
@@ -78,7 +78,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     queue.seek(Number(seektime))
 
                     if (db.user_config.action_messages) 
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`-10 seconds\``)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`-10 seconds\`")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     statusEmbed(queue, db, song)
@@ -90,7 +90,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     queue.seek(Number(seektime))
 
                     if (db.user_config.action_messages) 
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", `Seeked the song for \`+10 seconds\``)
+                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`+10 seconds\`")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
 
                     statusEmbed(queue, db, song)
@@ -122,7 +122,7 @@ async function sendStatusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song
         .addField("Autoplay:", `\`${queue.autoplay ? "✅" : "❌"}\``, true)
         .addField("Filter:", `\`${filters.length != 0 ? filters : "❌"}\``, true)
         .setFooter(queue.client.user.username, queue.client.user.displayAvatarURL())
-    if (song.user) embed.setAuthor(song.user.tag.split('#')[0], song.user.displayAvatarURL({ dynamic: true }))
+    if (song.user) embed.setAuthor(song.user.tag.split("#")[0], song.user.displayAvatarURL({ dynamic: true }))
     if (song.thumbnail) embed.setThumbnail(song.thumbnail)
 
     // Send new playing message
@@ -138,7 +138,7 @@ async function sendStatusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song
     })
 
     // Save the message id to db
-    db.kvstore.put(`playingembed_${embedMessage.guild.id}`, embedMessage.id)
+    db.kvstore.put("playingembed_${embedMessage.guild.id}", embedMessage.id)
 
     // Return the message
     return embedMessage

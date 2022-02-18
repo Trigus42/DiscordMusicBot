@@ -23,43 +23,43 @@ exports.BUTTONS = void 0;
 const Discord = __importStar(require("discord.js"));
 exports.BUTTONS = {
     next_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '⏭',
-        customId: 'tracknext'
+        style: "SECONDARY",
+        emoji: "⏭",
+        customId: "tracknext"
     }),
     back_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '⏮️',
-        customId: 'trackback'
+        style: "SECONDARY",
+        emoji: "⏮️",
+        customId: "trackback"
     }),
     play_pause_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '⏯️',
-        customId: 'playpause'
+        style: "SECONDARY",
+        emoji: "⏯️",
+        customId: "playpause"
     }),
     stop_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '⏹',
-        customId: 'stop'
+        style: "SECONDARY",
+        emoji: "⏹",
+        customId: "stop"
     }),
     lower_volume_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '🔉',
-        customId: 'lower_volume'
+        style: "SECONDARY",
+        emoji: "🔉",
+        customId: "lower_volume"
     }),
     raise_volume_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '🔊',
-        customId: 'raise_volume'
+        style: "SECONDARY",
+        emoji: "🔊",
+        customId: "raise_volume"
     }),
     seek_forward_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '▶️',
-        customId: 'seek_forward'
+        style: "SECONDARY",
+        emoji: "▶️",
+        customId: "seek_forward"
     }),
     seek_backward_Button: new Discord.MessageButton({
-        style: 'SECONDARY',
-        emoji: '◀️',
-        customId: 'seek_backward'
+        style: "SECONDARY",
+        emoji: "◀️",
+        customId: "seek_backward"
     })
 };

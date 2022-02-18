@@ -30,7 +30,7 @@ function queueEmbed(queue, client) {
     for (let i = 0; i < queue.songs.length; i += 10) {
         // Get next 10 songs
         const current = queue.songs.slice(i, i + 10);
-        // Create string of each song (`**Index** - [Title](Link)`)
+        // Create string of each song ("**Index** - [Title](Link)")
         let info = [];
         for (let j = 0; j < current.length; j++) {
             try {

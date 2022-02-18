@@ -8,7 +8,7 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
-            .setAuthor(message.author.tag.split('#')[0], message.member.user.displayAvatarURL({ dynamic: true }))
+            .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({ dynamic: true }))
             .setFooter(client.user.username, client.user.displayAvatarURL())
 
         if (title) embed.setTitle(title)
@@ -27,7 +27,7 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
 export function embedBuilder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel|Discord.GuildTextBasedChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
     let embed = new Discord.MessageEmbed()
         .setColor(color)
-        .setAuthor(user.tag.split('#')[0], user.displayAvatarURL({ dynamic: true }))
+        .setAuthor(user.tag.split("#")[0], user.displayAvatarURL({ dynamic: true }))
         .setFooter(client.user.username, client.user.displayAvatarURL())
 
     if (title) embed.setTitle(title)

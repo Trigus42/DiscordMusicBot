@@ -32,15 +32,15 @@ class Deezer {
     async listenForCode() {
         return new Promise((resolve, reject) => {
             const server = http.createServer((req, res) => {
-                if (req.method === 'GET') {
-                    res.writeHead(200, { 'Content-Type': 'text/plain' });
-                    res.end('Authentication complete! Please return to the app.');
-                    resolve(req.url.replace('/?code=', ''));
+                if (req.method === "GET") {
+                    res.writeHead(200, { "Content-Type": "text/plain" });
+                    res.end("Authentication complete! Please return to the app.");
+                    resolve(req.url.replace("/?code=", ""));
                 }
                 else {
-                    res.writeHead(405, { 'Content-Type': 'text/plain' });
-                    res.end('Method Not Allowed\n');
-                    reject(new Error('Method not allowed'));
+                    res.writeHead(405, { "Content-Type": "text/plain" });
+                    res.end("Method Not Allowed\n");
+                    reject(new Error("Method not allowed"));
                 }
             });
             server.listen(this.port);
@@ -51,8 +51,8 @@ class Deezer {
     */
     async auth() {
         let code = await this.listenForCode();
-        const res = await axios_1.default.get(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.appSecret}&code=${code}`);
-        this.accessToken = res.data.split('=')[1].split('&')[0];
+        const res = await axios_1.default.get("https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.appSecret}&code=${code}");
+        this.accessToken = res.data.split("=")[1].split("&")[0];
     }
     /**
      * Creates listener for the redirect url.
@@ -62,7 +62,7 @@ class Deezer {
         this.appId = appId;
         this.appSecret = appSecret;
         this.redirectUrl = redirectUrl;
-        this.port = this.redirectUrl.split(':')[2].split('/')[0];
+        this.port = this.redirectUrl.split(":")[2].split("/")[0];
         // Start listner
         this.auth();
         return `https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.redirectUrl}&perms=offline_access`;
@@ -75,19 +75,19 @@ class Deezer {
         let id = url.split("/").slice(-1)[0];
         switch (type) {
             case "track": {
-                const res = await axios_1.default.get(`https://api.deezer.com/track/${id}`);
+                const res = await axios_1.default.get("https://api.deezer.com/track/${id}");
                 return [[res.data.title, res.data.artist.name]];
             }
             case "album": {
-                const res = await axios_1.default.get(`https://api.deezer.com/album/${id}?limit=${limit}`);
+                const res = await axios_1.default.get("https://api.deezer.com/album/${id}?limit=${limit}");
                 return res.data.tracks.data.map((track) => [track.title, track.artist.name]);
             }
             case "playlist": {
-                const res = await axios_1.default.get(`https://api.deezer.com/playlist/${id}?limit=${limit}`);
+                const res = await axios_1.default.get("https://api.deezer.com/playlist/${id}?limit=${limit}");
                 return res.data.tracks.data.map((track) => [track.title, track.artist.name]);
             }
             case "artist": {
-                const res = await axios_1.default.get(`https://api.deezer.com/artist/${id}/top?limit=${limit}`);
+                const res = await axios_1.default.get("https://api.deezer.com/artist/${id}/top?limit=${limit}");
                 return res.data.data.map((track) => [track.title, track.artist.name]);
             }
             default: throw new Error("Type not supported");

@@ -12,7 +12,7 @@ export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discor
         // Get next 10 songs
         const current = queue.songs.slice(i, i+10)
 
-        // Create string of each song (`**Index** - [Title](Link)`)
+        // Create string of each song ("**Index** - [Title](Link)")
         let info: string[] = []
         for (let j = 0; j < current.length; j++) {
             try {

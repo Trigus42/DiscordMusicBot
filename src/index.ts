@@ -19,7 +19,7 @@ let deezer = new Deezer()
 const client = new Discord.Client({
     messageCacheLifetime: 0,
     messageSweepInterval: 0,
-    intents: ['GUILDS', 'GUILD_MESSAGES', 'GUILD_VOICE_STATES']
+    intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]
 })
 
 let distube_options = Object.assign(
@@ -51,7 +51,7 @@ client.login(db.user_config.token)
 
 // Log when ready and set presence
 client.on("ready", () => {
-    console.log(` :: Bot has started as :: ${client.user.tag}`)
+    console.log(" :: Bot has started as :: ${client.user.tag}")
     client.user.setPresence({
         status: "online",
         activities: [
@@ -64,14 +64,14 @@ client.on("ready", () => {
 })
 
 // Log when reconnect
-client.on('reconnecting', () => {
-    console.log(' :: Reconnecting')
+client.on("reconnecting", () => {
+    console.log(" :: Reconnecting")
     client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 })
 
 // Log when disconnecting
-client.on('disconnect', () => {
-    console.log(' :: Disconnect'); 
+client.on("disconnect", () => {
+    console.log(" :: Disconnect"); 
     client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
 })
 
@@ -95,7 +95,7 @@ client.on("messageCreate", async message => {
         }
         // React if message mentions bot
         else if (message.mentions.has(client.user)) {
-            message.reply({ embeds: [new Discord.MessageEmbed().setColor("#fffff0").setAuthor(`${message.author.username}, My Prefix is ${prefix}, to get started; type ${prefix}help`, message.author.displayAvatarURL({ dynamic: true }))]})
+            message.reply({ embeds: [new Discord.MessageEmbed().setColor("#fffff0").setAuthor("${message.author.username}, My Prefix is ${prefix}, to get started; type ${prefix}help", message.author.displayAvatarURL({ dynamic: true }))]})
             return
         }
         // Return if message doesn't start with prefix
@@ -107,7 +107,7 @@ client.on("messageCreate", async message => {
         //// COMMANDS /////
         ///////////////////
         if (command === "invite" || command === "add") {
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "Invite me", `[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=49572160&scope=bot)`)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "Invite me", "[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=49572160&scope=bot)")
             return
         }
         else if (command === "help"  || command === "about" || command === "h" || command === "info") {
@@ -116,25 +116,25 @@ client.on("messageCreate", async message => {
         else if (command === "prefix") {
             // If no arguments are given, return current prefix
             if (!args[0]){
-                Embeds.embedBuilderMessage(client, message, "RED", `Current Prefix: \`${prefix}\``, `Please provide a new prefix`)
+                Embeds.embedBuilderMessage(client, message, "RED", "Current Prefix: \`${prefix}\`", "Please provide a new prefix")
                 return
             }
 
             // If user is not owner, return error
             if (!message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", `❌ You don\'t have permission for this Command`)
+                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", "❌ You don't have permission for this Command")
                 return
             }
 
             // If prefix includes spaces, return error
             if (args[1]) {
-                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", `'❌ The prefix can\'t have whitespaces'`)
+                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", "❌ The prefix can't have whitespaces")
                 return
             }
 
             // Set new prefix in database
             db.guilds.set("prefix", args[0], message.guild.id)
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "PREFIX", `:ballot_box_with_check: Successfully set new prefix to **\`${args[0]}\`**`)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "PREFIX", ":ballot_box_with_check: Successfully set new prefix to **\`${args[0]}\`**")
             return
         }
         else if (command == "status") {
@@ -170,7 +170,7 @@ client.on("messageCreate", async message => {
             return
         }
         else if (command === "ping") {
-            Embeds.embedBuilderMessage(client, message, `#fffff0`, `PING:`, `\`${client.ws.ping} ms\``)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "PING:", "\`${client.ws.ping} ms\`")
             return
         }
         else if (command === "uptime") {
@@ -178,7 +178,7 @@ client.on("messageCreate", async message => {
             let hours = Math.floor(client.uptime / 3600000) % 24
             let minutes = Math.floor(client.uptime / 60000) % 60
             let seconds = Math.floor(client.uptime / 1000) % 60
-            Embeds.embedBuilderMessage(client, message, `#fffff0`, `UPTIME:`, `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\``)
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "UPTIME:", "\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\`")
             return
         }
         else if (command === "play" || command === "p") {
@@ -300,7 +300,7 @@ client.on("messageCreate", async message => {
             const collector = embedMessage.createMessageComponentCollector()
 
             let currentIndex = 0
-            collector.on('collect', async (interaction: any) => {
+            collector.on("collect", async (interaction: any) => {
                 try {
                     // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
                     interaction.deferUpdate()
@@ -334,7 +334,7 @@ client.on("messageCreate", async message => {
                 return
             }
             else {
-                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", `Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
+                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -355,7 +355,7 @@ client.on("messageCreate", async message => {
                 return
             }
             else {
-                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", `Please use a number between **0** and **${distube.getQueue(message).songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
+                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", "Please use a number between **0** and **${distube.getQueue(message).songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                 return
             }
@@ -385,7 +385,7 @@ client.on("messageCreate", async message => {
             return
         }
         else if (message.content.startsWith(prefix)) {
-            Embeds.embedBuilderMessage(client, message, "RED", "Unknown Command", `Type ${prefix}help to see all available commands`)
+            Embeds.embedBuilderMessage(client, message, "RED", "Unknown Command", "Type ${prefix}help to see all available commands")
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
             return
         }
@@ -399,7 +399,7 @@ client.on("messageCreate", async message => {
 ///////////////
 
 distube
-    .on('playSong', (queue, song) => {
+    .on("playSong", (queue, song) => {
         try {
             Embeds.statusEmbed(queue, db, song)
         } catch (error) {
@@ -408,7 +408,7 @@ distube
     })
     .on("addSong", (queue, song) => {
         try {
-            Embeds.embedBuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail)
+            Embeds.embedBuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", "Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}", song.thumbnail)
             return
         } 
         catch (error) { 
@@ -417,7 +417,7 @@ distube
     })
     .on("addList", (queue, playlist) => {
         try {
-            Embeds.embedBuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
+            Embeds.embedBuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", "Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}", playlist.thumbnail)
             return
         } catch (error) {
             console.error(error)
@@ -440,7 +440,7 @@ distube
             console.error(error)
         }
         try {
-            Embeds.embedBuilderMessage(client, message, "RED", `Searching canceled`, "")
+            Embeds.embedBuilderMessage(client, message, "RED", "Searching canceled", "")
             return
         } catch (error) {
             console.error(error)

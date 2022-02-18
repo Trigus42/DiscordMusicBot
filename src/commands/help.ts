@@ -4,7 +4,7 @@ export async function help(message: Discord.Message, prefix: string, filters: Ob
     let helpembed = new Discord.MessageEmbed()
         .setColor("#fffff0")
         .setTitle("**COMMANDS**\n")
-        .setAuthor(message.author.tag.split('#')[0], message.member.user.displayAvatarURL({dynamic:true}))
+        .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({dynamic:true}))
         .setFooter(message.client.user.username + " | Syntax:  <>...required    []...optional", message.client.user.displayAvatarURL())
         .addField(`\`${prefix}autoplay\` **/** \`${prefix}ap\``, `Enables autoplay`, true)
         .addField(`\`${prefix}filter <add/del> <NAME> [OPTIONS]\``, `Add/delete [custom filters](https://ffmpeg.org/ffmpeg-filters.html)`, true)
