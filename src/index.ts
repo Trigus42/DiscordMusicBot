@@ -289,7 +289,7 @@ client.on("messageCreate", async message => {
             const embedMessage = await queue.textChannel.send({
                 embeds: [queue_embeds[0]],
                 components: queue_embeds.length < 2 ? [] : [new Discord.MessageActionRow({components: [
-                    BUTTONS.next_Button
+                    BUTTONS.nextButton
                 ]})]
             })
 
@@ -305,7 +305,7 @@ client.on("messageCreate", async message => {
                     // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
                     interaction.deferUpdate()
                     // Increase/decrease index
-                    interaction.customId === BUTTONS.back_Button.customId ? (currentIndex -= 1) : (currentIndex += 1)
+                    interaction.customId === BUTTONS.backButton.customId ? (currentIndex -= 1) : (currentIndex += 1)
                     // Respond to interaction by updating message with new embed
                     embedMessage.edit({
                         embeds: [queue_embeds[currentIndex]],
@@ -313,9 +313,9 @@ client.on("messageCreate", async message => {
                             new Discord.MessageActionRow({
                                 components: [
                                     // back button if it isn't the start
-                                    ...(currentIndex ? [BUTTONS.back_Button] : []),
+                                    ...(currentIndex ? [BUTTONS.backButton] : []),
                                     // forward button if it isn't the end
-                                    ...(currentIndex + 1 < queue_embeds.length ? [BUTTONS.next_Button] : [])
+                                    ...(currentIndex + 1 < queue_embeds.length ? [BUTTONS.nextButton] : [])
                                 ]
                             })
                         ]
