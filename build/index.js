@@ -54,7 +54,10 @@ let distube_options = Object.assign({
 }, db.userConfig.spotify ? { plugins: [new spotify_1.SpotifyPlugin({ api: {
                 clientId: db.userConfig.spotify.clientId,
                 clientSecret: db.userConfig.spotify.clientSecret
-            } })] } : undefined);
+            },
+            parallel: true,
+            emitEventsAfterFetching: true
+        })] } : undefined);
 // Create a new distube instance
 const distube = new DisTube.DisTube(client, distube_options);
 // Login to discord

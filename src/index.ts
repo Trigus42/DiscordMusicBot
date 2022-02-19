@@ -35,8 +35,10 @@ let distube_options = Object.assign(
     },    
     db.userConfig.spotify ? {plugins: [new SpotifyPlugin({api: {
         clientId: db.userConfig.spotify.clientId,
-        clientSecret: db.userConfig.spotify.clientSecret
-    }})]} : undefined
+        clientSecret: db.userConfig.spotify.clientSecret},
+        parallel: true,
+        emitEventsAfterFetching: true
+    })]} : undefined
 )
 
 // Create a new distube instance
