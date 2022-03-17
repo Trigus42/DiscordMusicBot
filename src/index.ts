@@ -1,6 +1,7 @@
 import * as Discord from "discord.js"
 import * as DisTube from "distube"
 import { SpotifyPlugin } from "@distube/spotify"
+import { YtDlpPlugin } from "@distube/yt-dlp"
 
 import { DB } from "./db"
 import { BUTTONS } from "./const/buttons"
@@ -22,27 +23,26 @@ const client = new Discord.Client({
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]
 })
 
-let distube_options = Object.assign(
-    {
-        youtubeCookie: db.userConfig.youtubeCookie ?? undefined,
-        youtubeIdentityToken: db.userConfig.youtubeIdentityToken ?? undefined,
-        nsfw: db.userConfig.nsfw ?? false,
-        customFilters: db.filters,
-        searchSongs: 10, 
-        leaveOnStop: true,
-        leaveOnFinish: false,
-        leaveOnEmpty: true,
-    },    
-    db.userConfig.spotify ? {plugins: [new SpotifyPlugin({api: {
-        clientId: db.userConfig.spotify.clientId,
-        clientSecret: db.userConfig.spotify.clientSecret},
-        parallel: true,
-        emitEventsAfterFetching: true
-    })]} : undefined
-)
-
 // Create a new distube instance
-const distube = new DisTube.DisTube(client, distube_options)
+const distube = new DisTube.DisTube(client, {
+    youtubeDL: false,
+    youtubeCookie: db.userConfig.youtubeCookie ?? undefined,
+    youtubeIdentityToken: db.userConfig.youtubeIdentityToken ?? undefined,
+    nsfw: db.userConfig.nsfw ?? false,
+    customFilters: db.filters,
+    searchSongs: 10, 
+    leaveOnStop: true,
+    leaveOnFinish: false,
+    leaveOnEmpty: true,
+    plugins: 
+        [db.userConfig.spotify ? (new SpotifyPlugin({api: {
+            clientId: db.userConfig.spotify.clientId,
+            clientSecret: db.userConfig.spotify.clientSecret},
+            parallel: true,
+            emitEventsAfterFetching: true
+        }), new YtDlpPlugin()) : new YtDlpPlugin(), 
+    ]
+})
 
 // Login to discord
 client.login(db.userConfig.token)
@@ -404,6 +404,7 @@ distube
     .on("playSong", (queue, song) => {
         try {
             Embeds.statusEmbed(queue, db, song)
+            return
         } catch (error) {
             console.error(error)
         }

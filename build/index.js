@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -26,6 +30,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Discord = __importStar(require("discord.js"));
 const DisTube = __importStar(require("distube"));
 const spotify_1 = require("@distube/spotify");
+const yt_dlp_1 = require("@distube/yt-dlp");
 const db_1 = require("./db");
 const buttons_1 = require("./const/buttons");
 const Commands = __importStar(require("./commands/index"));
@@ -42,7 +47,9 @@ const client = new Discord.Client({
     messageSweepInterval: 0,
     intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]
 });
-let distube_options = Object.assign({
+// Create a new distube instance
+const distube = new DisTube.DisTube(client, {
+    youtubeDL: false,
     youtubeCookie: (_a = db.userConfig.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
     youtubeIdentityToken: (_b = db.userConfig.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
     nsfw: (_c = db.userConfig.nsfw) !== null && _c !== void 0 ? _c : false,
@@ -51,15 +58,15 @@ let distube_options = Object.assign({
     leaveOnStop: true,
     leaveOnFinish: false,
     leaveOnEmpty: true,
-}, db.userConfig.spotify ? { plugins: [new spotify_1.SpotifyPlugin({ api: {
+    plugins: [db.userConfig.spotify ? (new spotify_1.SpotifyPlugin({ api: {
                 clientId: db.userConfig.spotify.clientId,
                 clientSecret: db.userConfig.spotify.clientSecret
             },
             parallel: true,
             emitEventsAfterFetching: true
-        })] } : undefined);
-// Create a new distube instance
-const distube = new DisTube.DisTube(client, distube_options);
+        }), new yt_dlp_1.YtDlpPlugin()) : new yt_dlp_1.YtDlpPlugin(),
+    ]
+});
 // Login to discord
 client.login(db.userConfig.token);
 /////////////////
@@ -406,6 +413,7 @@ distube
     .on("playSong", (queue, song) => {
     try {
         Embeds.statusEmbed(queue, db, song);
+        return;
     }
     catch (error) {
         console.error(error);
