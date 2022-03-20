@@ -6,6 +6,7 @@
     "axios": "^0.25.0",
     "discord.js": "^13.3.1",
     "distube": "^3.3.2",
+    "patch-package": "^6.4.7",
     "sqlite3": "https://github.com/mapbox/node-sqlite3/tarball/master"
   },
   "devDependencies": {
@@ -18,7 +19,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npx patch-package # Patch distube to workaround this issue: https://github.com/skick1234/DisTube/issues/242"
   },
   "keywords": [],
   "author": "",

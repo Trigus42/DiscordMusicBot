@@ -11,8 +11,9 @@ RUN \
 
 COPY ./build /app/build
 COPY ./config /app/config
-COPY ./package.json /app/package.json
 COPY ./package-lock.json /app/package-lock.json
+COPY ./package.json /app/package.json
+COPY ./patches /app/patches
 
 RUN npm install
 
