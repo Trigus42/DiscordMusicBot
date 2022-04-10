@@ -103,24 +103,21 @@ client.on("messageCreate", async (message) => {
             return;
         // Get prefix for guild
         let prefix = (_a = await db.guilds.get("prefix", message.guild.id)) !== null && _a !== void 0 ? _a : db.userConfig.prefix;
-        // Ignore messages that don't start with the prefix
-        if (!message.content.startsWith(prefix))
-            return;
-        const args = message.content.slice(prefix.length).trim().split(/ +/g); // Remove prefix and split message into arguments
-        const command = args.shift(); // Get command name (first argument)
         // React if message starts with prefix 
         if (message.content.startsWith(prefix)) {
             message.react("🆗");
         }
         // React if message mentions bot
         else if (message.mentions.has(client.user)) {
-            message.reply({ embeds: [new Discord.MessageEmbed().setColor("#fffff0").setAuthor(`${message.author.username}, My Prefix is ${prefix}, to get started; type ${prefix}help`, message.author.displayAvatarURL({ dynamic: true }))] });
+            message.reply({ embeds: [new Discord.MessageEmbed().setAuthor({ name: `${message.author.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true }) }).setDescription(`My Prefix is "${prefix}". To get started; type ${prefix}help`)] });
             return;
         }
         // Return if message doesn't start with prefix
         else {
             return;
         }
+        const args = message.content.slice(prefix.length).trim().split(/ +/g); // Remove prefix and split message into arguments
+        const command = args.shift(); // Get command name (first argument)
         ///////////////////
         //// COMMANDS /////
         ///////////////////

@@ -44,9 +44,9 @@ async function sendStatusEmbed(queue, db, song, title) {
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
         .addField("Autoplay:", `\`${queue.autoplay ? "✅" : "❌"}\``, true)
         .addField("Filter:", `\`${filters.length !== 0 ? filters : "❌"}\``, true)
-        .setFooter(queue.client.user.username, queue.client.user.displayAvatarURL());
+        .setFooter({ text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL() });
     if (song.user) {
-        embed.setAuthor(song.user.tag.split("#")[0], song.user.displayAvatarURL({ dynamic: true }));
+        embed.setAuthor({ name: song.user.tag.split("#")[0], iconURL: song.user.displayAvatarURL({ dynamic: true }) });
     }
     if (song.thumbnail) {
         embed.setThumbnail(song.thumbnail);

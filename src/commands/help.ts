@@ -1,11 +1,11 @@
 import * as Discord from "discord.js"
 
 export async function help(message: Discord.Message, prefix: string, filters: Object) {
-    let helpembed = new Discord.MessageEmbed()
+    let helpEmbed = new Discord.MessageEmbed()
         .setColor("#fffff0")
         .setTitle("**COMMANDS**\n")
-        .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({dynamic:true}))
-        .setFooter(message.client.user.username + " | Syntax:  <>...required    []...optional", message.client.user.displayAvatarURL())
+        .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member.user.displayAvatarURL({dynamic:true})})
+        .setFooter({text: message.client.user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: message.client.user.displayAvatarURL({dynamic:true})})
         .addField(`\`${prefix}autoplay\` **/** \`${prefix}ap\``, "Enables autoplay", true)
         .addField(`\`${prefix}filter <add/del> <NAME> [OPTIONS]\``, "Add/delete [custom filters](https://ffmpeg.org/ffmpeg-filters.html)", true)
         .addField(`\`${prefix}help\` **/** \`${prefix}h\``, "List of all commands", true)
@@ -27,5 +27,5 @@ export async function help(message: Discord.Message, prefix: string, filters: Ob
         .addField(`\`${prefix}volume <VOLUME>\` **/** \`${prefix}vol\``, "Changes volume", true)
         .addField("**FILTERS**", Object.keys(filters).map((filter) => `\`${prefix}${filter}\``).join(" "))
 
-    return message.channel.send({ embeds: [helpembed] })
+    return message.channel.send({ embeds: [helpEmbed] })
 }

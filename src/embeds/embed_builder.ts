@@ -8,8 +8,8 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
-            .setAuthor(message.author.tag.split("#")[0], message.member.user.displayAvatarURL({ dynamic: true }))
-            .setFooter(client.user.username, client.user.displayAvatarURL())
+            .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member.user.displayAvatarURL({ dynamic: true })})
+            .setFooter({text: client.user.username, iconURL: client.user.displayAvatarURL()})
 
         if (title) {embed.setTitle(title)}
         if (description) {embed.setDescription(description)}
@@ -27,8 +27,8 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
 export function embedBuilder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel|Discord.GuildTextBasedChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
     let embed = new Discord.MessageEmbed()
         .setColor(color)
-        .setAuthor(user.tag.split("#")[0], user.displayAvatarURL({ dynamic: true }))
-        .setFooter(client.user.username, client.user.displayAvatarURL())
+        .setAuthor({name: user.tag.split("#")[0], iconURL: user.displayAvatarURL({ dynamic: true })})
+        .setFooter({text: client.user.username, iconURL: client.user.displayAvatarURL()})
 
     if (title) embed.setTitle(title)
     if (description) embed.setDescription(description)
