@@ -324,17 +324,26 @@ client.on("messageCreate", async message => {
                 }
             })
         }
-        else if (command === "loop" || command === "repeat") {
+        else if (command === "loop") {
+            let queue = distube.getQueue(message)
+            if (!queue) {
+                Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
+                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
+                message.react("❌")
+                return
+            }
+
             if (0 <= Number(args[0]) && Number(args[0]) <= 2) {
                 distube.setRepeatMode(message, parseInt(args[0]))
                 await Embeds.embedBuilderMessage(client, message, "#fffff0", "Repeat mode set to:", `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`)
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
                 message.react("✅")
                 return
             }
             else {
-                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*")
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+                Embeds.embedBuilderMessage(client, message, "RED", "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat the entire queue)*")
+                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
+                message.react("❌")
                 return
             }
         }
@@ -342,23 +351,22 @@ client.on("messageCreate", async message => {
             let queue = distube.getQueue(message)
             if (!queue) {
                 Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
+                message.react("❌")
                 return
             }
         
             if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
                 await distube.jump(message, parseInt(args[0]))
-                    .catch(err => message.channel.send("Invalid song number.")
-                        .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000)))
-                    message.react("✅")
+                    .catch(err => {
+                        Embeds.embedBuilderMessage(client, message, "RED", "Invalid song number")
+                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
+                        message.react("❌")
+                        return
+                    })
+                message.react("✅")
                 return
             }
-            else {
-                Embeds.embedBuilderMessage(client, message, "RED", "ERROR", `Please use a number between **0** and **${distube.getQueue(message).songs.length}**   |   *(0: disabled, 1: Repeat a song, 2: Repeat all the queue)*`)
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                return
-            }
-
         }
         else if (command === "filter") {
             if (args[0] === "add") { 
