@@ -2,7 +2,7 @@ import * as sql from "sqlite3"
 import * as fs from "fs"
 
 interface UserConfig {
-    token: string,
+    tokens: string[],
     prefix: string,
     actionMessages: boolean,
     spotify?: {

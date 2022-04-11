@@ -39,64 +39,188 @@ const deezer_1 = __importDefault(require("./apis/deezer"));
 /////////////////
 /// Initialize //
 /////////////////
-let db = new db_1.DB("./config/db.sqlite");
-let deezer = new deezer_1.default();
-// Create a new discord client
-const client = new Discord.Client({
-    messageCacheLifetime: 0,
-    messageSweepInterval: 0,
-    intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]
-});
-// Create a new distube instance
-const distube = new DisTube.DisTube(client, {
-    youtubeDL: false,
-    youtubeCookie: (_a = db.userConfig.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
-    youtubeIdentityToken: (_b = db.userConfig.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
-    nsfw: (_c = db.userConfig.nsfw) !== null && _c !== void 0 ? _c : false,
-    customFilters: db.filters,
-    searchSongs: 10,
-    leaveOnStop: true,
-    leaveOnFinish: false,
-    leaveOnEmpty: true,
-    plugins: [db.userConfig.spotify ? (new spotify_1.SpotifyPlugin({ api: {
-                clientId: db.userConfig.spotify.clientId,
-                clientSecret: db.userConfig.spotify.clientSecret
-            },
-            parallel: true,
-            emitEventsAfterFetching: true
-        }), new yt_dlp_1.YtDlpPlugin()) : new yt_dlp_1.YtDlpPlugin(),
-    ]
-});
-// Login to discord
-client.login(db.userConfig.token);
+const db = new db_1.DB("./config/db.sqlite");
+const deezer = new deezer_1.default();
+// Array of available clients
+// Discord client, Distube instance pairs
+let clients = [];
+for (let token of db.userConfig.tokens) {
+    // Discord client
+    let discord = new Discord.Client({
+        messageCacheLifetime: 0,
+        messageSweepInterval: 0,
+        intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_VOICE_STATES"]
+    });
+    discord.login(token);
+    let distube = new DisTube.DisTube(discord, {
+        youtubeDL: false,
+        youtubeCookie: (_a = db.userConfig.youtubeCookie) !== null && _a !== void 0 ? _a : undefined,
+        youtubeIdentityToken: (_b = db.userConfig.youtubeIdentityToken) !== null && _b !== void 0 ? _b : undefined,
+        nsfw: (_c = db.userConfig.nsfw) !== null && _c !== void 0 ? _c : false,
+        customFilters: db.filters,
+        searchSongs: 10,
+        leaveOnStop: true,
+        leaveOnFinish: false,
+        leaveOnEmpty: true,
+        plugins: [db.userConfig.spotify ? (new spotify_1.SpotifyPlugin({ api: {
+                    clientId: db.userConfig.spotify.clientId,
+                    clientSecret: db.userConfig.spotify.clientSecret
+                },
+                parallel: true,
+                emitEventsAfterFetching: true
+            }), new yt_dlp_1.YtDlpPlugin()) : new yt_dlp_1.YtDlpPlugin(),
+        ]
+    });
+    clients.push({ discord: discord, distube: distube });
+}
+// Main client responsible for message handling
+let mainClient = clients[0].discord;
+let mainDisTube = clients[0].distube;
 /////////////////
 ///// Events ////
 /////////////////
-// Log when ready and set presence
-client.on("ready", () => {
-    console.log(`:: Bot has started as :: ${client.user.tag}`);
-    client.user.setPresence({
-        status: "online",
-        activities: [
-            {
-                name: "Music",
-                type: "PLAYING",
-            }
-        ]
+for (let { discord: client, distube } of clients) {
+    // Log when ready and set presence
+    client.on("ready", () => {
+        // Wait for client user to be set
+        while (!client.user)
+            setTimeout(() => { }, 100);
+        console.log(`Client "${client.user.tag}" is ready. Invite link: https://discord.com/oauth2/authorize?client_id=${client.user.id}&permissions=103183076416&scope=bot`);
+        client.user.setPresence({
+            status: "online",
+            activities: [
+                {
+                    name: "Music",
+                    type: "PLAYING",
+                }
+            ]
+        });
     });
-});
-// Log when reconnect
-client.on("reconnecting", () => {
-    console.log(" :: Reconnecting");
-    client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
-});
-// Log when disconnecting
-client.on("disconnect", () => {
-    console.log(" :: Disconnect");
-    client.user.setPresence({ status: "invisible" }); // Change discord presence to offline
-});
-client.on("messageCreate", async (message) => {
-    var _a;
+    // Log when reconnecting
+    client.on("reconnecting", () => {
+        console.log(`Client "${client.user.tag}" is reconnecting`);
+        client.user.setPresence({ status: "invisible" });
+    });
+    // Log when disconnected
+    client.on("disconnect", () => {
+        console.log(`Client "${client.user.tag}" is disconnected`);
+        client.user.setPresence({ status: "invisible" });
+    });
+    ///////////////
+    /// DISTUBE ///
+    ///////////////
+    distube
+        .on("playSong", (queue, song) => {
+        try {
+            Embeds.statusEmbed(queue, db, song);
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("addSong", (queue, song) => {
+        try {
+            Embeds.embedBuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail);
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("addList", (queue, playlist) => {
+        try {
+            Embeds.embedBuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail);
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("searchResult", (message, results) => {
+        try {
+            let i = 0;
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`);
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("searchCancel", (message) => {
+        try {
+            message.reactions.removeAll();
+            message.react("❌");
+        }
+        catch (error) {
+            console.error(error);
+        }
+        try {
+            Embeds.embedBuilderMessage(client, message, "RED", "Searching canceled", "");
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("error", (channel, error) => {
+        try {
+            channel.lastMessage.reactions.removeAll();
+            channel.lastMessage.react("❌");
+        }
+        catch (error) {
+            console.error(error);
+        }
+        console.log(error);
+        try {
+            Embeds.embedBuilder(client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```" + error + "```");
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("finish", async (queue) => {
+        try {
+            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("empty", queue => {
+        try {
+            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("noRelated", queue => {
+        try {
+            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
+            return;
+        }
+        catch (error) {
+            console.error(error);
+        }
+    })
+        .on("initQueue", queue => {
+        try {
+            queue.autoplay = false;
+            queue.volume = 100;
+        }
+        catch (error) {
+            console.log(error);
+        }
+    })
+        .on("searchDone", () => { })
+        .on("searchNoResult", () => { })
+        .on("searchInvalidAnswer", () => { });
+}
+mainClient.on("messageCreate", async (message) => {
+    var _a, _b;
     try {
         // Ignore non commands, messages from bots and DMs
         if (message.author.bot || !message.guild)
@@ -108,7 +232,7 @@ client.on("messageCreate", async (message) => {
             message.react("🆗");
         }
         // React if message mentions bot
-        else if (message.mentions.has(client.user)) {
+        else if (message.mentions.members.has(mainClient.user.id)) {
             message.reply({ embeds: [new Discord.MessageEmbed().setAuthor({ name: `${message.author.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true }) }).setDescription(`My Prefix is "${prefix}". To get started; type ${prefix}help`)] });
             return;
         }
@@ -121,35 +245,44 @@ client.on("messageCreate", async (message) => {
         ///////////////////
         //// COMMANDS /////
         ///////////////////
-        if (command === "invite" || command === "add") {
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "Invite me", `[\`Click here\`](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=49572160&scope=bot)`);
-            return;
-        }
-        else if (command === "help" || command === "about" || command === "h" || command === "info") {
+        if (command === "help" || command === "about" || command === "h" || command === "info") {
             await Commands.help(message, prefix, await db.guilds.getFilters(message.guild.id));
         }
         else if (command === "prefix") {
             // If no arguments are given, return current prefix
             if (!args[0]) {
-                Embeds.embedBuilderMessage(client, message, "RED", `Current Prefix: \`${prefix}\``, "Please provide a new prefix");
+                Embeds.embedBuilderMessage(mainClient, message, "RED", `Current Prefix: \`${prefix}\``, "Please provide a new prefix");
                 return;
             }
             // If user is not owner, return error
             if (!message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", "❌ You don't have permission for this Command");
+                Embeds.embedBuilderMessage(mainClient, message, "RED", "PREFIX", "❌ You don't have permission for this Command");
                 return;
             }
             // If prefix includes spaces, return error
             if (args[1]) {
-                Embeds.embedBuilderMessage(client, message, "RED", "PREFIX", "❌ The prefix can't have whitespaces");
+                Embeds.embedBuilderMessage(mainClient, message, "RED", "PREFIX", "❌ The prefix can't have whitespaces");
                 return;
             }
             // Set new prefix in database
             db.guilds.set("prefix", args[0], message.guild.id);
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "PREFIX", `☑️ Successfully set new prefix to **\`${args[0]}\`**`);
+            Embeds.embedBuilderMessage(mainClient, message, "#fffff0", "PREFIX", `☑️ Successfully set new prefix to **\`${args[0]}\`**`);
             return;
         }
-        else if (command == "status") {
+        // Get pair of client and distube for the members voice channel or use a new pair if member is in a new voice channel
+        let clientArray = (_b = clients.find(i => i.distube.getQueue(message.guildId) ? // Check if client has a queue
+            i.distube.getQueue(message.guildId).voiceChannel.id === message.member.voice.channel.id : false // Check if client queue is in the same voice channel as the message author
+        )) !== null && _b !== void 0 ? _b : clients.find(i => // If no client has been found, use a new client
+         !i.distube.getQueue(message.guildId) // Check if client has no queue
+            && i.discord.guilds.fetch().then(guilds => guilds.has(message.guildId)) // Check if client is in the same guild as the message author
+        );
+        if (!clientArray) {
+            Embeds.embedBuilderMessage(mainClient, message, "RED", "❌ There are no available clients", "Please try again later or free up one of the clients");
+            return;
+        }
+        let client = clientArray.discord;
+        let distube = clientArray.distube;
+        if (command == "status") {
             let queue = distube.getQueue(message.guild.id);
             if (!queue) {
                 Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
@@ -215,7 +348,9 @@ client.on("messageCreate", async (message) => {
                     return;
                 }
             }
-            await distube.play(message.member.voice.channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), {
+            // Replace default client with the correct client
+            let channel = await client.channels.fetch(message.member.voice.channel.id);
+            await distube.play(channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), {
                 position: Number.isInteger(Number(args[1])) ? Number(args[1]) : -1,
                 textChannel: message.channel,
                 message: message,
@@ -411,116 +546,3 @@ client.on("messageCreate", async (message) => {
         console.error(error);
     }
 });
-///////////////
-/// DISTUBE ///
-///////////////
-distube
-    .on("playSong", (queue, song) => {
-    try {
-        Embeds.statusEmbed(queue, db, song);
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("addSong", (queue, song) => {
-    try {
-        Embeds.embedBuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail);
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("addList", (queue, playlist) => {
-    try {
-        Embeds.embedBuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail);
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("searchResult", (message, results) => {
-    try {
-        let i = 0;
-        Embeds.embedBuilderMessage(client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`);
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("searchCancel", (message) => {
-    try {
-        message.reactions.removeAll();
-        message.react("❌");
-    }
-    catch (error) {
-        console.error(error);
-    }
-    try {
-        Embeds.embedBuilderMessage(client, message, "RED", "Searching canceled", "");
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("error", (channel, error) => {
-    try {
-        channel.lastMessage.reactions.removeAll();
-        channel.lastMessage.react("❌");
-    }
-    catch (error) {
-        console.error(error);
-    }
-    console.log(error);
-    try {
-        Embeds.embedBuilder(client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```" + error + "```");
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("finish", async (queue) => {
-    try {
-        Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("empty", queue => {
-    try {
-        Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("noRelated", queue => {
-    try {
-        Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000));
-        return;
-    }
-    catch (error) {
-        console.error(error);
-    }
-})
-    .on("initQueue", queue => {
-    try {
-        queue.autoplay = false;
-        queue.volume = 100;
-    }
-    catch (error) {
-        console.log(error);
-    }
-})
-    .on("searchDone", () => { })
-    .on("searchNoResult", () => { })
-    .on("searchInvalidAnswer", () => { });
