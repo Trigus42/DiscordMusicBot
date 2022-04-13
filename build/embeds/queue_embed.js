@@ -49,7 +49,7 @@ function queueEmbed(queue, client) {
             .setTitle("Server Queue")
             .setColor("#fffff0")
             .setDescription(`**Current Song - [\`${queue.songs[0].name}\`](${queue.songs[0].url})**\n\n${info.join("\n")}`)
-            .setFooter(client.user.username, client.user.displayAvatarURL());
+            .setFooter({ text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL() });
         embeds.push(embed);
     }
     // Return the embeds
