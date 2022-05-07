@@ -19,7 +19,7 @@ import { DB } from "../db"
         .setColor("#fffff0")
         .setTitle(title ?? "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
-        .addField("Duration:", `\`${queue.formattedCurrentTime !== "00:00" ? queue.formattedCurrentTime + " / " + song.formattedDuration: song.formattedDuration}\``, true)
+        .addField("Ends:", `<t:${Math.floor(Date.now()/1000) + queue.songs[0].duration}:R>`, true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
         .addField("Volume:", `\`${queue.volume} %\``, true)
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
@@ -32,13 +32,14 @@ import { DB } from "../db"
     // Send new playing message
     const embedMessage = await queue.textChannel.send({
         embeds: [embed],
-        components: [new Discord.MessageActionRow({components: [
-            BUTTONS.playPauseButton,
-            BUTTONS.backButton,
-            BUTTONS.nextButton,
-            BUTTONS.seekBackwardButton,
-            BUTTONS.seekForwardButton,
-        ]})]
+        components: [
+            new Discord.MessageActionRow({components: [
+                BUTTONS.playPauseButton,
+                BUTTONS.backButton,
+                BUTTONS.nextButton,
+                BUTTONS.seekBackwardButton,
+                BUTTONS.seekForwardButton]})
+        ]
     })
 
     // Save the message id to db

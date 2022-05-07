@@ -38,7 +38,7 @@ async function sendStatusEmbed(queue, db, song, title) {
         .setColor("#fffff0")
         .setTitle(title !== null && title !== void 0 ? title : "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
-        .addField("Duration:", `\`${queue.formattedCurrentTime !== "00:00" ? queue.formattedCurrentTime + " / " + song.formattedDuration : song.formattedDuration}\``, true)
+        .addField("Ends:", `<t:${Math.floor(Date.now() / 1000) + queue.songs[0].duration}:R>`, true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
         .addField("Volume:", `\`${queue.volume} %\``, true)
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
@@ -54,13 +54,15 @@ async function sendStatusEmbed(queue, db, song, title) {
     // Send new playing message
     const embedMessage = await queue.textChannel.send({
         embeds: [embed],
-        components: [new Discord.MessageActionRow({ components: [
+        components: [
+            new Discord.MessageActionRow({ components: [
                     buttons_1.BUTTONS.playPauseButton,
                     buttons_1.BUTTONS.backButton,
                     buttons_1.BUTTONS.nextButton,
                     buttons_1.BUTTONS.seekBackwardButton,
-                    buttons_1.BUTTONS.seekForwardButton,
-                ] })]
+                    buttons_1.BUTTONS.seekForwardButton
+                ] })
+        ]
     });
     // Save the message id to db
     db.kvstore.put(`playingembed_${queue.voiceChannel.id}`, embedMessage.id);

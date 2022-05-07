@@ -46,7 +46,7 @@ function queueEmbed(queue, client) {
         }
         // Create and add embed
         const embed = new Discord.MessageEmbed()
-            .setTitle("Server Queue")
+            .setTitle(`Queue - "${queue.voiceChannel.name}"`)
             .setColor("#fffff0")
             .setDescription(`**Current Song - [\`${queue.songs[0].name}\`](${queue.songs[0].url})**\n\n${info.join("\n")}`)
             .setFooter({ text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL() });

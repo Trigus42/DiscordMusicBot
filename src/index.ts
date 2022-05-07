@@ -1,5 +1,5 @@
 import * as Discord from "discord.js"
-import dist, * as DisTube from "distube"
+import * as DisTube from "distube"
 import { SpotifyPlugin } from "@distube/spotify"
 import { YtDlpPlugin } from "@distube/yt-dlp"
 
@@ -105,7 +105,7 @@ for (let {discord: client, distube} of clients) {
     })
     .on("addSong", (queue, song) => {
         try {
-            Embeds.embedBuilder(client, song.user, queue.textChannel, "#fffff0", "Added a Song", `Song: [\`${song.name}\`](${song.url})  -  \`${song.formattedDuration}\` \n\nRequested by: ${song.user}`, song.thumbnail)
+            Embeds.songEmbed(queue, song)
             return
         } 
         catch (error) { 
@@ -221,9 +221,10 @@ mainClient.on("messageCreate", async message => {
         const args = message.content.slice(prefix.length).trim().split(/ +/g); // Remove prefix and split message into arguments
         const command = args.shift();                                          // Get command name (first argument)
 
-        ///////////////////
-        //// COMMANDS /////
-        ///////////////////
+        //////////////////////////
+        //// GENERAL COMMANDS ////
+        //////////////////////////
+
         if (command === "help"  || command === "about" || command === "h" || command === "info") {
             await Commands.help(message, prefix, await db.guilds.getFilters(message.guild.id)) 
         }
@@ -252,6 +253,10 @@ mainClient.on("messageCreate", async message => {
             return
         }
 
+        //////////////////////
+        //// GET INSTANCE ////
+        //////////////////////
+
         // Get pair of client and distube for the members voice channel or use a new pair if member is in a new voice channel
         let clientArray = clients.find(i =>
             i.distube.getQueue(message.guildId) ? // Check if client has a queue
@@ -268,9 +273,17 @@ mainClient.on("messageCreate", async message => {
 
         let client = clientArray.discord
         let distube = clientArray.distube
+        let queue = distube.getQueue(message.guild.id)
+
+        if (queue) {
+            queue.textChannel = message.channel as Discord.TextChannel
+        }
+
+        ////////////////////////////
+        //// INSTANCE COMMANDS /////
+        ////////////////////////////
 
         if (command == "status") {
-            let queue = distube.getQueue(message.guild.id)
             if (!queue) {
                 Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.statusEmbed = exports.queueEmbed = exports.embedBuilderMessage = exports.embedBuilder = void 0;
+exports.songEmbed = exports.statusEmbed = exports.queueEmbed = exports.embedBuilderMessage = exports.embedBuilder = void 0;
 var embed_builder_1 = require("./embed_builder");
 Object.defineProperty(exports, "embedBuilder", { enumerable: true, get: function () { return embed_builder_1.embedBuilder; } });
 Object.defineProperty(exports, "embedBuilderMessage", { enumerable: true, get: function () { return embed_builder_1.embedBuilderMessage; } });
@@ -8,3 +8,5 @@ var queue_embed_1 = require("./queue_embed");
 Object.defineProperty(exports, "queueEmbed", { enumerable: true, get: function () { return queue_embed_1.queueEmbed; } });
 var status_embed_1 = require("./status_embed");
 Object.defineProperty(exports, "statusEmbed", { enumerable: true, get: function () { return status_embed_1.statusEmbed; } });
+var add_song_1 = require("./add_song");
+Object.defineProperty(exports, "songEmbed", { enumerable: true, get: function () { return add_song_1.songEmbed; } });
