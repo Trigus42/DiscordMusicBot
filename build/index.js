@@ -247,6 +247,7 @@ mainClient.on("messageCreate", async (message) => {
         //////////////////////////
         if (command === "help" || command === "about" || command === "h" || command === "info") {
             await Commands.help(message, prefix, await db.guilds.getFilters(message.guild.id));
+            return;
         }
         else if (command === "prefix") {
             // If no arguments are given, return current prefix
