@@ -1,15 +1,14 @@
 import * as Discord from "discord.js"
 import * as DisTube from "distube"
-import { Queue } from "distube"
 
 import {BUTTONS} from "../const/buttons"
 import * as embeds from "../embeds/index"
-import { DB } from "../config"
+import { Config } from "../config"
 
 /**
  *  Generate and send status embed
  */
- async function sendStatusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song, title?: string) {
+ async function sendStatusEmbed(queue: DisTube.Queue, config: Config, song?: DisTube.Song, title?: string) {
     // If no song is provided, use the first song in the queue
     song = song ?? queue.songs[0]
 
@@ -43,7 +42,7 @@ import { DB } from "../config"
     })
 
     // Save the message id to db
-    db.kvstore.put(`playingembed_${queue.voiceChannel.id}`, embedMessage.id)
+    config.setPlayingMessage(queue.textChannel.guildId, queue.voiceChannel.id, embedMessage.id)
 
     // Return the message
     return embedMessage
@@ -52,16 +51,16 @@ import { DB } from "../config"
 /**
  *  Send and watch the status embed
  */
-export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.Song, status?: string) {
+export async function statusEmbed(queue: DisTube.Queue, config: Config, song?: DisTube.Song, status?: string) {
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.voiceChannel.id}`))).delete()
+            (await queue.textChannel.messages.fetch(await config.getPlayingMessage(queue.textChannel.guildId, queue.voiceChannel.id))).delete()
         /* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
         } catch (error) {}
 
         // Send new playing message
-        let embedMessage = await sendStatusEmbed(queue, db, song, status)
+        let embedMessage = await sendStatusEmbed(queue, config, song, status)
 
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector()
@@ -77,18 +76,18 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     if (queue.playing) {
                         queue.pause()
 
-                        if (db.userConfig.actionMessages) {
+                        if (config.userConfig.actionMessages) {
                             embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", "Paused the song")
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                            statusEmbed(queue, db, song, "Paused")
+                            statusEmbed(queue, config, song, "Paused")
                         }
                     } else {
                         queue.resume()
 
-                        if (db.userConfig.actionMessages) {
+                        if (config.userConfig.actionMessages) {
                             embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", "Resumed the song")
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                            statusEmbed(queue, db, song)
+                            statusEmbed(queue, config, song)
                         }
                     }           
                     return
@@ -101,7 +100,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                         await queue.skip()
                     }
 
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", "Skipped the song")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                     }
@@ -111,7 +110,7 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                 case BUTTONS.backButton.customId:
                     queue.previous()
 
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", "Playing previous song")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                     }
@@ -123,11 +122,11 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     if (seektime < 0) {seektime = 0}
                     queue.seek(Number(seektime))
 
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`-10 seconds\`")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                     }
-                    statusEmbed(queue, db, song)
+                    statusEmbed(queue, config, song)
                     return
 
                 case BUTTONS.seekForwardButton.customId:
@@ -135,11 +134,11 @@ export async function statusEmbed(queue: DisTube.Queue, db: DB, song?: DisTube.S
                     if (seektime >= queue.songs[0].duration) { seektime = queue.songs[0].duration - 1 }
                     queue.seek(Number(seektime))
 
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`+10 seconds\`")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                     }
-                    statusEmbed(queue, db, song)
+                    statusEmbed(queue, config, song)
                     return
             }
         })

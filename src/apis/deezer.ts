@@ -12,7 +12,7 @@ export default class Deezer {
    * Listen for get requests on the redirect url port
    * in order to attain the oauth code.
   */
-  async listenForCode(): Promise<string> {
+  async _listenForCode(): Promise<string> {
     return new Promise((resolve, reject) => {
       const server = http.createServer((req, res) => {
         if ( req.method === "GET" ) {
@@ -33,8 +33,8 @@ export default class Deezer {
   /**
    * Wait for the user to authorize the app set the access token for this instance.
   */
-  async auth() {
-    let code = await this.listenForCode()
+  async _auth() {
+    let code = await this._listenForCode()
 
     const res = await axios.get(`https://connect.deezer.com/oauth/access_token.php?app_id=${this.appId}&secret=${this.appSecret}&code=${code}`)
     this.accessToken = res.data.split("=")[1].split("&")[0]
@@ -51,7 +51,7 @@ export default class Deezer {
     this.port = this.redirectUrl.split(":")[2].split("/")[0]
 
     // Start listner
-    this.auth()
+    this._auth()
 
     return `https://connect.deezer.com/oauth/auth.php?app_id=${this.appId}&redirect_uri=${this.redirectUrl}&perms=offline_access`
   }

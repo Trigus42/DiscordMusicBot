@@ -27,7 +27,7 @@ export class Config {
     /*
     * Constructor function to initialize database connection
     */
-    constructor (filename?: string, user_config?: UserConfig|string, filters?: Dict|string) {
+    constructor (filename?: string, userConfig?: UserConfig|string, filters?: Dict|string) {
         // Connect to database
         this.path = filename ?? "./config/db.sqlite"
         this.db = new Sequelize({
@@ -36,12 +36,12 @@ export class Config {
         })
 
         // Load user config
-        if (user_config) {
-            if (typeof user_config === "string") {
+        if (userConfig) {
+            if (typeof userConfig === "string") {
                 // eslint-disable-next-line detect-non-literal-fs-filename
-                this.userConfig = JSON.parse(fs.readFileSync(user_config, "utf8")) as UserConfig
+                this.userConfig = JSON.parse(fs.readFileSync(userConfig, "utf8")) as UserConfig
             } else {
-                this.userConfig = user_config
+                this.userConfig = userConfig
             }
         } else {
             this.userConfig = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8")) as UserConfig
@@ -65,12 +65,12 @@ export class Config {
 
         // Guilds
         class Guild extends Model {
-            declare id: number
+            declare id: string
           }
         
         Guild.init({
             id: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.STRING,
                 autoIncrement: true,
                 primaryKey: true
             }
@@ -80,7 +80,7 @@ export class Config {
 
         // Filters
         class Filter extends Model {
-            declare guildId: number
+            declare guildId: string
             declare name: string
             declare value: string
           }
@@ -106,24 +106,24 @@ export class Config {
 
         // Status embeds
         class StatusEmbed extends Model {
-            declare guildId: number
-            declare channelId: number
-            declare messageId: number
+            declare guildId: string
+            declare channelId: string
+            declare messageId: string
           }
         
         StatusEmbed.init({
             guildId: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.STRING,
                 primaryKey: true,
                 references: {key: "id", model: Guild},
                 onDelete: "CASCADE"
             },
             channelId: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.STRING,
                 primaryKey: true
             },
             messageId: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.STRING,
                 defaultValue: null,
             }
         }, {sequelize: this.db})
@@ -131,7 +131,7 @@ export class Config {
         StatusEmbed.sync()
     }
 
-    async getFilters(guildId: number): Promise<Dict> {
+    async getFilters(guildId: string): Promise<Dict> {
         // Get custom guild filters from database
         const customFilters = await this.db.models.filter.findAll({
             where: {guildId: guildId}
@@ -147,7 +147,7 @@ export class Config {
         return Object.assign(Object.assign({}, this.filters), customFiltersDict)
     }
 
-    async getFilter(guildId: number, name: string): Promise<string|null> {
+    async getFilter(guildId: string, name: string): Promise<string|null> {
         // Get custom guild filters from database
         const customFilter = await this.db.models.filter.findOne({
             where: {guildId: guildId, name: name}
@@ -157,7 +157,7 @@ export class Config {
         return customFilter?.getDataValue("value") ?? this.filters[name] ?? null
     }
 
-    async setFilter(guildId: number, name: string, value: string): Promise<void> {
+    async setFilter(guildId: string, name: string, value: string): Promise<void> {
         // Get custom guild filters from database
         const customFilter = await this.db.models.filter.findOne({
             where: {guildId: guildId, name: name}
@@ -176,14 +176,14 @@ export class Config {
         }
     }
 
-    async deleteFilter(guildId: number, name: string): Promise<void> {
+    async deleteFilter(guildId: string, name: string): Promise<void> {
         // Get custom guild filters from database
         await this.db.models.filter.destroy({
             where: {guildId: guildId, name: name}
         })
     }
 
-    async setPlayingMessage(guildId: number, channelId: number, messageId: string): Promise<void> {
+    async setPlayingMessage(guildId: string, channelId: string, messageId: string): Promise<void> {
         this.db.models.statusEmbed.upsert({
             guildId: guildId,
             channelId: channelId,
@@ -191,7 +191,7 @@ export class Config {
         })
     }
 
-    async getPlayingMessage(guildId: number, channelId: number): Promise<string|null> {
+    async getPlayingMessage(guildId: string, channelId: string): Promise<string|null> {
         const statusEmbed = await this.db.models.statusEmbed.findOne({
             where: {
                 guildId: guildId,

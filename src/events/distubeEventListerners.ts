@@ -1,7 +1,12 @@
-distube
+import { DisTube } from "distube"
+import * as Embeds from "../embeds/index"
+import { Config } from "../config"
+
+export function registerDistubeEventListeners(distube: DisTube, config: Config) {
+    distube
     .on("playSong", (queue, song) => {
         try {
-            Embeds.statusEmbed(queue, db, song)
+            Embeds.statusEmbed(queue, config, song)
             return
         } catch (error) {
             console.error(error)
@@ -18,7 +23,7 @@ distube
     })
     .on("addList", (queue, playlist) => {
         try {
-            Embeds.embedBuilder(client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
+            Embeds.embedBuilder(distube.client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
             return
         } catch (error) {
             console.error(error)
@@ -27,7 +32,7 @@ distube
     .on("searchResult", (message, results) => {
         try {
             let i = 0
-            Embeds.embedBuilderMessage(client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`)
+            Embeds.embedBuilderMessage(distube.client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`)
             return
         } catch (error) {
             console.error(error)
@@ -41,7 +46,7 @@ distube
             console.error(error)
         }
         try {
-            Embeds.embedBuilderMessage(client, message, "RED", "Searching canceled", "")
+            Embeds.embedBuilderMessage(distube.client, message, "RED", "Searching canceled", "")
             return
         } catch (error) {
             console.error(error)
@@ -58,7 +63,7 @@ distube
         console.log(error)
 
         try {
-            Embeds.embedBuilder(client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```"+error+"```")
+            Embeds.embedBuilder(distube.client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```"+error+"```")
             return
         } catch (error) {
             console.error(error)
@@ -66,14 +71,14 @@ distube
     })
     .on("finish", async queue => {
         try {
-            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            Embeds.embedBuilder(distube.client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
         } catch (error) {
             console.error(error)
         }
     })
     .on("empty", queue => {
         try {
-            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            Embeds.embedBuilder(distube.client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -81,7 +86,7 @@ distube
     })
     .on("noRelated", queue => {
         try {
-            Embeds.embedBuilder(client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+            Embeds.embedBuilder(distube.client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             return
         } catch (error) {
             console.error(error)
@@ -98,3 +103,4 @@ distube
     .on("searchDone", () => {})
     .on("searchNoResult", () => {})
     .on("searchInvalidAnswer", () => {})
+}
