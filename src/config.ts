@@ -1,0 +1,204 @@
+import * as fs from "fs"
+import { Sequelize, DataTypes, Model } from "sequelize"
+
+interface UserConfig {
+    tokens: string[],
+    actionMessages: boolean,
+    spotify?: {
+        clientId: string,
+        clientSecret: string
+    },
+    nsfw?: boolean,
+    youtubeIdentityToken?: string,
+    youtubeCookie?: string,
+}
+
+interface Dict { 
+    [key: string] : string
+}
+
+export class Config {
+    path: string
+    db: Sequelize
+
+    userConfig: UserConfig
+    filters: Dict
+
+    /*
+    * Constructor function to initialize database connection
+    */
+    constructor (filename?: string, user_config?: UserConfig|string, filters?: Dict|string) {
+        // Connect to database
+        this.path = filename ?? "./config/db.sqlite"
+        this.db = new Sequelize({
+            dialect: 'sqlite',
+            storage: this.path
+        })
+
+        // Load user config
+        if (user_config) {
+            if (typeof user_config === "string") {
+                // eslint-disable-next-line detect-non-literal-fs-filename
+                this.userConfig = JSON.parse(fs.readFileSync(user_config, "utf8")) as UserConfig
+            } else {
+                this.userConfig = user_config
+            }
+        } else {
+            this.userConfig = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8")) as UserConfig
+        }
+
+        // Load filters
+        if (filters) {
+            if (typeof filters === "string") {
+                // eslint-disable-next-line detect-non-literal-fs-filename
+                this.filters = JSON.parse(fs.readFileSync(filters, "utf8"))
+            } else {
+                this.filters = filters
+            }
+        } else {
+            this.filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"))
+        }
+
+        // Don't allow modification of user config
+        Object.freeze(this.userConfig)
+        Object.freeze(this.filters)
+
+        // Guilds
+        class Guild extends Model {
+            declare id: number
+          }
+        
+        Guild.init({
+            id: {
+                type: DataTypes.INTEGER,
+                autoIncrement: true,
+                primaryKey: true
+            }
+        }, {sequelize: this.db})
+
+        Guild.sync()
+
+        // Filters
+        class Filter extends Model {
+            declare guildId: number
+            declare name: string
+            declare value: string
+          }
+        
+        Filter.init({
+            guildId: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                references: {key: "id", model: Guild},
+                onDelete: "CASCADE"
+            },
+            name: {
+                type: DataTypes.STRING,
+                primaryKey: true
+            },
+            value: {
+                type: DataTypes.STRING,
+                defaultValue: null,
+            }
+        }, {sequelize: this.db})
+
+        Filter.sync()
+
+        // Status embeds
+        class StatusEmbed extends Model {
+            declare guildId: number
+            declare channelId: number
+            declare messageId: number
+          }
+        
+        StatusEmbed.init({
+            guildId: {
+                type: DataTypes.INTEGER,
+                primaryKey: true,
+                references: {key: "id", model: Guild},
+                onDelete: "CASCADE"
+            },
+            channelId: {
+                type: DataTypes.INTEGER,
+                primaryKey: true
+            },
+            messageId: {
+                type: DataTypes.INTEGER,
+                defaultValue: null,
+            }
+        }, {sequelize: this.db})
+
+        StatusEmbed.sync()
+    }
+
+    async getFilters(guildId: number): Promise<Dict> {
+        // Get custom guild filters from database
+        const customFilters = await this.db.models.filter.findAll({
+            where: {guildId: guildId}
+        })
+
+        // Convert to dictionary
+        const customFiltersDict: Dict = {}
+        for (const filter of customFilters) {
+            customFiltersDict[filter.getDataValue("name")] = filter.getDataValue("value")
+        }
+
+        // Merge default filters with custom filters, overwriting default filters in case of a conflict
+        return Object.assign(Object.assign({}, this.filters), customFiltersDict)
+    }
+
+    async getFilter(guildId: number, name: string): Promise<string|null> {
+        // Get custom guild filters from database
+        const customFilter = await this.db.models.filter.findOne({
+            where: {guildId: guildId, name: name}
+        })
+
+        // Return custom filter value, or default filter value if not found
+        return customFilter?.getDataValue("value") ?? this.filters[name] ?? null
+    }
+
+    async setFilter(guildId: number, name: string, value: string): Promise<void> {
+        // Get custom guild filters from database
+        const customFilter = await this.db.models.filter.findOne({
+            where: {guildId: guildId, name: name}
+        })
+
+        // If custom filter exists, update it
+        if (customFilter) {
+            await customFilter.update({value: value})
+        } else {
+            // Create custom filter
+            await this.db.models.filter.create({
+                guildId: guildId,
+                name: name,
+                value: value
+            })
+        }
+    }
+
+    async deleteFilter(guildId: number, name: string): Promise<void> {
+        // Get custom guild filters from database
+        await this.db.models.filter.destroy({
+            where: {guildId: guildId, name: name}
+        })
+    }
+
+    async setPlayingMessage(guildId: number, channelId: number, messageId: string): Promise<void> {
+        this.db.models.statusEmbed.upsert({
+            guildId: guildId,
+            channelId: channelId,
+            messageId: messageId
+        })
+    }
+
+    async getPlayingMessage(guildId: number, channelId: number): Promise<string|null> {
+        const statusEmbed = await this.db.models.statusEmbed.findOne({
+            where: {
+                guildId: guildId,
+                channelId: channelId
+            }
+        })
+
+        return statusEmbed?.getDataValue("messageId") ?? null
+    }
+}
