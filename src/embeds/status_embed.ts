@@ -4,7 +4,7 @@ import { Queue } from "distube"
 
 import {BUTTONS} from "../const/buttons"
 import * as embeds from "../embeds/index"
-import { DB } from "../db"
+import { DB } from "../config"
 
 /**
  *  Generate and send status embed

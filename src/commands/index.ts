@@ -1,1 +1,0 @@
-export { help } from "./help"
