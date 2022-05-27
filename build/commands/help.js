@@ -23,23 +23,29 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HelpCommand = void 0;
+const command_1 = require("../classes/command");
 const Discord = __importStar(require("discord.js"));
-class HelpCommand extends Command {
-    constructor(context, options) {
-        super(context, {
-            ...options,
-            name: 'help',
-            description: 'Prints help message',
-            chatInputCommand: { register: true }
-        });
+class NewCommand extends command_1.Command {
+    constructor() {
+        super(...arguments);
+        this.name = "help";
+        this.description = "Prints help message";
+        this.aliases = ["h"];
+        this.args = false;
+        this.usage = "help [command]";
+        this.guildOnly = false;
+        this.adminOnly = false;
+        this.ownerOnly = false;
+        this.hidden = false;
+        this.enabled = true;
+        this.cooldown = 0;
     }
-    async sendEmbed(user) {
+    async execute(message, args, client, distube) {
         let embed = new Discord.MessageEmbed()
             .setColor("#fffff0")
             .setTitle("**COMMANDS**\n")
-            .setAuthor({ name: user.tag.split("#")[0], iconURL: user.displayAvatarURL({ dynamic: true }) })
-            .setFooter({ text: user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: user.displayAvatarURL({ dynamic: true }) })
+            .setAuthor({ name: message.author.tag.split("#")[0], iconURL: message.author.displayAvatarURL({ dynamic: true }) })
+            .setFooter({ text: client.user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user.displayAvatarURL({ dynamic: true }) })
             .addField(`\`$/autoplay\` **/** \`$/ap\``, "Enables autoplay", true)
             .addField(`\`$/filter <add/del> <NAME> [OPTIONS]\``, "Add/delete [custom filters](https://ffmpeg.org/ffmpeg-filters.html)", true)
             .addField(`\`$/help\` **/** \`$/h\``, "List of all commands", true)
@@ -60,9 +66,7 @@ class HelpCommand extends Command {
             .addField(`\`$/uptime\``, "Shows you the bot's uptime", true)
             .addField(`\`$/volume <VOLUME>\` **/** \`$/vol\``, "Changes volume", true);
         // .addField("**FILTERS**", Object.keys(filters).map((filter) => `\`$/${filter}\``).join(" "))
-    }
-    async chatInputRun(interaction) {
-        this.sendEmbed(interaction.user);
+        message.channel.send({ embeds: [embed] });
     }
 }
-exports.HelpCommand = HelpCommand;
+exports.default = new NewCommand();

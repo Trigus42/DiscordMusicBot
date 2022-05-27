@@ -4,7 +4,7 @@ import DisTube from "distube"
 /**
  *  Build and send embed in the channel of the message
  */
-export function embedBuilderMessage(client: Discord.Client, message: Discord.Message, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
+export function embedBuilderMessage(client: Discord.Client, message: Discord.Message, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string): Promise<Discord.Message> {
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)

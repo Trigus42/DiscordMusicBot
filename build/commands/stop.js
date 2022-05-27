@@ -1,21 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StopCommand = void 0;
-class StopCommand extends Command {
-    constructor(context, options) {
-        super(context, {
-            ...options,
-            name: 'stop',
-            description: 'Stop playing music and clear the queue',
-            chatInputCommand: { register: true }
-        });
+const command_1 = require("../classes/command");
+class NewCommand extends command_1.Command {
+    constructor() {
+        super(...arguments);
+        this.name = "stop";
+        this.description = "Stop playing music and clear the queue";
+        this.aliases = [];
+        this.args = false;
+        this.usage = "stop";
+        this.guildOnly = true;
+        this.adminOnly = false;
+        this.ownerOnly = false;
+        this.hidden = false;
+        this.enabled = true;
+        this.cooldown = 0;
     }
-    async chatInputRun(interaction) {
+    async execute(message, args, client, distube) {
         let queue = distube.getQueue(message.guild.id);
         if (queue)
             await queue.stop();
         message.react("✅");
-        return;
     }
 }
-exports.StopCommand = StopCommand;
+exports.default = new NewCommand();

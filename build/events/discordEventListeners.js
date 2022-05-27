@@ -23,10 +23,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerMessageListener = void 0;
+exports.registerDiscordEventListeners = void 0;
 const Discord = __importStar(require("discord.js"));
 const Embeds = __importStar(require("../embeds/index"));
-function registerMessageListener(clients, config, commands) {
+function registerDiscordEventListeners(clients, config, commands) {
     const mainClient = clients[0].discord;
     mainClient.on("messageCreate", async (message) => {
         var _a;
@@ -67,11 +67,11 @@ function registerMessageListener(clients, config, commands) {
             }
             // Execute command
             const command = commands.get(commandName);
-            command.execute(message, args, client, distube);
+            command.execute(message, args, client, distube, config);
         }
         catch (error) {
             console.error(error);
         }
     });
 }
-exports.registerMessageListener = registerMessageListener;
+exports.registerDiscordEventListeners = registerDiscordEventListeners;

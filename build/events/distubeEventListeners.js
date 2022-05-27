@@ -83,7 +83,7 @@ function registerDistubeEventListeners(clients, config) {
         })
             .on("error", (channel, error) => {
             try {
-                channel.lastMessage.reactions.removeAll();
+                channel.lastMessage.reactions.resolve("✅").users.remove(distube.client.user.id);
                 channel.lastMessage.react("❌");
             }
             catch (error) {

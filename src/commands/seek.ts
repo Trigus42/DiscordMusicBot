@@ -1,16 +1,21 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
 
-export class SeekCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'seek',
-            description: 'Seek to a specific time in the current song',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "seek"
+    public description: string = "Seek to a specific time in the current song"
+    public aliases: string[] = []
+    public args: boolean = true
+    public usage: string = "seek <HH:MM:SS>"
+    public guildOnly: boolean = true
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         // Get time in seconds from HH:MM:SS time_string
         let time_array = args[0].split(":")
         let time_seconds = 0
@@ -19,6 +24,7 @@ export class SeekCommand extends Command {
         }
         distube.seek(message, time_seconds)
         message.react("✅")
-        return
     }
 }
+
+export default new NewCommand()

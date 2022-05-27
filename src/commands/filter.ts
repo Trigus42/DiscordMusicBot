@@ -1,31 +1,50 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
+import { Config } from "../config"
+import * as Embeds from "../embeds"
 
-export class FilterCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'filter',
-            description: 'Add or remove a filter',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "filter"
+    public description: string = "Enable/disable or add/delete ([custom filters](https://ffmpeg.org/ffmpeg-filters.html))"
+    public aliases: string[] = []
+    public args: boolean = true
+    public usage: string = "filter [add|del] <name> [filter]"
+    public guildOnly: boolean = true
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         let queue = distube.getQueue(message.guild.id)
+        // Add filter
         if (args[0] === "add") { 
-            await db.guilds.setFilters(message.guild.id, {[args[1]] : args[2]})
+            await config.setFilter(message.guild.id, args[0], args[1])
+        // Delete filter
         } else if (args[0] === "del") {
-            await db.guilds.delFilter(message.guild.id, args[1])
-        }
-        else if (queue) {
-            if (queue.filters.includes(message.guildId + command)) {
-                queue.setFilter(message.guild.id + command)
+            await config.deleteFilter(message.guild.id, args[0])
+        // Apply filter
+        } else if (queue) {
+            // Check if filter exists
+            let filter = await config.getFilter(message.guild.id, args[0])
+            if (filter) {
+                distube.filters[message.guild.id + args[0]] = filter
+                queue.setFilter(message.guild.id + args[0])
             } else {
-                distube.filters[message.guild.id + command] = (await db.guilds.getFilters(message.guild.id))[command]
-                queue.setFilter(message.guild.id + command)
+                Embeds.embedBuilderMessage(client, message, "RED", "Filter not found")
+                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
+                return
             }
+        } else {
+            Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
+                .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
+            message.react("❌")
+            return
         }
         message.react("✅")
-        return
     }
 }
+
+export default new NewCommand()

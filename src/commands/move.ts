@@ -1,16 +1,21 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
 
-export class MoveCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'move',
-            description: 'Move a song from one position to another in the queue',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "move"
+    public description: string = "Move a song from one position to another in the queue"
+    public aliases: string[] = ["mv"]
+    public args: boolean = true
+    public usage: string = "move <from> <to>"
+    public guildOnly: boolean = true
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         if (!isNaN(Number(args[0])) && !isNaN(Number(args[1]))) {
             let queue = distube.getQueue(message)
 
@@ -18,8 +23,8 @@ export class MoveCommand extends Command {
             queue.songs.splice(Number(args[1]), 0, queue.songs.splice(Number(args[0]), 1)[0])
 
             message.react("✅")
-            queue = distube.getQueue(message)
-            return
         }
     }
 }
+
+export default new NewCommand()

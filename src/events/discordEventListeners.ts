@@ -5,7 +5,7 @@ import { Command } from "../classes/command";
 import { Config } from "../config";
 import * as Embeds from "../embeds/index"
 
-export function registerMessageListener(clients: {discord: Discord.Client, distube: DisTube}[], config: Config, commands: Collection<string, Command>): void {
+export function registerDiscordEventListeners(clients: {discord: Discord.Client, distube: DisTube}[], config: Config, commands: Collection<string, Command>): void {
     const mainClient = clients[0].discord
 
     mainClient.on("messageCreate", async message => {
@@ -52,7 +52,7 @@ export function registerMessageListener(clients: {discord: Discord.Client, distu
 
             // Execute command
             const command = commands.get(commandName)
-            command.execute(message, args, client, distube)
+            command.execute(message, args, client, distube, config)
         } catch (error) {
             console.error(error)
         }

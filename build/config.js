@@ -122,11 +122,23 @@ class Config {
         }, { sequelize: this.db });
         StatusEmbed.sync();
     }
+    async addGuild(guildId) {
+        this.db.models.Guild.upsert({
+            id: guildId
+        });
+    }
+    async removeGuild(guildId) {
+        await this.db.models.Guild.destroy({
+            where: {
+                id: guildId
+            }
+        });
+    }
     async getFilters(guildId) {
         // Get custom guild filters from database
         const customFilters = await this.db.models.Filter.findAll({
             where: { guildId: guildId }
-        });
+        }).catch(() => null);
         // Convert to dictionary
         const customFiltersDict = {};
         for (const filter of customFilters) {
@@ -140,27 +152,21 @@ class Config {
         // Get custom guild filters from database
         const customFilter = await this.db.models.Filter.findOne({
             where: { guildId: guildId, name: name }
-        });
+        }).catch(() => null);
         // Return custom filter value, or default filter value if not found
         return (_b = (_a = customFilter === null || customFilter === void 0 ? void 0 : customFilter.getDataValue("value")) !== null && _a !== void 0 ? _a : this.filters[name]) !== null && _b !== void 0 ? _b : null;
     }
     async setFilter(guildId, name, value) {
+        await this.addGuild(guildId);
         // Get custom guild filters from database
         const customFilter = await this.db.models.filter.findOne({
             where: { guildId: guildId, name: name }
         });
-        // If custom filter exists, update it
-        if (customFilter) {
-            await customFilter.update({ value: value });
-        }
-        else {
-            // Create custom filter
-            await this.db.models.Filter.create({
-                guildId: guildId,
-                name: name,
-                value: value
-            });
-        }
+        this.db.models.Filter.upsert({
+            guildId: guildId,
+            name: name,
+            value: value
+        });
     }
     async deleteFilter(guildId, name) {
         // Get custom guild filters from database
@@ -169,6 +175,7 @@ class Config {
         });
     }
     async setPlayingMessage(guildId, channelId, messageId) {
+        await this.addGuild(guildId);
         this.db.models.StatusEmbed.upsert({
             guildId: guildId,
             channelId: channelId,
@@ -182,7 +189,7 @@ class Config {
                 guildId: guildId,
                 channelId: channelId
             }
-        });
+        }).catch(() => null);
         return (_a = statusEmbed === null || statusEmbed === void 0 ? void 0 : statusEmbed.getDataValue("messageId")) !== null && _a !== void 0 ? _a : null;
     }
     async getPrefix(guildId) {

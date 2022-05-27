@@ -23,22 +23,27 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AutoplayCommand = void 0;
 const Embeds = __importStar(require("../embeds"));
-class AutoplayCommand extends Command {
-    constructor(context, options) {
-        super(context, {
-            ...options,
-            name: 'autoplay',
-            description: 'Toggle autoplay',
-            chatInputCommand: { register: true }
-        });
+const command_1 = require("../classes/command");
+class NewCommand extends command_1.Command {
+    constructor() {
+        super(...arguments);
+        this.name = "autoplay";
+        this.description = "Toggle autoplay";
+        this.aliases = ["ap"];
+        this.args = false;
+        this.usage = "autoplay";
+        this.guildOnly = true;
+        this.adminOnly = false;
+        this.ownerOnly = false;
+        this.hidden = false;
+        this.enabled = true;
+        this.cooldown = 0;
     }
-    async chatInputRun(interaction) {
-        await Embeds.embedBuilderMessage(interaction.client, interaction.message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
+    async execute(message, args, client, distube) {
+        await Embeds.embedBuilderMessage(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
         message.react("✅");
-        return;
     }
 }
-exports.AutoplayCommand = AutoplayCommand;
+exports.default = new NewCommand();

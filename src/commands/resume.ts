@@ -1,18 +1,24 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
 
-export class ResumeCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'resume',
-            description: 'Resume the current song',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "resume"
+    public description: string = "Resume the current song"
+    public aliases: string[] = []
+    public args: boolean = false
+    public usage: string = ""
+    public guildOnly: boolean = true
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         distube.resume(message)
         message.react("✅")
-        return
     }
 }
+
+export default new NewCommand()

@@ -1,21 +1,26 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
 
-export class HelpCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'help',
-            description: 'Prints help message',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "help"
+    public description: string = "Prints help message"
+    public aliases: string[] = ["h"]
+    public args: boolean = false
+    public usage: string = "help [command]"
+    public guildOnly: boolean = false
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async sendEmbed(user: Discord.User) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let embed = new Discord.MessageEmbed()
             .setColor("#fffff0")
             .setTitle("**COMMANDS**\n")
-            .setAuthor({name: user.tag.split("#")[0], iconURL: user.displayAvatarURL({dynamic:true})})
-            .setFooter({text: user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: user.displayAvatarURL({dynamic:true})})
+            .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.author.displayAvatarURL({dynamic:true})})
+            .setFooter({text: client.user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user.displayAvatarURL({dynamic:true})})
             .addField(`\`$/autoplay\` **/** \`$/ap\``, "Enables autoplay", true)
             .addField(`\`$/filter <add/del> <NAME> [OPTIONS]\``, "Add/delete [custom filters](https://ffmpeg.org/ffmpeg-filters.html)", true)
             .addField(`\`$/help\` **/** \`$/h\``, "List of all commands", true)
@@ -36,9 +41,9 @@ export class HelpCommand extends Command {
             .addField(`\`$/uptime\``, "Shows you the bot's uptime", true)
             .addField(`\`$/volume <VOLUME>\` **/** \`$/vol\``, "Changes volume", true)
             // .addField("**FILTERS**", Object.keys(filters).map((filter) => `\`$/${filter}\``).join(" "))
-    }
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
-        this.sendEmbed(interaction.user)
+        message.channel.send({ embeds: [embed] })
     }
 }
+
+export default new NewCommand()

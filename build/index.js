@@ -26,17 +26,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const config_1 = require("./config");
 const createClients_1 = require("./clients/createClients");
-const distubeEventListerners_1 = require("./events/distubeEventListerners");
-const messageListener_1 = require("./events/messageListener");
+const distubeEventListeners_1 = require("./events/distubeEventListeners");
+const discordEventListeners_1 = require("./events/discordEventListeners");
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 // Create config object
 const config = new config_1.Config();
 main().catch((error) => {
     config.db.close().then(() => {
-        console.error(error);
-    }).then(() => {
-        process.exit(1);
+        throw error;
     });
 });
 async function main() {
@@ -51,6 +49,6 @@ async function main() {
         let command = (await Promise.resolve().then(() => __importStar(require(filePath)))).default;
         commands.set(command.name, command);
     }
-    (0, distubeEventListerners_1.registerDistubeEventListeners)(clients, config);
-    (0, messageListener_1.registerMessageListener)(clients, config, commands);
+    (0, distubeEventListeners_1.registerDistubeEventListeners)(clients, config);
+    (0, discordEventListeners_1.registerDiscordEventListeners)(clients, config, commands);
 }

@@ -1,8 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PingCommand = void 0;
 const command_1 = require("../classes/command");
-class PingCommand extends command_1.Command {
+class NewCommand extends command_1.Command {
     constructor() {
         super(...arguments);
         this.name = "ping";
@@ -16,11 +15,12 @@ class PingCommand extends command_1.Command {
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
-        this.execute = async (message) => {
-            const m = await message.channel.send("Pong!");
-            const ping = message.createdTimestamp - m.createdTimestamp;
-            m.edit(`Pong! Latency: ${ping}ms`);
-        };
+    }
+    async execute(message, args, client, distube) {
+        const m = await message.channel.send("Pong!");
+        const ping = m.createdTimestamp - message.createdTimestamp;
+        m.edit(`Pong! Latency: ${ping}ms`);
+        message.react("✅");
     }
 }
-exports.PingCommand = PingCommand;
+exports.default = new NewCommand();

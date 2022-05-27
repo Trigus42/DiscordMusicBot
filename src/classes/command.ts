@@ -1,5 +1,6 @@
 import * as Discord from 'discord.js';
 import { DisTube } from 'distube';
+import { Config } from '../config';
 
 export class Command {
     public name: string;
@@ -14,7 +15,10 @@ export class Command {
     public enabled: boolean
     public cooldown: number
     // public permission: string
-    public execute: (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube) => Promise<void>
+    
+    public async execute(message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube, config: Config): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
     constructor() {}
 }

@@ -1,8 +1,8 @@
 import { Command } from "../classes/command"
-import { DisTube } from "distube"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
 
-export class PingCommand extends Command {
+class NewCommand extends Command {
     public name: string = "ping"
     public description: string = "Displays the bot's ping"
     public aliases: string[] = []
@@ -15,9 +15,13 @@ export class PingCommand extends Command {
     public enabled: boolean = true
     public cooldown: number = 0
 
-    public execute: (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube) => Promise<void> = async (message) => {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         const m = await message.channel.send("Pong!")
-        const ping = message.createdTimestamp - m.createdTimestamp
+        const ping =  m.createdTimestamp - message.createdTimestamp
         m.edit(`Pong! Latency: ${ping}ms`)
+
+        message.react("✅")
     }
 }
+
+export default new NewCommand()

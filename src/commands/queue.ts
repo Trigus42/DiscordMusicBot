@@ -1,16 +1,23 @@
+import { BUTTONS } from "../const/buttons"
+import { Command } from "../classes/command"
 import * as Discord from "discord.js"
+import * as DisTube from "distube"
+import * as Embeds from "../embeds"
 
-export class QueueCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'queue',
-            description: 'Show the current queue',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "queue"
+    public description: string = "Show the current queue"
+    public aliases: string[] = ["qu"]
+    public args: boolean = false
+    public usage: string = ""
+    public guildOnly: boolean = false
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let queue = distube.getQueue(message)
 
         if (!queue) {
@@ -61,5 +68,9 @@ export class QueueCommand extends Command {
                 console.error(error)
             }
         })
+
+        message.react("✅")
     }
 }
+
+export default new NewCommand()

@@ -1,16 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SeekCommand = void 0;
-class SeekCommand extends Command {
-    constructor(context, options) {
-        super(context, {
-            ...options,
-            name: 'seek',
-            description: 'Seek to a specific time in the current song',
-            chatInputCommand: { register: true }
-        });
+const command_1 = require("../classes/command");
+class NewCommand extends command_1.Command {
+    constructor() {
+        super(...arguments);
+        this.name = "seek";
+        this.description = "Seek to a specific time in the current song";
+        this.aliases = [];
+        this.args = true;
+        this.usage = "seek <HH:MM:SS>";
+        this.guildOnly = true;
+        this.adminOnly = false;
+        this.ownerOnly = false;
+        this.hidden = false;
+        this.enabled = true;
+        this.cooldown = 0;
     }
-    async chatInputRun(interaction) {
+    async execute(message, args, client, distube) {
         // Get time in seconds from HH:MM:SS time_string
         let time_array = args[0].split(":");
         let time_seconds = 0;
@@ -19,7 +25,6 @@ class SeekCommand extends Command {
         }
         distube.seek(message, time_seconds);
         message.react("✅");
-        return;
     }
 }
-exports.SeekCommand = SeekCommand;
+exports.default = new NewCommand();

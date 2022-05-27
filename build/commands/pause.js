@@ -1,19 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PauseCommand = void 0;
-class PauseCommand extends Command {
-    constructor(context, options) {
-        super(context, {
-            ...options,
-            name: 'pause',
-            description: 'Pause the current song',
-            chatInputCommand: { register: true }
-        });
+const command_1 = require("../classes/command");
+class NewCommand extends command_1.Command {
+    constructor() {
+        super(...arguments);
+        this.name = "pause";
+        this.description = "Pause the current song";
+        this.aliases = [];
+        this.args = false;
+        this.usage = "pause";
+        this.guildOnly = true;
+        this.adminOnly = false;
+        this.ownerOnly = false;
+        this.hidden = false;
+        this.enabled = true;
+        this.cooldown = 0;
     }
-    async chatInputRun(interaction) {
+    async execute(message, args, client, distube) {
         distube.pause(message);
         message.react("✅");
-        return;
     }
 }
-exports.PauseCommand = PauseCommand;
+exports.default = new NewCommand();

@@ -1,16 +1,22 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
+import * as Embeds from "../embeds"
 
-export class SkipCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'skip',
-            description: 'Skip current song',
-            chatInputCommand: {register: true}
-        })
-    }
+class NewCommand extends Command {
+    public name: string = "skip"
+    public description: string = "Skip song at optional queue position or current song"
+    public aliases: string[] = ["s"]
+    public args: boolean = true
+    public usage: string = "skip [position]"
+    public guildOnly: boolean = true
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
 
-    public async chatInputRun(interaction: Command.ChatInputInteraction) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let queue = distube.getQueue(message.guild.id)
         // If queue is empty after skipping, stop playing
         if (!queue.autoplay && queue.songs.length <= 1) {
@@ -34,6 +40,7 @@ export class SkipCommand extends Command {
             }
         }
         message.react("✅")
-        return
     }
 }
+
+export default new NewCommand()

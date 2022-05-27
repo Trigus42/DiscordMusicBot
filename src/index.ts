@@ -2,8 +2,8 @@ import { Collection } from "discord.js"
 import { Command } from "./classes/command"
 import { Config } from "./config"
 import { createClients } from "./clients/createClients"
-import { registerDistubeEventListeners } from "./events/distubeEventListerners"
-import { registerMessageListener as registerDiscordEventListeners } from "./events/messageListener"
+import { registerDistubeEventListeners } from "./events/distubeEventListeners"
+import { registerDiscordEventListeners } from "./events/discordEventListeners"
 import * as fs from "fs"
 import * as path from "path"
 
@@ -12,9 +12,9 @@ const config = new Config()
 
 main().catch((error) => {
     config.db.close().then(() => {
-        console.error(error)}).then(() => {
-            process.exit(1)})}
-    )
+        throw error
+    })
+})
 
 async function main(): Promise<void> {
     // Create discord.js and distube client pairs

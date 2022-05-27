@@ -23,18 +23,26 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.QueueCommand = void 0;
+const buttons_1 = require("../const/buttons");
+const command_1 = require("../classes/command");
 const Discord = __importStar(require("discord.js"));
-class QueueCommand extends Command {
-    constructor(context, options) {
-        super(context, {
-            ...options,
-            name: 'queue',
-            description: 'Show the current queue',
-            chatInputCommand: { register: true }
-        });
+const Embeds = __importStar(require("../embeds"));
+class NewCommand extends command_1.Command {
+    constructor() {
+        super(...arguments);
+        this.name = "queue";
+        this.description = "Show the current queue";
+        this.aliases = ["qu"];
+        this.args = false;
+        this.usage = "";
+        this.guildOnly = false;
+        this.adminOnly = false;
+        this.ownerOnly = false;
+        this.hidden = false;
+        this.enabled = true;
+        this.cooldown = 0;
     }
-    async chatInputRun(interaction) {
+    async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);
         if (!queue) {
             Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
@@ -47,7 +55,7 @@ class QueueCommand extends Command {
         const embedMessage = await queue.textChannel.send({
             embeds: [queue_embeds[0]],
             components: queue_embeds.length < 2 ? [] : [new Discord.MessageActionRow({ components: [
-                        BUTTONS.nextButton
+                        buttons_1.BUTTONS.nextButton
                     ] })]
         });
         // Exit if there is only one page of guilds (no need for all of this)
@@ -61,7 +69,7 @@ class QueueCommand extends Command {
                 // Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
                 interaction.deferUpdate();
                 // Increase/decrease index
-                interaction.customId === BUTTONS.backButton.customId ? (currentIndex -= 1) : (currentIndex += 1);
+                interaction.customId === buttons_1.BUTTONS.backButton.customId ? (currentIndex -= 1) : (currentIndex += 1);
                 // Respond to interaction by updating message with new embed
                 embedMessage.edit({
                     embeds: [queue_embeds[currentIndex]],
@@ -69,9 +77,9 @@ class QueueCommand extends Command {
                         new Discord.MessageActionRow({
                             components: [
                                 // back button if it isn't the start
-                                ...(currentIndex ? [BUTTONS.backButton] : []),
+                                ...(currentIndex ? [buttons_1.BUTTONS.backButton] : []),
                                 // forward button if it isn't the end
-                                ...(currentIndex + 1 < queue_embeds.length ? [BUTTONS.nextButton] : [])
+                                ...(currentIndex + 1 < queue_embeds.length ? [buttons_1.BUTTONS.nextButton] : [])
                             ]
                         })
                     ]
@@ -81,6 +89,7 @@ class QueueCommand extends Command {
                 console.error(error);
             }
         });
+        message.react("✅");
     }
 }
-exports.QueueCommand = QueueCommand;
+exports.default = new NewCommand();

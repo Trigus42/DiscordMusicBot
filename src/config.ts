@@ -120,11 +120,25 @@ export class Config {
         StatusEmbed.sync()
     }
 
+    async addGuild(guildId: string): Promise<void> {
+        this.db.models.Guild.upsert({
+            id: guildId
+        })
+    }
+
+    async removeGuild(guildId: string): Promise<void> {
+        await this.db.models.Guild.destroy({
+            where: {
+                id: guildId
+            }
+        })
+    }
+
     async getFilters(guildId: string): Promise<Dict> {
         // Get custom guild filters from database
         const customFilters = await this.db.models.Filter.findAll({
             where: {guildId: guildId}
-        })
+        }).catch(() => null)
 
         // Convert to dictionary
         const customFiltersDict: Dict = {}
@@ -140,29 +154,25 @@ export class Config {
         // Get custom guild filters from database
         const customFilter = await this.db.models.Filter.findOne({
             where: {guildId: guildId, name: name}
-        })
+        }).catch(() => null)
 
         // Return custom filter value, or default filter value if not found
         return customFilter?.getDataValue("value") ?? this.filters[name] ?? null
     }
 
     async setFilter(guildId: string, name: string, value: string): Promise<void> {
+        await this.addGuild(guildId)
+
         // Get custom guild filters from database
         const customFilter = await this.db.models.filter.findOne({
             where: {guildId: guildId, name: name}
         })
 
-        // If custom filter exists, update it
-        if (customFilter) {
-            await customFilter.update({value: value})
-        } else {
-            // Create custom filter
-            await this.db.models.Filter.create({
-                guildId: guildId,
-                name: name,
-                value: value
-            })
-        }
+        this.db.models.Filter.upsert({
+            guildId: guildId,
+            name: name,
+            value: value
+        })
     }
 
     async deleteFilter(guildId: string, name: string): Promise<void> {
@@ -173,6 +183,8 @@ export class Config {
     }
 
     async setPlayingMessage(guildId: string, channelId: string, messageId: string): Promise<void> {
+        await this.addGuild(guildId)
+
         this.db.models.StatusEmbed.upsert({
             guildId: guildId,
             channelId: channelId,
@@ -186,7 +198,7 @@ export class Config {
                 guildId: guildId,
                 channelId: channelId
             }
-        })
+        }).catch(() => null)
 
         return statusEmbed?.getDataValue("messageId") ?? null
     }
