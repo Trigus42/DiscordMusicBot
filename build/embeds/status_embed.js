@@ -30,7 +30,7 @@ const embeds = __importStar(require("../embeds/index"));
 /**
  *  Generate and send status embed
  */
-async function sendStatusEmbed(queue, db, song, title) {
+async function sendStatusEmbed(queue, config, song, title) {
     // If no song is provided, use the first song in the queue
     song = song !== null && song !== void 0 ? song : queue.songs[0];
     let filters = queue.filters.map(filter => { return filter.includes(queue.textChannel.guildId) ? filter.split(queue.textChannel.guildId)[1] : filter; });
@@ -65,23 +65,23 @@ async function sendStatusEmbed(queue, db, song, title) {
         ]
     });
     // Save the message id to db
-    db.kvstore.put(`playingembed_${queue.voiceChannel.id}`, embedMessage.id);
+    config.setPlayingMessage(queue.textChannel.guildId, queue.voiceChannel.id, embedMessage.id);
     // Return the message
     return embedMessage;
 }
 /**
  *  Send and watch the status embed
  */
-async function statusEmbed(queue, db, song, status) {
+async function statusEmbed(queue, config, song, status) {
     try {
         // Delete old playing message if there is one
         try {
-            (await queue.textChannel.messages.fetch(await db.kvstore.get(`playingembed_${queue.voiceChannel.id}`))).delete();
+            (await queue.textChannel.messages.fetch(await config.getPlayingMessage(queue.textChannel.guildId, queue.voiceChannel.id))).delete();
             /* eslint no-empty: ["error", { "allowEmptyCatch": true }] */
         }
         catch (error) { }
         // Send new playing message
-        let embedMessage = await sendStatusEmbed(queue, db, song, status);
+        let embedMessage = await sendStatusEmbed(queue, config, song, status);
         // Collect button interactions
         const collector = embedMessage.createMessageComponentCollector();
         collector.on("collect", async (interaction) => {
@@ -95,18 +95,18 @@ async function statusEmbed(queue, db, song, status) {
                 case buttons_1.BUTTONS.playPauseButton.customId:
                     if (queue.playing) {
                         queue.pause();
-                        if (db.userConfig.actionMessages) {
+                        if (config.userConfig.actionMessages) {
                             embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", "Paused the song")
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                            statusEmbed(queue, db, song, "Paused");
+                            statusEmbed(queue, config, song, "Paused");
                         }
                     }
                     else {
                         queue.resume();
-                        if (db.userConfig.actionMessages) {
+                        if (config.userConfig.actionMessages) {
                             embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", "Resumed the song")
                                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                            statusEmbed(queue, db, song);
+                            statusEmbed(queue, config, song);
                         }
                     }
                     return;
@@ -118,7 +118,7 @@ async function statusEmbed(queue, db, song, status) {
                     else {
                         await queue.skip();
                     }
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", "Skipped the song")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     }
@@ -126,7 +126,7 @@ async function statusEmbed(queue, db, song, status) {
                     return;
                 case buttons_1.BUTTONS.backButton.customId:
                     queue.previous();
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", "Playing previous song")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     }
@@ -138,11 +138,11 @@ async function statusEmbed(queue, db, song, status) {
                         seektime = 0;
                     }
                     queue.seek(Number(seektime));
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`-10 seconds\`")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     }
-                    statusEmbed(queue, db, song);
+                    statusEmbed(queue, config, song);
                     return;
                 case buttons_1.BUTTONS.seekForwardButton.customId:
                     var seektime = queue.currentTime + 10;
@@ -150,11 +150,11 @@ async function statusEmbed(queue, db, song, status) {
                         seektime = queue.songs[0].duration - 1;
                     }
                     queue.seek(Number(seektime));
-                    if (db.userConfig.actionMessages) {
+                    if (config.userConfig.actionMessages) {
                         embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`+10 seconds\`")
                             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     }
-                    statusEmbed(queue, db, song);
+                    statusEmbed(queue, config, song);
                     return;
             }
         });

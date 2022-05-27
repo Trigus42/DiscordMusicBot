@@ -1,25 +1,23 @@
-import { isMessageInstance } from '@sapphire/discord.js-utilities';
-import { Command } from '@sapphire/framework';
-import { Message } from 'discord.js';
+import { Command } from "../classes/command"
+import { DisTube } from "distube"
+import * as Discord from "discord.js"
 
 export class PingCommand extends Command {
-    public constructor(context: Command.Context, options: Command.Options) {
-        super(context, {
-            ...options,
-            name: 'ping',
-            description: 'Ping bot to see if it is alive'
-        })
+    public name: string = "ping"
+    public description: string = "Displays the bot's ping"
+    public aliases: string[] = []
+    public args: boolean = false
+    public usage: string = ""
+    public guildOnly: boolean = false
+    public adminOnly: boolean = false
+    public ownerOnly: boolean = false
+    public hidden: boolean = false
+    public enabled: boolean = true
+    public cooldown: number = 0
+
+    public execute: (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube) => Promise<void> = async (message) => {
+        const m = await message.channel.send("Pong!")
+        const ping = message.createdTimestamp - m.createdTimestamp
+        m.edit(`Pong! Latency: ${ping}ms`)
     }
-
-  public async chatInputRun(interaction: Command.ChatInputInteraction) {
-    const msg = await interaction.reply({ content: `Ping?`, ephemeral: true, fetchReply: true }) as Message
-
-    if (isMessageInstance(msg)) {
-      const diff = msg.createdTimestamp - interaction.createdTimestamp;
-      const ping = Math.round(this.container.client.ws.ping);
-      return interaction.editReply(`Pong 🏓! (Round trip took: ${diff}ms. Heartbeat: ${ping}ms.)`);
-    }
-
-    return interaction.editReply('Failed to retrieve ping :(');
-  }
 }

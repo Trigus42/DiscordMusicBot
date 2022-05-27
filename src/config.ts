@@ -1,21 +1,6 @@
 import * as fs from "fs"
 import { Sequelize, DataTypes, Model } from "sequelize"
-
-interface UserConfig {
-    tokens: string[],
-    actionMessages: boolean,
-    spotify?: {
-        clientId: string,
-        clientSecret: string
-    },
-    nsfw?: boolean,
-    youtubeIdentityToken?: string,
-    youtubeCookie?: string,
-}
-
-interface Dict { 
-    [key: string] : string
-}
+import { UserConfig, Dict } from "./interfaces"
 
 export class Config {
     path: string
@@ -71,9 +56,13 @@ export class Config {
         Guild.init({
             id: {
                 type: DataTypes.STRING,
-                autoIncrement: true,
                 primaryKey: true
-            }
+            },
+            prefix: {
+                type: DataTypes.STRING,
+                allowNull: false,
+                defaultValue: this.userConfig.prefix
+            },
         }, {sequelize: this.db})
 
         Guild.sync()
@@ -133,7 +122,7 @@ export class Config {
 
     async getFilters(guildId: string): Promise<Dict> {
         // Get custom guild filters from database
-        const customFilters = await this.db.models.filter.findAll({
+        const customFilters = await this.db.models.Filter.findAll({
             where: {guildId: guildId}
         })
 
@@ -149,7 +138,7 @@ export class Config {
 
     async getFilter(guildId: string, name: string): Promise<string|null> {
         // Get custom guild filters from database
-        const customFilter = await this.db.models.filter.findOne({
+        const customFilter = await this.db.models.Filter.findOne({
             where: {guildId: guildId, name: name}
         })
 
@@ -168,7 +157,7 @@ export class Config {
             await customFilter.update({value: value})
         } else {
             // Create custom filter
-            await this.db.models.filter.create({
+            await this.db.models.Filter.create({
                 guildId: guildId,
                 name: name,
                 value: value
@@ -178,13 +167,13 @@ export class Config {
 
     async deleteFilter(guildId: string, name: string): Promise<void> {
         // Get custom guild filters from database
-        await this.db.models.filter.destroy({
+        await this.db.models.Filter.destroy({
             where: {guildId: guildId, name: name}
         })
     }
 
     async setPlayingMessage(guildId: string, channelId: string, messageId: string): Promise<void> {
-        this.db.models.statusEmbed.upsert({
+        this.db.models.StatusEmbed.upsert({
             guildId: guildId,
             channelId: channelId,
             messageId: messageId
@@ -192,7 +181,7 @@ export class Config {
     }
 
     async getPlayingMessage(guildId: string, channelId: string): Promise<string|null> {
-        const statusEmbed = await this.db.models.statusEmbed.findOne({
+        const statusEmbed = await this.db.models.StatusEmbed.findOne({
             where: {
                 guildId: guildId,
                 channelId: channelId
@@ -200,5 +189,20 @@ export class Config {
         })
 
         return statusEmbed?.getDataValue("messageId") ?? null
+    }
+
+    async getPrefix(guildId: string): Promise<string> {
+        const guild = await this.db.models.Guild.findOne({
+            where: {id: guildId}
+        })
+
+        return guild?.getDataValue("prefix") ?? this.userConfig.prefix
+    }
+
+    async setPrefix(guildId: string, prefix: string): Promise<void> {
+        this.db.models.Guild.upsert({
+            guildId: guildId,
+            prefix: prefix
+        })
     }
 }

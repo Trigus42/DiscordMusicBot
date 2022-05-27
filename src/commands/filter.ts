@@ -1,4 +1,3 @@
-import { Command } from '@sapphire/framework'
 import * as Discord from "discord.js"
 
 export class FilterCommand extends Command {

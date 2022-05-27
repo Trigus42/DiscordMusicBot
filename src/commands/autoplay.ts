@@ -1,5 +1,4 @@
-import { Command } from '@sapphire/framework'
-import * as Discord from "discord.js"
+import * as Embeds from '../embeds'
 
 export class AutoplayCommand extends Command {
     public constructor(context: Command.Context, options: Command.Options) {
@@ -12,7 +11,7 @@ export class AutoplayCommand extends Command {
     }
 
     public async chatInputRun(interaction: Command.ChatInputInteraction) {
-        await Embeds.embedBuilderMessage(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
+        await Embeds.embedBuilderMessage(interaction.client, interaction.message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
         message.react("✅")
         return
