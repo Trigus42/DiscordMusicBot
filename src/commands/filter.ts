@@ -3,10 +3,11 @@ import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
+import { Dict } from '../interfaces'
 
 class NewCommand extends Command {
     public name: string = "filter"
-    public description: string = "Enable/disable or add/delete ([custom filters](https://ffmpeg.org/ffmpeg-filters.html))"
+    public description: string = "Toggle or add/delete ([custom](https://ffmpeg.org/ffmpeg-filters.html)) filters"
     public aliases: string[] = []
     public args: boolean = true
     public usage: string = "filter [add|del] <name> [filter]"
@@ -16,15 +17,16 @@ class NewCommand extends Command {
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0
+    public cooldowns: Dict = {}
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         let queue = distube.getQueue(message.guild.id)
         // Add filter
         if (args[0] === "add") { 
-            await config.setFilter(message.guild.id, args[0], args[1])
+            await config.setFilter(message.guild.id, args[1], args[2])
         // Delete filter
         } else if (args[0] === "del") {
-            await config.deleteFilter(message.guild.id, args[0])
+            await config.deleteFilter(message.guild.id, args[1])
         // Apply filter
         } else if (queue) {
             // Check if filter exists

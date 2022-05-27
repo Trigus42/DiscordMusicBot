@@ -39,6 +39,7 @@ class NewCommand extends command_1.Command {
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         await Embeds.embedBuilderMessage(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)

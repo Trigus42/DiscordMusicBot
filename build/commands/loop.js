@@ -39,6 +39,7 @@ class NewCommand extends command_1.Command {
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);

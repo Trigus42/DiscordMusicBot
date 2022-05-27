@@ -32,23 +32,27 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 // Create config object
 const config = new config_1.Config();
-main().catch((error) => {
-    config.db.close().then(() => {
-        throw error;
+start();
+function start() {
+    main().catch((error) => {
+        console.log(error);
+        start();
     });
-});
+}
 async function main() {
     // Create discord.js and distube client pairs
     const clients = await (0, createClients_1.createClients)(config);
     // Read commands from commands directory
-    let commands = new discord_js_1.Collection();
+    config.commands = new discord_js_1.Collection();
     let commandsPath = path.join(__dirname, 'commands');
     let commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
     for (let file of commandFiles) {
         let filePath = path.join(commandsPath, file);
         let command = (await Promise.resolve().then(() => __importStar(require(filePath)))).default;
-        commands.set(command.name, command);
+        if (!command.enabled)
+            return;
+        config.commands.set(command.name, command);
     }
     (0, distubeEventListeners_1.registerDistubeEventListeners)(clients, config);
-    (0, discordEventListeners_1.registerDiscordEventListeners)(clients, config, commands);
+    (0, discordEventListeners_1.registerDiscordEventListeners)(clients, config);
 }

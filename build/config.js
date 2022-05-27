@@ -158,10 +158,6 @@ class Config {
     }
     async setFilter(guildId, name, value) {
         await this.addGuild(guildId);
-        // Get custom guild filters from database
-        const customFilter = await this.db.models.filter.findOne({
-            where: { guildId: guildId, name: name }
-        });
         this.db.models.Filter.upsert({
             guildId: guildId,
             name: name,

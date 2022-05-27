@@ -6,15 +6,16 @@ class NewCommand extends command_1.Command {
         super(...arguments);
         this.name = "shuffle";
         this.description = "Shuffle the queue";
-        this.aliases = [];
+        this.aliases = ["mix"];
         this.args = false;
-        this.usage = "";
+        this.usage = "shuffle";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         await distube.shuffle(message);

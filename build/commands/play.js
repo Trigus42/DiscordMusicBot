@@ -34,7 +34,7 @@ class NewCommand extends command_1.Command {
     constructor() {
         super(...arguments);
         this.name = "play";
-        this.description = "Play a song or playlist";
+        this.description = "Add a song or playlist to the queue";
         this.aliases = ["p"];
         this.args = true;
         this.usage = "play [url]";
@@ -44,6 +44,7 @@ class NewCommand extends command_1.Command {
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         // Check if user in voice channel or bot in voice channel

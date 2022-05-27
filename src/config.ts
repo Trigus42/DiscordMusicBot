@@ -1,6 +1,8 @@
 import * as fs from "fs"
 import { Sequelize, DataTypes, Model } from "sequelize"
 import { UserConfig, Dict } from "./interfaces"
+import { Command } from "./classes/command"
+import { Collection } from "discord.js"
 
 export class Config {
     path: string
@@ -8,6 +10,7 @@ export class Config {
 
     userConfig: UserConfig
     filters: Dict
+    commands: Collection<string, Command>
 
     /*
     * Constructor function to initialize database connection
@@ -162,11 +165,6 @@ export class Config {
 
     async setFilter(guildId: string, name: string, value: string): Promise<void> {
         await this.addGuild(guildId)
-
-        // Get custom guild filters from database
-        const customFilter = await this.db.models.filter.findOne({
-            where: {guildId: guildId, name: name}
-        })
 
         this.db.models.Filter.upsert({
             guildId: guildId,

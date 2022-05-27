@@ -2,6 +2,7 @@ export interface UserConfig {
     tokens: string[],
     prefix: string,
     actionMessages: boolean,
+    ownerId?: string,
     spotify?: {
         clientId: string,
         clientSecret: string
@@ -12,5 +13,5 @@ export interface UserConfig {
 }
 
 export interface Dict { 
-    [key: string] : string
+    [key: string|number|symbol] : any
 }

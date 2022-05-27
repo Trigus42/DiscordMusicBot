@@ -26,13 +26,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.registerDiscordEventListeners = void 0;
 const Discord = __importStar(require("discord.js"));
 const Embeds = __importStar(require("../embeds/index"));
-function registerDiscordEventListeners(clients, config, commands) {
+function registerDiscordEventListeners(clients, config) {
     const mainClient = clients[0].discord;
     mainClient.on("messageCreate", async (message) => {
-        var _a;
+        var _a, _b;
         try {
-            // Ignore messages from bots, webhooks, and DMs
-            if (message.author.bot || message.webhookId || !message.guild)
+            // Ignore messages from bots and webhooks
+            if (message.author.bot || message.webhookId)
                 return;
             const prefix = await config.getPrefix(message.guild.id);
             // Ignore messages that don't start with the prefix or mention the bot
@@ -44,13 +44,14 @@ function registerDiscordEventListeners(clients, config, commands) {
             // Get the command name and arguments
             const args = message.content.slice(prefix.length).trim().split(/ +/g);
             const commandName = args.shift();
-            // Check if the command exists
-            if (!commands.has(commandName))
+            // Get command
+            const command = (_a = config.commands.get(commandName)) !== null && _a !== void 0 ? _a : config.commands.find(command => command.aliases.includes(commandName));
+            if (!command)
                 return;
             // Get pair of client and distube for the members voice channel or use a new pair if member is in a new voice channel
-            let clientArray = (_a = clients.find(i => i.distube.getQueue(message.guildId) ? // Check if client has a queue
+            let clientArray = (_b = clients.find(i => i.distube.getQueue(message.guildId) ? // Check if client has a queue
                 i.distube.getQueue(message.guildId).voiceChannel.id === message.member.voice.channel.id : false // Check if client queue is in the same voice channel as the message author
-            )) !== null && _a !== void 0 ? _a : clients.find(i => // If no client has been found, use a new client
+            )) !== null && _b !== void 0 ? _b : clients.find(i => // If no client has been found, use a new client
              !i.distube.getQueue(message.guildId) // Check if client has no queue
                 && i.discord.guilds.fetch().then(guilds => guilds.has(message.guildId)) // Check if client is in the same guild as the message author
             );
@@ -65,8 +66,33 @@ function registerDiscordEventListeners(clients, config, commands) {
             if (queue) {
                 queue.textChannel = message.channel;
             }
+            // Check if command can be executed in the current state
+            if (command.adminOnly && !message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
+                Embeds.embedBuilderMessage(client, message, "RED", "❌ You don't have permission for this Command");
+                return;
+            }
+            else if (command.guildOnly && !message.guild) {
+                Embeds.embedBuilderMessage(client, message, "RED", "❌ This Command can only be used in a server");
+                return;
+            }
+            else if (command.ownerOnly && !(message.author.id === config.userConfig.ownerId)) {
+                Embeds.embedBuilderMessage(client, message, "RED", "❌ You don't have permission for this Command");
+                return;
+            }
+            else if (command.cooldown > 0) {
+                if (message.author.id in command.cooldowns) {
+                    const expirationTime = command.cooldowns[message.author.id];
+                    if (expirationTime > Date.now()) {
+                        const timeLeft = (expirationTime - Date.now()) / 1000;
+                        Embeds.embedBuilderMessage(client, message, "RED", `❌ You can use this command again in ${timeLeft.toFixed(1)} seconds`);
+                        return;
+                    }
+                }
+                else {
+                    command.cooldowns[message.author.id] = Date.now() + command.cooldown;
+                }
+            }
             // Execute command
-            const command = commands.get(commandName);
             command.execute(message, args, client, distube, config);
         }
         catch (error) {

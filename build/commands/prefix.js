@@ -23,18 +23,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Embeds = __importStar(require("../embeds"));
 const command_1 = require("../classes/command");
+const Discord = __importStar(require("discord.js"));
+const Embeds = __importStar(require("../embeds"));
 class NewCommand extends command_1.Command {
     constructor() {
         super(...arguments);
-        this.name = "uptime";
-        this.description = "Prints the bot\'s uptime";
+        this.name = "prefix";
+        this.description = "Changes the prefix of the bot";
         this.aliases = [];
         this.args = false;
-        this.usage = "uptime";
-        this.guildOnly = false;
-        this.adminOnly = false;
+        this.usage = "prefix <NEW PREFIX>";
+        this.guildOnly = true;
+        this.adminOnly = true;
         this.ownerOnly = false;
         this.hidden = false;
         this.enabled = true;
@@ -42,12 +43,28 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
     }
     async execute(message, args, client, distube, config) {
-        let days = Math.floor(client.uptime / 86400000);
-        let hours = Math.floor(client.uptime / 3600000) % 24;
-        let minutes = Math.floor(client.uptime / 60000) % 60;
-        let seconds = Math.floor(client.uptime / 1000) % 60;
-        Embeds.embedBuilderMessage(client, message, "#fffff0", "UPTIME:", `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\``);
-        message.react("✅");
+        // If no arguments are given, return current prefix
+        if (!args[0]) {
+            Embeds.embedBuilderMessage(client, message, "#fffff0", `Current Prefix: \`${await config.getPrefix(message.guild.id)}\``, "Please provide a new prefix");
+            message.react("✅");
+            return;
+        }
+        // If user is not server admin, return error
+        else if (!message.member.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
+            Embeds.embedBuilderMessage(client, message, "RED", "❌ You don't have permission for this Command");
+            return;
+        }
+        // If prefix includes spaces, return error
+        else if (args[1]) {
+            Embeds.embedBuilderMessage(client, message, "RED", "❌ The prefix can't have whitespaces");
+            return;
+        }
+        else {
+            // Set new prefix in database
+            config.setPrefix(message.guild.id, args[0]);
+            message.react("✅");
+            Embeds.embedBuilderMessage(client, message, "#fffff0", "PREFIX", `Successfully set new prefix to **\`${args[0]}\`**`);
+        }
     }
 }
 exports.default = new NewCommand();

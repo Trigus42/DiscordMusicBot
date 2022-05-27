@@ -1,6 +1,4 @@
-# Don't use this branch
-
-## Simple Discord Music Bot
+## Discord Music Bot
 
 ![Screenshot_20220210_165620](https://user-images.githubusercontent.com/59501676/153449381-42ac153b-2456-4a46-b726-2c1677866b16.png)
 

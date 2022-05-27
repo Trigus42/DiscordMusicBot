@@ -29,7 +29,7 @@ class NewCommand extends command_1.Command {
     constructor() {
         super(...arguments);
         this.name = "filter";
-        this.description = "Enable/disable or add/delete ([custom filters](https://ffmpeg.org/ffmpeg-filters.html))";
+        this.description = "Toggle or add/delete ([custom](https://ffmpeg.org/ffmpeg-filters.html)) filters";
         this.aliases = [];
         this.args = true;
         this.usage = "filter [add|del] <name> [filter]";
@@ -39,16 +39,17 @@ class NewCommand extends command_1.Command {
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube, config) {
         let queue = distube.getQueue(message.guild.id);
         // Add filter
         if (args[0] === "add") {
-            await config.setFilter(message.guild.id, args[0], args[1]);
+            await config.setFilter(message.guild.id, args[1], args[2]);
             // Delete filter
         }
         else if (args[0] === "del") {
-            await config.deleteFilter(message.guild.id, args[0]);
+            await config.deleteFilter(message.guild.id, args[1]);
             // Apply filter
         }
         else if (queue) {

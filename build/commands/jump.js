@@ -28,17 +28,18 @@ const Embeds = __importStar(require("../embeds"));
 class NewCommand extends command_1.Command {
     constructor() {
         super(...arguments);
-        this.name = "update";
-        this.description = "Update playback status";
+        this.name = "jump";
+        this.description = "Jumps to a song in queue";
         this.aliases = [];
-        this.args = false;
-        this.usage = "update";
+        this.args = true;
+        this.usage = "jump <POSITION>";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);

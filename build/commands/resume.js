@@ -8,13 +8,14 @@ class NewCommand extends command_1.Command {
         this.description = "Resume the current song";
         this.aliases = [];
         this.args = false;
-        this.usage = "";
+        this.usage = "resume";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         distube.resume(message);

@@ -8,13 +8,14 @@ class NewCommand extends command_1.Command {
         this.description = "Displays the bot's ping";
         this.aliases = [];
         this.args = false;
-        this.usage = "";
+        this.usage = "ping";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         const m = await message.channel.send("Pong!");

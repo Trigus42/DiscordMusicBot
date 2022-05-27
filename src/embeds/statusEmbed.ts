@@ -2,7 +2,7 @@ import * as Discord from "discord.js"
 import * as DisTube from "distube"
 
 import {BUTTONS} from "../const/buttons"
-import * as embeds from "../embeds/index"
+import * as embeds from "./index"
 import { Config } from "../config"
 
 /**

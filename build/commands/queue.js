@@ -34,13 +34,14 @@ class NewCommand extends command_1.Command {
         this.description = "Show the current queue";
         this.aliases = ["qu"];
         this.args = false;
-        this.usage = "";
+        this.usage = "queue";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
+        this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);
