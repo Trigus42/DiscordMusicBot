@@ -7,11 +7,12 @@ class NewCommand extends Command {
     public name: string = "move"
     public description: string = "Move a song from one position to another in the queue"
     public aliases: string[] = ["mv"]
-    public args: boolean = true
+    public needsArgs: boolean = true
     public usage: string = "move <from> <to>"
     public guildOnly: boolean = true
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = true
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

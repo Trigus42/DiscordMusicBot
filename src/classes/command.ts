@@ -7,11 +7,12 @@ export class Command {
     public name: string;
     public description: string;
     public aliases: string[];
-    public args: boolean;
+    public needsArgs: boolean;
     public usage: string;
     public guildOnly: boolean
     public adminOnly: boolean
     public ownerOnly: boolean
+    public needsQueue: boolean
     public hidden: boolean
     public enabled: boolean
     public cooldown: number

@@ -31,11 +31,12 @@ class NewCommand extends command_1.Command {
         this.name = "uptime";
         this.description = "Prints the bot\'s uptime";
         this.aliases = [];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "uptime";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

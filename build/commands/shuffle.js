@@ -7,11 +7,12 @@ class NewCommand extends command_1.Command {
         this.name = "shuffle";
         this.description = "Shuffle the queue";
         this.aliases = ["mix"];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "shuffle";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

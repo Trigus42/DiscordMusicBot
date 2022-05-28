@@ -31,11 +31,12 @@ class NewCommand extends command_1.Command {
         this.name = "autoplay";
         this.description = "Toggle autoplay";
         this.aliases = ["ap"];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "autoplay";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

@@ -31,11 +31,12 @@ class NewCommand extends command_1.Command {
         this.name = "help";
         this.description = "Prints help message";
         this.aliases = ["h"];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "help";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

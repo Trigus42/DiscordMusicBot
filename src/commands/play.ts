@@ -9,11 +9,12 @@ export class NewCommand extends Command {
     public name: string = "play"
     public description: string = "Add a song or playlist to the queue"
     public aliases: string[] = ["p"]
-    public args: boolean = true
+    public needsArgs: boolean = true
     public usage: string = "play [url]"
     public guildOnly: boolean = true
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = false
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

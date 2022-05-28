@@ -7,11 +7,12 @@ class NewCommand extends command_1.Command {
         this.name = "move";
         this.description = "Move a song from one position to another in the queue";
         this.aliases = ["mv"];
-        this.args = true;
+        this.needsArgs = true;
         this.usage = "move <from> <to>";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

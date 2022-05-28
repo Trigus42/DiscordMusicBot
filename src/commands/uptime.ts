@@ -9,11 +9,12 @@ class NewCommand extends Command {
     public name: string = "uptime"
     public description: string = "Prints the bot\'s uptime"
     public aliases: string[] = []
-    public args: boolean = false
+    public needsArgs: boolean = false
     public usage: string = "uptime"
     public guildOnly: boolean = false
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = false
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

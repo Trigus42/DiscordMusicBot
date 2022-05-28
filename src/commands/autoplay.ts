@@ -8,11 +8,12 @@ class NewCommand extends Command {
     public name: string = "autoplay"
     public description: string = "Toggle autoplay"
     public aliases: string[] = ["ap"]
-    public args: boolean = false
+    public needsArgs: boolean = false
     public usage: string = "autoplay"
     public guildOnly: boolean = true
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = true
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

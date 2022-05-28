@@ -7,11 +7,12 @@ class NewCommand extends Command {
     public name: string = "ping"
     public description: string = "Displays the bot's ping"
     public aliases: string[] = []
-    public args: boolean = false
+    public needsArgs: boolean = false
     public usage: string = "ping"
     public guildOnly: boolean = false
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = false
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

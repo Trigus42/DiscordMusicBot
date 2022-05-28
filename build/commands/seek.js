@@ -7,11 +7,12 @@ class NewCommand extends command_1.Command {
         this.name = "seek";
         this.description = "Seek to a specific time in the current song";
         this.aliases = [];
-        this.args = true;
+        this.needsArgs = true;
         this.usage = "seek <HH:MM:SS>";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

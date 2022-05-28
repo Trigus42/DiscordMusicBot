@@ -1,7 +1,5 @@
 import * as Discord from "discord.js";
-import { Collection } from "discord.js";
 import { DisTube } from "distube"
-import { Command } from "../classes/command";
 import { Config } from "../config";
 import * as Embeds from "../embeds/index"
 
@@ -72,12 +70,28 @@ export function registerDiscordEventListeners(clients: {discord: Discord.Client,
                 } else {
                     command.cooldowns[message.author.id] = Date.now() + command.cooldown
                 }
-            }
+            } else if (command.needsQueue && !queue) {
+                    Embeds.embedBuilderMessage(client, message, "RED", `❌ There is nothing playing in the queue`)
+                    return
+            } else if (command.needsArgs && !args.length) {
+                Embeds.embedBuilderMessage(client, message, "RED", `❌ You didn't provide any arguments for the ${command.name} command`)
+                return
+            } 
 
             // Execute command
             command.execute(message, args, client, distube, config)
         } catch (error) {
             console.error(error)
         }
+    })
+
+    // React to messages mentioning other clients than the main client
+    clients.slice(1).forEach(client => {
+        client.discord.on("messageCreate", async message => {
+            const prefix = await config.getPrefix(message.guild.id)
+            if (message.mentions.members.has(client.discord.user.id)) {
+                message.reply({ embeds: [new Discord.MessageEmbed().setAuthor({name: `${message.author.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true })}).setDescription(`My Prefix is "${prefix}". To get started; type ${prefix}help`)]})
+            }
+        })
     })
 }

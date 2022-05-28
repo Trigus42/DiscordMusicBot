@@ -9,11 +9,12 @@ class NewCommand extends Command {
     public name: string = "queue"
     public description: string = "Show the current queue"
     public aliases: string[] = ["qu"]
-    public args: boolean = false
+    public needsArgs: boolean = false
     public usage: string = "queue"
     public guildOnly: boolean = false
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = true
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0
@@ -21,12 +22,6 @@ class NewCommand extends Command {
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let queue = distube.getQueue(message)
-
-        if (!queue) {
-            Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-            return
-        }
 
         const {author, channel} = message
         const queue_embeds = Embeds.queueEmbed(queue, client)

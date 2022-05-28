@@ -32,11 +32,12 @@ class NewCommand extends command_1.Command {
         this.name = "prefix";
         this.description = "Changes the prefix of the bot";
         this.aliases = [];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "prefix <NEW PREFIX>";
         this.guildOnly = true;
         this.adminOnly = true;
         this.ownerOnly = false;
+        this.needsQueue = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

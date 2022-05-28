@@ -31,11 +31,12 @@ class NewCommand extends command_1.Command {
         this.name = "jump";
         this.description = "Jumps to a song in queue";
         this.aliases = [];
-        this.args = true;
+        this.needsArgs = true;
         this.usage = "jump <POSITION>";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
@@ -43,12 +44,6 @@ class NewCommand extends command_1.Command {
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);
-        if (!queue) {
-            Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000));
-            message.react("❌");
-            return;
-        }
         if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
             await distube.jump(message, parseInt(args[0]))
                 .catch(err => {

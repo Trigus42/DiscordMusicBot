@@ -9,11 +9,12 @@ class NewCommand extends Command {
     public name: string = "filter"
     public description: string = "Toggle or add/delete ([custom](https://ffmpeg.org/ffmpeg-filters.html)) filters"
     public aliases: string[] = []
-    public args: boolean = true
+    public needsArgs: boolean = true
     public usage: string = "filter [add|del] <name> [filter]"
     public guildOnly: boolean = true
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = false
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

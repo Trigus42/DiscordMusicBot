@@ -31,11 +31,12 @@ class NewCommand extends command_1.Command {
         this.name = "filter";
         this.description = "Toggle or add/delete ([custom](https://ffmpeg.org/ffmpeg-filters.html)) filters";
         this.aliases = [];
-        this.args = true;
+        this.needsArgs = true;
         this.usage = "filter [add|del] <name> [filter]";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

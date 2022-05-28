@@ -33,11 +33,12 @@ class NewCommand extends command_1.Command {
         this.name = "queue";
         this.description = "Show the current queue";
         this.aliases = ["qu"];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "queue";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
@@ -45,11 +46,6 @@ class NewCommand extends command_1.Command {
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);
-        if (!queue) {
-            Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-            return;
-        }
         const { author, channel } = message;
         const queue_embeds = Embeds.queueEmbed(queue, client);
         const guilds = [...client.guilds.cache.values()];

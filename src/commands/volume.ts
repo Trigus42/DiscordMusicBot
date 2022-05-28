@@ -8,12 +8,13 @@ import { Dict } from '../interfaces'
 class NewCommand extends Command {
     public name: string = "volume"
     public description: string = "Set bot volume (0-100)"
-    public aliases: string[] = []
-    public args: boolean = false
+    public aliases: string[] = ["vol"]
+    public needsArgs: boolean = true
     public usage: string = "volume <volume>"
     public guildOnly: boolean = true
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = true
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

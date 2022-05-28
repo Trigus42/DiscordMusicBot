@@ -8,11 +8,12 @@ class NewCommand extends Command {
     public name: string = "help"
     public description: string = "Prints help message"
     public aliases: string[] = ["h"]
-    public args: boolean = false
+    public needsArgs: boolean = false
     public usage: string = "help"
     public guildOnly: boolean = false
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = false
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

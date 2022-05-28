@@ -31,11 +31,12 @@ class NewCommand extends command_1.Command {
         this.name = "update";
         this.description = "Update playback status";
         this.aliases = [];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "update";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
@@ -43,11 +44,6 @@ class NewCommand extends command_1.Command {
     }
     async execute(message, args, client, distube, config) {
         let queue = distube.getQueue(message.guild.id);
-        if (!queue) {
-            Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-            return;
-        }
         await Embeds.statusEmbed(queue, config, queue.songs[0]);
         message.react("✅");
     }

@@ -6,12 +6,13 @@ class NewCommand extends command_1.Command {
         super(...arguments);
         this.name = "volume";
         this.description = "Set bot volume (0-100)";
-        this.aliases = [];
-        this.args = false;
+        this.aliases = ["vol"];
+        this.needsArgs = true;
         this.usage = "volume <volume>";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

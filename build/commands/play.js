@@ -36,11 +36,12 @@ class NewCommand extends command_1.Command {
         this.name = "play";
         this.description = "Add a song or playlist to the queue";
         this.aliases = ["p"];
-        this.args = true;
+        this.needsArgs = true;
         this.usage = "play [url]";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

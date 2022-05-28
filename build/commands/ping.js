@@ -7,11 +7,12 @@ class NewCommand extends command_1.Command {
         this.name = "ping";
         this.description = "Displays the bot's ping";
         this.aliases = [];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "ping";
         this.guildOnly = false;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = false;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;

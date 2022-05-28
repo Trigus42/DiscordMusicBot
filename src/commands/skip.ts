@@ -8,11 +8,12 @@ class NewCommand extends Command {
     public name: string = "skip"
     public description: string = "Skip song at optional queue position or current song"
     public aliases: string[] = ["s"]
-    public args: boolean = true
+    public needsArgs: boolean = true
     public usage: string = "skip [position]"
     public guildOnly: boolean = true
     public adminOnly: boolean = false
     public ownerOnly: boolean = false
+    public needsQueue: boolean = true
     public hidden: boolean = false
     public enabled: boolean = true
     public cooldown: number = 0

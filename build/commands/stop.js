@@ -7,11 +7,12 @@ class NewCommand extends command_1.Command {
         this.name = "stop";
         this.description = "Stop playing music and clear the queue";
         this.aliases = [];
-        this.args = false;
+        this.needsArgs = false;
         this.usage = "stop";
         this.guildOnly = true;
         this.adminOnly = false;
         this.ownerOnly = false;
+        this.needsQueue = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
