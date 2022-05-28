@@ -2,7 +2,6 @@ import * as Discord from "discord.js"
 import * as DisTube from "distube"
 
 import {BUTTONS} from "../const/buttons"
-import * as embeds from "./index"
 import { Config } from "../config"
 
 /**
@@ -18,7 +17,7 @@ import { Config } from "../config"
         .setColor("#fffff0")
         .setTitle(title ?? "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
-        .addField("Ends:", `<t:${Math.floor(Date.now()/1000) + queue.songs[0].duration}:R>`, true)
+        .addField("Ends:", queue.playing ? `<t:${Math.floor(Date.now()/1000) + queue.songs[0].duration}:R>` : "`Stopped`", true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
         .addField("Volume:", `\`${queue.volume} %\``, true)
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
@@ -75,21 +74,11 @@ export async function statusEmbed(queue: DisTube.Queue, config: Config, song?: D
                 case BUTTONS.playPauseButton.customId:
                     if (queue.playing) {
                         queue.pause()
-
-                        if (config.userConfig.actionMessages) {
-                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", "Paused the song")
-                                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                            statusEmbed(queue, config, song, "Paused")
-                        }
+                        statusEmbed(queue, config, song, "Paused")
                     } else {
                         queue.resume()
-
-                        if (config.userConfig.actionMessages) {
-                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", "Resumed the song")
-                                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                            statusEmbed(queue, config, song)
-                        }
-                    }           
+                        statusEmbed(queue, config, song)
+                    }
                     return
 
                 case BUTTONS.nextButton.customId:
@@ -99,33 +88,16 @@ export async function statusEmbed(queue: DisTube.Queue, config: Config, song?: D
                     } else {
                         await queue.skip()
                     }
-
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", "Skipped the song")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                    }
-                    // The Distube "playSong" event will call the "playsong" function again
                     return
 
                 case BUTTONS.backButton.customId:
                     queue.previous()
-
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", "Playing previous song")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                    }
-                    // The Distube "playSong" event will call the "playsong" function again
                     return
 
                 case BUTTONS.seekBackwardButton.customId:
                     var seektime = queue.currentTime - 10
                     if (seektime < 0) {seektime = 0}
                     queue.seek(Number(seektime))
-
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`-10 seconds\`")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                    }
                     statusEmbed(queue, config, song)
                     return
 
@@ -133,11 +105,6 @@ export async function statusEmbed(queue: DisTube.Queue, config: Config, song?: D
                     var seektime = queue.currentTime + 10
                     if (seektime >= queue.songs[0].duration) { seektime = queue.songs[0].duration - 1 }
                     queue.seek(Number(seektime))
-
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`+10 seconds\`")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
-                    }
                     statusEmbed(queue, config, song)
                     return
             }

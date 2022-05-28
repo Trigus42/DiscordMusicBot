@@ -35,20 +35,18 @@ function queueEmbed(queue, client) {
         // Get next 10 songs
         const current = queue.songs.slice(i, i + 10);
         // Create string of each song ("**Index** - [Title](Link)")
-        let info = [];
+        let infos = [[], [], []];
         for (let j = 0; j < current.length; j++) {
-            try {
-                info.push(`**${j + i}** - [${current[j].name}](${current[j].url})`);
-            }
-            catch (error) {
-                info.push(`**${j + i}** - ${current[j].url}`);
-            }
+            infos[0].push(`${j + i}`);
+            infos[1].push(`[${current[j].name}](${current[j].url})`);
         }
         // Create and add embed
         const embed = new Discord.MessageEmbed()
-            .setTitle(`Queue - "${queue.voiceChannel.name}"`)
+            .setTitle(`Queue: \`${queue.voiceChannel.name}\``)
             .setColor("#fffff0")
-            .setDescription(`**Current Song - [\`${queue.songs[0].name}\`](${queue.songs[0].url})**\n\n${info.join("\n")}`)
+            .setDescription(`**Current Song: [\`${queue.songs[0].name}\`](${queue.songs[0].url})**`)
+            .addField("Index", infos[0].join("\n"), true)
+            .addField("Song", infos[1].join("\n"), true)
             .setFooter({ text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL() });
         embeds.push(embed);
     }

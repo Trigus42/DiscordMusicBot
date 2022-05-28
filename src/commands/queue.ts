@@ -23,9 +23,7 @@ class NewCommand extends Command {
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let queue = distube.getQueue(message)
 
-        const {author, channel} = message
         const queue_embeds = Embeds.queueEmbed(queue, client)
-        const guilds = [...client.guilds.cache.values()]
 
         const embedMessage = await queue.textChannel.send({
             embeds: [queue_embeds[0]],

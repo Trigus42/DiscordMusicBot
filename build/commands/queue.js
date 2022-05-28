@@ -46,9 +46,7 @@ class NewCommand extends command_1.Command {
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message);
-        const { author, channel } = message;
         const queue_embeds = Embeds.queueEmbed(queue, client);
-        const guilds = [...client.guilds.cache.values()];
         const embedMessage = await queue.textChannel.send({
             embeds: [queue_embeds[0]],
             components: queue_embeds.length < 2 ? [] : [new Discord.MessageActionRow({ components: [

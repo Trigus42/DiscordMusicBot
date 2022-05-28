@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const command_1 = require("../classes/command");
+const embeds_1 = require("../embeds");
 class NewCommand extends command_1.Command {
     constructor() {
         super(...arguments);
@@ -18,8 +19,9 @@ class NewCommand extends command_1.Command {
         this.cooldown = 0;
         this.cooldowns = {};
     }
-    async execute(message, args, client, distube) {
+    async execute(message, args, client, distube, config) {
         distube.resume(message);
+        (0, embeds_1.statusEmbed)(distube.getQueue(message.guildId), config);
         message.react("✅");
     }
 }

@@ -2,6 +2,8 @@ import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import { Dict } from '../interfaces'
+import { statusEmbed } from "../embeds"
+import { Config } from "../config"
 
 class NewCommand extends Command {
     public name: string = "resume"
@@ -18,8 +20,9 @@ class NewCommand extends Command {
     public cooldown: number = 0
     public cooldowns: Dict = {}
 
-    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         distube.resume(message)
+        statusEmbed(distube.getQueue(message.guildId), config)
         message.react("✅")
     }
 }

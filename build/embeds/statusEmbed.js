@@ -26,7 +26,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.statusEmbed = void 0;
 const Discord = __importStar(require("discord.js"));
 const buttons_1 = require("../const/buttons");
-const embeds = __importStar(require("./index"));
 /**
  *  Generate and send status embed
  */
@@ -38,7 +37,7 @@ async function sendStatusEmbed(queue, config, song, title) {
         .setColor("#fffff0")
         .setTitle(title !== null && title !== void 0 ? title : "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
-        .addField("Ends:", `<t:${Math.floor(Date.now() / 1000) + queue.songs[0].duration}:R>`, true)
+        .addField("Ends:", queue.playing ? `<t:${Math.floor(Date.now() / 1000) + queue.songs[0].duration}:R>` : "`Stopped`", true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
         .addField("Volume:", `\`${queue.volume} %\``, true)
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
@@ -95,19 +94,11 @@ async function statusEmbed(queue, config, song, status) {
                 case buttons_1.BUTTONS.playPauseButton.customId:
                     if (queue.playing) {
                         queue.pause();
-                        if (config.userConfig.actionMessages) {
-                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PAUSED", "Paused the song")
-                                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                            statusEmbed(queue, config, song, "Paused");
-                        }
+                        statusEmbed(queue, config, song, "Paused");
                     }
                     else {
                         queue.resume();
-                        if (config.userConfig.actionMessages) {
-                            embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "RESUMED", "Resumed the song")
-                                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                            statusEmbed(queue, config, song);
-                        }
+                        statusEmbed(queue, config, song);
                     }
                     return;
                 case buttons_1.BUTTONS.nextButton.customId:
@@ -118,19 +109,9 @@ async function statusEmbed(queue, config, song, status) {
                     else {
                         await queue.skip();
                     }
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "SKIPPED", "Skipped the song")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    }
-                    // The Distube "playSong" event will call the "playsong" function again
                     return;
                 case buttons_1.BUTTONS.backButton.customId:
                     queue.previous();
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "PREVIOUS", "Playing previous song")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    }
-                    // The Distube "playSong" event will call the "playsong" function again
                     return;
                 case buttons_1.BUTTONS.seekBackwardButton.customId:
                     var seektime = queue.currentTime - 10;
@@ -138,10 +119,6 @@ async function statusEmbed(queue, config, song, status) {
                         seektime = 0;
                     }
                     queue.seek(Number(seektime));
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`-10 seconds\`")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    }
                     statusEmbed(queue, config, song);
                     return;
                 case buttons_1.BUTTONS.seekForwardButton.customId:
@@ -150,10 +127,6 @@ async function statusEmbed(queue, config, song, status) {
                         seektime = queue.songs[0].duration - 1;
                     }
                     queue.seek(Number(seektime));
-                    if (config.userConfig.actionMessages) {
-                        embeds.embedBuilder(queue.client, interaction.member.user, queue.textChannel, "#fffff0", "Seeked", "Seeked the song for \`+10 seconds\`")
-                            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-                    }
                     statusEmbed(queue, config, song);
                     return;
             }
