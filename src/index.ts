@@ -13,28 +13,28 @@ const config = new Config()
 start()
 
 function start(): void {
-    main().catch((error) => {
-        console.log(error)
-        start()
-    })
+	main().catch((error) => {
+		console.log(error)
+		start()
+	})
 }
 
 async function main(): Promise<void> {
-    // Create discord.js and distube client pairs
-    const clientPairs = await createClients(config)
+	// Create discord.js and distube client pairs
+	const clientPairs = await createClients(config)
 
-    // Read commands from commands directory
-    config.commands = new Collection() as Collection<string, Command>
-    let commandsPath = path.join(__dirname, 'commands');
-    let commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
+	// Read commands from commands directory
+	config.commands = new Collection() as Collection<string, Command>
+	const commandsPath = path.join(__dirname, "commands")
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".ts"))
 
-    for (let file of commandFiles) {
-        let filePath = path.join(commandsPath, file);
-        let command = (await import(filePath)).default as Command
-        if (!command.enabled) return
-        config.commands.set(command.name, command)
-    }
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file)
+		const command = (await import(filePath)).default as Command
+		if (!command.enabled) return
+		config.commands.set(command.name, command)
+	}
 
-    registerDistubeEventListeners(clientPairs, config)
-    registerDiscordEventListeners(clientPairs, config)
+	registerDistubeEventListeners(clientPairs, config)
+	registerDiscordEventListeners(clientPairs, config)
 }
