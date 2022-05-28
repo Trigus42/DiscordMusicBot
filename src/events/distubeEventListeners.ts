@@ -8,6 +8,8 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
 		distube
 			.on("playSong", (queue, song) => {
 				Embeds.statusEmbed(queue, config, song)
+				const start = config.startTimes.get(song.member.guild.id + song.member.voice.channelId + song.id)
+				if (start) queue.seek(start)
 			})
 			.on("addSong", (queue, song) => {
 				Embeds.songEmbed(queue, song)

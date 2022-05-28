@@ -6,6 +6,7 @@ import { Dict } from "../interfaces"
 export class Command {
 	public name!: string
 	public description = "No description"
+	public verboseDescription: string = null
 	public aliases: string[] = []
 	public needsArgs = false
 	public usage = "No usage"

@@ -8,6 +8,10 @@ import { Config } from "../config"
 class NewCommand extends Command {
 	public name = "move"
 	public description = "Move a song from one position to another in the queue"
+	public verboseDescription = 
+		"This command moves a song from one position to another in the queue. " +
+		"The song a the `<from>` position will be moved to the `<to>` position, and the song that was previously at the `<to>` position will be moved back by one.\n" +
+		"If the song is moved to position `0`, the current playback progress is saved, the new song is played and the playback is resumed later."
 	public aliases: string[] = ["mv"]
 	public needsArgs = true
 	public usage = "move <from> <to>"
@@ -24,7 +28,7 @@ class NewCommand extends Command {
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
 		const queue = distube.getQueue(message)
 
-		if (isNaN(Number(args[0])) || !isNaN(Number(args[1])) || Number(args[0]) < 1 || Number(args[1]) > queue.songs.length) {
+		if (isNaN(Number(args[0])) || isNaN(Number(args[1])) || Number(args[0]) < 0 || Number(args[1]) > queue.songs.length) {
 			message.react("❌")
 			Embeds.embedBuilderMessage({
 				client,
@@ -35,10 +39,18 @@ class NewCommand extends Command {
 			})
 			return
 		}
-            
 
-		// Move song from position args[0] to position args[1]
+		// If song is moved to position 0, save current playback progress
+		if (Number(args[1]) === 0) {
+			config.startTimes.set(message.guild.id + message.member.voice.channelId + queue.songs[0].id, queue.currentTime)
+		}
+		// Insert song at new position, move the old song back one position
 		queue.songs.splice(Number(args[1]), 0, queue.songs.splice(Number(args[0]), 1)[0])
+		// If currently playing song has changed, start playing the new song and update the embed
+		if (Number(args[1]) === 0) {
+			queue.seek(0)
+			Embeds.statusEmbed(queue, config)
+		}
 		message.react("✅")
 
 		if (config.userConfig.actionMessages) {

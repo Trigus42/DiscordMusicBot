@@ -11,6 +11,7 @@ export class Config {
 	userConfig: UserConfig
 	filters: Dict
 	commands: Collection<string, Command> = new Collection()
+	startTimes: Collection<string, number> = new Collection()
 
 	/*
     * Constructor function to initialize database connection
