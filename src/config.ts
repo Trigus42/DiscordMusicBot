@@ -20,7 +20,8 @@ export class Config {
 		this.path = filename ?? "./config/db.sqlite"
 		this.db = new Sequelize({
 			dialect: "sqlite",
-			storage: this.path
+			storage: this.path,
+			logging: false
 		})
 
 		// Load user config
