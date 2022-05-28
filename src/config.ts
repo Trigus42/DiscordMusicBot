@@ -32,7 +32,7 @@ export class Config {
 				this.userConfig = userConfig
 			}
 		} else {
-			this.userConfig = JSON.parse(fs.readFileSync("./config/user_config.json", "utf8")) as UserConfig
+			this.userConfig = JSON.parse(fs.readFileSync("./config/userConfig.json", "utf8")) as UserConfig
 		}
 
 		// Load filters
