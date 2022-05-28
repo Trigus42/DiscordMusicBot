@@ -42,10 +42,20 @@ class NewCommand extends command_1.Command {
         this.cooldown = 0;
         this.cooldowns = {};
     }
-    async execute(message, args, client, distube) {
-        await Embeds.embedBuilderMessage({ client, message, color: "#fffff0", title: `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}` })
-            .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+    async execute(message, args, client, distube, config) {
         message.react("✅");
+        let autoplayStatus = distube.toggleAutoplay(message) ? "ON" : "OFF";
+        if (config.userConfig.actionMessages) {
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "#fffff0",
+                title: `Autoplay is now ${autoplayStatus}`,
+                deleteAfter: 10000
+            });
+        }
+        // Update status embed autoplay status
+        Embeds.statusEmbed(distube.getQueue(message.guildId), config);
     }
 }
 exports.default = new NewCommand();

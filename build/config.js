@@ -26,11 +26,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Config = void 0;
 const fs = __importStar(require("fs"));
 const sequelize_1 = require("sequelize");
+const discord_js_1 = require("discord.js");
 class Config {
     /*
     * Constructor function to initialize database connection
     */
     constructor(filename, userConfig, filters) {
+        this.commands = new discord_js_1.Collection();
         // Connect to database
         this.path = filename !== null && filename !== void 0 ? filename : "./config/db.sqlite";
         this.db = new sequelize_1.Sequelize({
@@ -141,7 +143,7 @@ class Config {
         }).catch(() => null);
         // Convert to dictionary
         const customFiltersDict = {};
-        for (const filter of customFilters) {
+        for (const filter of customFilters !== null && customFilters !== void 0 ? customFilters : []) {
             customFiltersDict[filter.getDataValue("name")] = filter.getDataValue("value");
         }
         // Merge default filters with custom filters, overwriting default filters in case of a conflict

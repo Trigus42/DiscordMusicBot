@@ -43,19 +43,33 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
         this.needsUserInVC = true;
     }
-    async execute(message, args, client, distube) {
+    async execute(message, args, client, distube, config) {
         let queue = distube.getQueue(message);
         if (0 <= Number(args[0]) && Number(args[0]) <= 2) {
-            distube.setRepeatMode(message, parseInt(args[0]));
-            await Embeds.embedBuilderMessage({ client, message, color: "#fffff0", title: "Repeat mode set to:", description: `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}` })
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000));
+            distube.setRepeatMode(message, Number(args[0]));
             message.react("✅");
+            if (config.userConfig.actionMessages) {
+                Embeds.embedBuilderMessage({
+                    client,
+                    message,
+                    color: "#fffff0",
+                    title: "Repeat mode set to:",
+                    description: `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`,
+                    deleteAfter: 10000
+                });
+            }
+            Embeds.statusEmbed(queue, config);
             return;
         }
         else {
-            Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat the entire queue)*" })
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000));
             message.react("❌");
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "RED",
+                title: "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat the entire queue)*",
+                deleteAfter: 10000
+            });
             return;
         }
     }

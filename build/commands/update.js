@@ -44,7 +44,7 @@ class NewCommand extends command_1.Command {
         this.needsUserInVC = true;
     }
     async execute(message, args, client, distube, config) {
-        let queue = distube.getQueue(message.guild.id);
+        let queue = distube.getQueue(message.guildId);
         await Embeds.statusEmbed(queue, config, queue.songs[0]);
         message.react("✅");
     }

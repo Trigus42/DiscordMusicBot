@@ -22,7 +22,7 @@ class NewCommand extends Command {
     public needsUserInVC: boolean = true
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
-        let queue = distube.getQueue(message.guild.id)
+        let queue = distube.getQueue(message.guildId!)
         await Embeds.statusEmbed(queue, config, queue.songs[0])
         message.react("✅")
     }

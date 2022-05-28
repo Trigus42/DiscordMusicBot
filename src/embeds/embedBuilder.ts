@@ -3,27 +3,32 @@ import * as Discord from "discord.js"
 /**
  *  Build and send embed in the channel of the message
  */
-export function embedBuilderMessage({ client, message, color, title, description, thumbnail }: { client: Discord.Client; message: Discord.Message; color: Discord.ColorResolvable; title?: string; description?: string; thumbnail?: string }): Promise<Discord.Message> {
-    try {
-        let embed = new Discord.MessageEmbed()
-            .setColor(color)
-            .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member?.user.displayAvatarURL({ dynamic: true })})
-            .setFooter({text: client.user?.username ?? "", iconURL: client.user?.displayAvatarURL()})
+export async function embedBuilderMessage({ client, message, color, title, description, thumbnail, deleteAfter }: { client: Discord.Client; message: Discord.Message; color: Discord.ColorResolvable; title?: string; description?: string; thumbnail?: string, deleteAfter?: number }) {
+    let embed = new Discord.MessageEmbed()
+        .setColor(color)
+        .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member?.user.displayAvatarURL({ dynamic: true })})
+        .setFooter({text: client.user?.username ?? "", iconURL: client.user?.displayAvatarURL()})
 
-        if (title) {embed.setTitle(title)}
-        if (description) {embed.setDescription(description)}
-        if (thumbnail) {embed.setThumbnail(thumbnail)}
+    if (title) {embed.setTitle(title)}
+    if (description) {embed.setDescription(description)}
+    if (thumbnail) {embed.setThumbnail(thumbnail)}
 
-        return message.channel.send({ embeds: [embed] })
-    } catch (error) {
-        console.error(error)
-    }
+    let embedMsg = await message.channel.send({ embeds: [embed] })
+        .then(msg => {
+            if (deleteAfter) {
+                setTimeout(() => msg.delete().catch(console.error), deleteAfter)
+            }
+            return msg
+        })
+        .catch(console.error)
+
+    return embedMsg
 }
 
 /**
  *  Build and send embed in the channel of the queue
  */
-export function embedBuilder({ client, channel, user, color, title, description, thumbnail }: { client: Discord.Client; channel: Discord.TextChannel | Discord.GuildTextBasedChannel; user?: Discord.User; color?: Discord.ColorResolvable; title?: string; description?: string; thumbnail?: string }) {
+export async function embedBuilder({ client, channel, user, color, title, description, thumbnail, deleteAfter }: { client: Discord.Client; channel: Discord.TextChannel | Discord.GuildTextBasedChannel; user?: Discord.User; color?: Discord.ColorResolvable; title?: string; description?: string; thumbnail?: string, deleteAfter?: number }) {
     let embed = new Discord.MessageEmbed()
         .setColor(color ?? "#fffff0")
         .setFooter({text: client.user?.username ?? "", iconURL: client.user?.displayAvatarURL()})
@@ -33,5 +38,14 @@ export function embedBuilder({ client, channel, user, color, title, description,
     if (description) embed.setDescription(description)
     if (thumbnail) embed.setThumbnail(thumbnail)
 
-    return channel.send({ embeds: [embed] })
+    let embedMsg = await channel.send({ embeds: [embed] })
+        .then(msg => {
+            if (deleteAfter) {
+                setTimeout(() => msg.delete().catch(console.error), deleteAfter)
+            }
+            return msg
+        })
+        .catch(console.error)
+
+    return embedMsg
 }

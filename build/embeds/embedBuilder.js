@@ -28,33 +28,36 @@ const Discord = __importStar(require("discord.js"));
 /**
  *  Build and send embed in the channel of the message
  */
-function embedBuilderMessage({ client, message, color, title, description, thumbnail }) {
+async function embedBuilderMessage({ client, message, color, title, description, thumbnail, deleteAfter }) {
     var _a, _b, _c, _d;
-    try {
-        let embed = new Discord.MessageEmbed()
-            .setColor(color)
-            .setAuthor({ name: message.author.tag.split("#")[0], iconURL: (_a = message.member) === null || _a === void 0 ? void 0 : _a.user.displayAvatarURL({ dynamic: true }) })
-            .setFooter({ text: (_c = (_b = client.user) === null || _b === void 0 ? void 0 : _b.username) !== null && _c !== void 0 ? _c : "", iconURL: (_d = client.user) === null || _d === void 0 ? void 0 : _d.displayAvatarURL() });
-        if (title) {
-            embed.setTitle(title);
-        }
-        if (description) {
-            embed.setDescription(description);
-        }
-        if (thumbnail) {
-            embed.setThumbnail(thumbnail);
-        }
-        return message.channel.send({ embeds: [embed] });
+    let embed = new Discord.MessageEmbed()
+        .setColor(color)
+        .setAuthor({ name: message.author.tag.split("#")[0], iconURL: (_a = message.member) === null || _a === void 0 ? void 0 : _a.user.displayAvatarURL({ dynamic: true }) })
+        .setFooter({ text: (_c = (_b = client.user) === null || _b === void 0 ? void 0 : _b.username) !== null && _c !== void 0 ? _c : "", iconURL: (_d = client.user) === null || _d === void 0 ? void 0 : _d.displayAvatarURL() });
+    if (title) {
+        embed.setTitle(title);
     }
-    catch (error) {
-        console.error(error);
+    if (description) {
+        embed.setDescription(description);
     }
+    if (thumbnail) {
+        embed.setThumbnail(thumbnail);
+    }
+    let embedMsg = await message.channel.send({ embeds: [embed] })
+        .then(msg => {
+        if (deleteAfter) {
+            setTimeout(() => msg.delete().catch(console.error), deleteAfter);
+        }
+        return msg;
+    })
+        .catch(console.error);
+    return embedMsg;
 }
 exports.embedBuilderMessage = embedBuilderMessage;
 /**
  *  Build and send embed in the channel of the queue
  */
-function embedBuilder({ client, channel, user, color, title, description, thumbnail }) {
+async function embedBuilder({ client, channel, user, color, title, description, thumbnail, deleteAfter }) {
     var _a, _b, _c;
     let embed = new Discord.MessageEmbed()
         .setColor(color !== null && color !== void 0 ? color : "#fffff0")
@@ -67,6 +70,14 @@ function embedBuilder({ client, channel, user, color, title, description, thumbn
         embed.setDescription(description);
     if (thumbnail)
         embed.setThumbnail(thumbnail);
-    return channel.send({ embeds: [embed] });
+    let embedMsg = await channel.send({ embeds: [embed] })
+        .then(msg => {
+        if (deleteAfter) {
+            setTimeout(() => msg.delete().catch(console.error), deleteAfter);
+        }
+        return msg;
+    })
+        .catch(console.error);
+    return embedMsg;
 }
 exports.embedBuilder = embedBuilder;

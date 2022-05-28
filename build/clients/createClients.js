@@ -46,8 +46,9 @@ async function createClients(config) {
         });
         // Log when the bot is ready
         discord.on("ready", async () => {
-            console.log(`Client "${discord.user.tag}" is ready. Invite link: https://discord.com/oauth2/authorize?client_id=${discord.user.id}&permissions=105330560064&scope=bot`);
-            discord.user.setPresence({
+            var _a, _b;
+            console.log(`Client "${(_a = discord.user) === null || _a === void 0 ? void 0 : _a.tag}" is ready. Invite link: https://discord.com/oauth2/authorize?client_id=${discord.user.id}&permissions=105330560064&scope=bot`);
+            (_b = discord.user) === null || _b === void 0 ? void 0 : _b.setPresence({
                 status: "online",
                 activities: [
                     {
@@ -59,13 +60,15 @@ async function createClients(config) {
         });
         // Log when reconnecting
         discord.on("reconnecting", () => {
-            console.log(`Client "${discord.user.tag}" is reconnecting`);
-            discord.user.setPresence({ status: "invisible" });
+            var _a, _b;
+            console.log(`Client "${(_a = discord.user) === null || _a === void 0 ? void 0 : _a.tag}" is reconnecting`);
+            (_b = discord.user) === null || _b === void 0 ? void 0 : _b.setPresence({ status: "invisible" });
         });
         // Log when disconnected
         discord.on("disconnect", () => {
-            console.log(`Client "${discord.user.tag}" is disconnected`);
-            discord.user.setPresence({ status: "invisible" });
+            var _a, _b;
+            console.log(`Client "${(_a = discord.user) === null || _a === void 0 ? void 0 : _a.tag}" is disconnected`);
+            (_b = discord.user) === null || _b === void 0 ? void 0 : _b.setPresence({ status: "invisible" });
         });
         clientPairs.push({ discord: discord, distube: distube });
     }

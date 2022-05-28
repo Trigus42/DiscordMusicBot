@@ -38,23 +38,23 @@ export function registerDiscordEventListeners(clientPairs: {discord: Discord.Cli
 
             // Check if the command can be used in the current context
             if (command.guildOnly && !message.guild) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ This Command can only be used in a server" })
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "This Command can only be used in a server" })
                 return
             } else if (command.ownerOnly && !(message.author.id === config.userConfig.ownerId)) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ You don't have permission for this Command" })
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You don't have permission for this command" })
                 return
             } else if ((command.needsUserInVC || command.needsQueue) && !message.member?.voice.channel) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ You need to be in a voice channel to use this Command" })
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You need to be in a voice channel to use this command" })
                 return
             } else if (command.needsArgs && !args.length) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `❌ You didn't provide any arguments for the ${command.name} command` })
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You didn't provide any arguments for the ${command.name} command` })
                 return
             } else if (command.cooldown > 0) {
                 if (message.author.id in command.cooldowns) {
                     const expirationTime = command.cooldowns[message.author.id]
                     if (expirationTime > Date.now()) {
                         const timeLeft = (expirationTime - Date.now()) / 1000
-                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `❌ You can use this command again in ${timeLeft.toFixed(1)} seconds` })
+                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You can use this command again in ${timeLeft.toFixed(1)} seconds` })
                         return
                     }
                 } else {
@@ -66,10 +66,10 @@ export function registerDiscordEventListeners(clientPairs: {discord: Discord.Cli
             if (message.guildId) {
                 // Check if command can be executed in the current state
                 if (command.adminOnly && !message.member?.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR)) {
-                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ You don't have permission for this Command" })
+                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You don't have permission for this command" })
                     return
                 } else if (command.needsQueue && !queue) {
-                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `❌ There is nothing playing in the queue` })
+                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `There is nothing playing in the queue` })
                     return
                 }
 
@@ -85,7 +85,7 @@ export function registerDiscordEventListeners(clientPairs: {discord: Discord.Cli
                     )
 
                     if (!chosenClientPair) {
-                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ There are no available clients", description: "Please try again later or free up one of the clients" })
+                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "There are no available clients", description: "Please try again later or free up one of the clients" })
                         return
                     }
 

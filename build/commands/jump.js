@@ -43,19 +43,31 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
         this.needsUserInVC = true;
     }
-    async execute(message, args, client, distube) {
+    async execute(message, args, client, distube, config) {
         let queue = distube.getQueue(message);
-        if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
-            await distube.jump(message, parseInt(args[0]))
-                .catch(err => {
-                Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Invalid song number" })
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000));
-                message.react("❌");
-                return;
+        await distube.jump(message, Number(args[0]))
+            .catch(err => {
+            message.react("❌");
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "RED",
+                title: "Invalid song number",
+                deleteAfter: 10000
             });
-            message.react("✅");
             return;
+        });
+        if (config.userConfig.actionMessages) {
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "#fffff0",
+                title: "Jumped to song",
+                description: `Jumped to **${queue.songs[0].name}**`,
+                deleteAfter: 10000
+            });
         }
+        message.react("✅");
     }
 }
 exports.default = new NewCommand();

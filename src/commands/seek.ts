@@ -2,6 +2,8 @@ import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import { Dict } from '../interfaces'
+import { Config } from "../config"
+import * as Embeds from "../embeds"
 
 class NewCommand extends Command {
     public name: string = "seek"
@@ -19,7 +21,7 @@ class NewCommand extends Command {
     public cooldowns: Dict = {}
     public needsUserInVC: boolean = true
 
-    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         // Get time in seconds from HH:MM:SS time_string
         let time_array = args[0].split(":")
         let time_seconds = 0
@@ -27,6 +29,18 @@ class NewCommand extends Command {
             time_seconds += parseInt(time_array[i]) * Math.pow(60, (time_array.length - 1) - i)
         }
         distube.seek(message, time_seconds)
+
+        if (config.userConfig.actionMessages) {
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "#fffff0",
+                title: "Seeked",
+                description: `Seeked to **${args[0]}** in song **${distube.getQueue(message.guildId!).songs[0].name}**`,
+                deleteAfter: 10000
+            })
+        }
+        Embeds.statusEmbed(distube.getQueue(message.guildId!), config)
         message.react("✅")
     }
 }

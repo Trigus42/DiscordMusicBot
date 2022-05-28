@@ -60,8 +60,13 @@ class NewCommand extends command_1.Command {
                 customPlaylist = await distube.createCustomPlaylist(urls, { member: (_a = message.member) !== null && _a !== void 0 ? _a : undefined, properties: { message: message } });
             }
             else {
-                Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Can only play tracks, albums, playlists and artists from Deezer" })
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+                Embeds.embedBuilderMessage({
+                    client,
+                    message,
+                    color: "RED",
+                    title: "Can only play tracks, albums, playlists and artists from Deezer",
+                    deleteAfter: 10000
+                });
                 return;
             }
         }

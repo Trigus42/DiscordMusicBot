@@ -26,7 +26,7 @@ class NewCommand extends Command {
 
         const queue_embeds = Embeds.queueEmbed(queue, client)
 
-        const embedMessage = await queue.textChannel.send({
+        const embedMessage = await queue.textChannel!.send({
             embeds: [queue_embeds[0]],
             components: queue_embeds.length < 2 ? [] : [new Discord.MessageActionRow({components: [
                 BUTTONS.nextButton

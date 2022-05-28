@@ -23,6 +23,7 @@ class NewCommand extends Command {
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         distube.setVolume(message, Number(args[0]))
+        Embeds.statusEmbed(distube.getQueue(message.guildId!), config)
         message.react("✅")
     }
 }

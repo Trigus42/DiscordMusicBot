@@ -48,8 +48,8 @@ export async function createClients(config: Config) {
 
         // Log when the bot is ready
         discord.on("ready", async () => {
-            console.log(`Client "${discord.user.tag}" is ready. Invite link: https://discord.com/oauth2/authorize?client_id=${discord.user.id}&permissions=105330560064&scope=bot`)
-            discord.user.setPresence({
+            console.log(`Client "${discord.user?.tag}" is ready. Invite link: https://discord.com/oauth2/authorize?client_id=${discord.user.id}&permissions=105330560064&scope=bot`)
+            discord.user?.setPresence({
                 status: "online",
                 activities: [
                     {
@@ -62,14 +62,14 @@ export async function createClients(config: Config) {
 
         // Log when reconnecting
         discord.on("reconnecting", () => {
-            console.log(`Client "${discord.user.tag}" is reconnecting`)
-            discord.user.setPresence({ status: "invisible" })
+            console.log(`Client "${discord.user?.tag}" is reconnecting`)
+            discord.user?.setPresence({ status: "invisible" })
         })
 
         // Log when disconnected
         discord.on("disconnect", () => {
-            console.log(`Client "${discord.user.tag}" is disconnected`); 
-            discord.user.setPresence({ status: "invisible" })
+            console.log(`Client "${discord.user?.tag}" is disconnected`); 
+            discord.user?.setPresence({ status: "invisible" })
         })
         
         clientPairs.push({discord: discord, distube: distube})

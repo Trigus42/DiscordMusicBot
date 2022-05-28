@@ -2,6 +2,8 @@ import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import { Dict } from '../interfaces'
+import * as Embeds from "../embeds"
+import { Config } from "../config"
 
 class NewCommand extends Command {
     public name: string = "shuffle"
@@ -19,8 +21,17 @@ class NewCommand extends Command {
     public cooldowns: Dict = {}
     public needsUserInVC: boolean = true
 
-    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         await distube.shuffle(message)
+        if (config.userConfig.actionMessages) {
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "#fffff0",
+                title: "Shuffled queue",
+                deleteAfter: 10000
+            })
+        }
         message.react("✅")
     }
 }

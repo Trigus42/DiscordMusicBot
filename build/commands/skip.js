@@ -43,8 +43,8 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
         this.needsUserInVC = true;
     }
-    async execute(message, args, client, distube) {
-        let queue = distube.getQueue(message.guild.id);
+    async execute(message, args, client, distube, config) {
+        let queue = distube.getQueue(message.guildId);
         // If queue is empty after skipping, stop playing
         if (!queue.autoplay && queue.songs.length <= 1) {
             queue.stop();
@@ -55,18 +55,44 @@ class NewCommand extends command_1.Command {
             if (!isNaN(Number(args[0]))) {
                 let skip = Number(args[0]);
                 if (Math.abs(skip) <= queue.songs.length) {
-                    queue.songs.splice(skip, 1);
+                    let skippedSong = queue.songs.splice(skip, 1)[0];
+                    if (config.userConfig.actionMessages) {
+                        Embeds.embedBuilderMessage({
+                            client,
+                            message,
+                            color: "#fffff0",
+                            title: "Song skipped",
+                            description: `Skipped **${skip}** - ${skippedSong.name}`,
+                            deleteAfter: 10000
+                        });
+                    }
                     // If skip is greater than queue length, send error message
                 }
                 else {
-                    Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Can't skip song at position " + skip + " because it doesn't exist" })
-                        .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
+                    Embeds.embedBuilderMessage({
+                        client,
+                        message,
+                        color: "RED",
+                        title: "Can't skip song at position " + skip + " because it doesn't exist",
+                        deleteAfter: 10000
+                    });
                     return;
                 }
                 // Skip song at current position if no number is given
             }
             else {
+                let skippedSong = queue.songs[0];
                 await distube.skip(message);
+                if (config.userConfig.actionMessages) {
+                    Embeds.embedBuilderMessage({
+                        client,
+                        message,
+                        color: "#fffff0",
+                        title: "Song skipped",
+                        description: `Skipped **${skippedSong.name}**`,
+                        deleteAfter: 10000
+                    });
+                }
             }
         }
         message.react("✅");

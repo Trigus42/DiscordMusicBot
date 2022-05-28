@@ -66,19 +66,19 @@ function registerDiscordEventListeners(clientPairs, config) {
                 return;
             // Check if the command can be used in the current context
             if (command.guildOnly && !message.guild) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ This Command can only be used in a server" });
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "This Command can only be used in a server" });
                 return;
             }
             else if (command.ownerOnly && !(message.author.id === config.userConfig.ownerId)) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ You don't have permission for this Command" });
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You don't have permission for this command" });
                 return;
             }
             else if ((command.needsUserInVC || command.needsQueue) && !((_e = message.member) === null || _e === void 0 ? void 0 : _e.voice.channel)) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ You need to be in a voice channel to use this Command" });
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You need to be in a voice channel to use this command" });
                 return;
             }
             else if (command.needsArgs && !args.length) {
-                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `❌ You didn't provide any arguments for the ${command.name} command` });
+                Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You didn't provide any arguments for the ${command.name} command` });
                 return;
             }
             else if (command.cooldown > 0) {
@@ -86,7 +86,7 @@ function registerDiscordEventListeners(clientPairs, config) {
                     const expirationTime = command.cooldowns[message.author.id];
                     if (expirationTime > Date.now()) {
                         const timeLeft = (expirationTime - Date.now()) / 1000;
-                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `❌ You can use this command again in ${timeLeft.toFixed(1)} seconds` });
+                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You can use this command again in ${timeLeft.toFixed(1)} seconds` });
                         return;
                     }
                 }
@@ -98,11 +98,11 @@ function registerDiscordEventListeners(clientPairs, config) {
             if (message.guildId) {
                 // Check if command can be executed in the current state
                 if (command.adminOnly && !((_f = message.member) === null || _f === void 0 ? void 0 : _f.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR))) {
-                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ You don't have permission for this Command" });
+                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You don't have permission for this command" });
                     return;
                 }
                 else if (command.needsQueue && !queue_1.default) {
-                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `❌ There is nothing playing in the queue` });
+                    Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `There is nothing playing in the queue` });
                     return;
                 }
                 // If this command needs the client to be in a voice channel, get an available client
@@ -118,7 +118,7 @@ function registerDiscordEventListeners(clientPairs, config) {
                         && clientPair.discord.guilds.fetch().then(guilds => guilds.has(message.guildId)) // Check if client is in the same guild as the message author
                     );
                     if (!chosenClientPair) {
-                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "❌ There are no available clients", description: "Please try again later or free up one of the clients" });
+                        Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "There are no available clients", description: "Please try again later or free up one of the clients" });
                         return;
                     }
                     let queue = chosenClientPair.distube.getQueue(message.guildId);

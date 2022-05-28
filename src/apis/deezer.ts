@@ -2,11 +2,11 @@ import { default as axios } from "axios"
 import * as http from "http"
 
 export default class Deezer {
-  appId: string
-  appSecret: string
-  redirectUrl: string
-  port: string
-  accessToken: string
+  appId: string|undefined
+  appSecret: string|undefined
+  redirectUrl: string|undefined
+  port: string|undefined
+  accessToken: string|undefined
 
   /**
    * Listen for get requests on the redirect url port

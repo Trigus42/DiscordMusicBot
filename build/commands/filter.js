@@ -43,34 +43,45 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
     }
     async execute(message, args, client, distube, config) {
-        let queue = distube.getQueue(message.guild.id);
+        let queue = distube.getQueue(message.guildId);
         // Add filter
         if (args[0] === "add") {
-            await config.setFilter(message.guild.id, args[1], args[2]);
+            await config.setFilter(message.guildId, args[1], args[2]);
             // Delete filter
         }
         else if (args[0] === "del") {
-            await config.deleteFilter(message.guild.id, args[1]);
+            await config.deleteFilter(message.guildId, args[1]);
             // Apply filter
         }
-        else if (queue) {
+        else {
             // Check if filter exists
-            let filter = await config.getFilter(message.guild.id, args[0]);
+            let filter = await config.getFilter(message.guildId, args[0]);
             if (filter) {
-                distube.filters[message.guild.id + args[0]] = filter;
-                queue.setFilter(message.guild.id + args[0]);
+                distube.filters[message.guildId + args[0]] = filter;
+                queue.setFilter(message.guildId + args[0]);
+                if (config.userConfig.actionMessages) {
+                    Embeds.embedBuilderMessage({
+                        client,
+                        message,
+                        color: "#fffff0",
+                        title: `Toggled filter ${args[0]}`,
+                        deleteAfter: 10000
+                    });
+                }
+                // Update status embed filter status
+                Embeds.statusEmbed(queue, config);
             }
             else {
-                Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Filter not found" })
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000));
+                message.react("❌");
+                Embeds.embedBuilderMessage({
+                    client,
+                    message,
+                    color: "RED",
+                    title: "Filter not found",
+                    deleteAfter: 10000
+                });
                 return;
             }
-        }
-        else {
-            Embeds.embedBuilderMessage({ client, message, color: "RED", title: "There is nothing playing" })
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000));
-            message.react("❌");
-            return;
         }
         message.react("✅");
     }

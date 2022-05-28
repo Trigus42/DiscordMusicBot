@@ -17,7 +17,7 @@ import { Config } from "../config"
         .setColor("#fffff0")
         .setTitle(title ?? "Playing Song")
         .setDescription(`Song: [\`${song.name}\`](${song.url})`)
-        .addField("Ends:", queue.playing ? `<t:${Math.floor(Date.now()/1000) + queue.songs[0].duration}:R>` : "`Stopped`", true)
+        .addField("Ends:", queue.playing ? `<t:${Math.floor(Date.now()/1000 + (queue.songs[0].duration - queue.currentTime))}:R>` : "`Stopped`", true)
         .addField("Queue:", `\`${queue.songs.length + (queue.songs.length < 2 ? " song" : " songs")} - ${queue.formattedDuration}\``, true)
         .addField("Volume:", `\`${queue.volume} %\``, true)
         .addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)

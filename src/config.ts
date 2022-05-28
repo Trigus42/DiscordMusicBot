@@ -10,7 +10,7 @@ export class Config {
 
     userConfig: UserConfig
     filters: Dict
-    commands: Collection<string, Command>
+    commands: Collection<string, Command> = new Collection()
 
     /*
     * Constructor function to initialize database connection
@@ -145,7 +145,7 @@ export class Config {
 
         // Convert to dictionary
         const customFiltersDict: Dict = {}
-        for (const filter of customFilters) {
+        for (const filter of customFilters ?? []) {
             customFiltersDict[filter.getDataValue("name")] = filter.getDataValue("value")
         }
 

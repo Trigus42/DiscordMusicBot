@@ -3,6 +3,7 @@ import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import * as Embeds from "../embeds"
 import { Dict } from '../interfaces'
+import { Config } from "../config"
 
 class NewCommand extends Command {
     public name: string = "jump"
@@ -20,20 +21,34 @@ class NewCommand extends Command {
     public cooldowns: Dict = {}
     public needsUserInVC: boolean = true
 
-    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
         let queue = distube.getQueue(message)
         
-        if (0 <= Number(args[0]) && Number(args[0]) <= queue.songs.length) {
-            await distube.jump(message, parseInt(args[0]))
-                .catch(err => {
-                    Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Invalid song number" })
-                        .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
-                    message.react("❌")
-                    return
+        await distube.jump(message, Number(args[0]))
+            .catch(err => {
+                message.react("❌")
+                Embeds.embedBuilderMessage({
+                    client,
+                    message,
+                    color: "RED",
+                    title: "Invalid song number",
+                    deleteAfter: 10000
                 })
-            message.react("✅")
-            return
+                return
+            })
+
+        if (config.userConfig.actionMessages) {
+            Embeds.embedBuilderMessage({
+                client,
+                message,
+                color: "#fffff0",
+                title: "Jumped to song",
+                description: `Jumped to **${queue.songs[0].name}**`,
+                deleteAfter: 10000
+            })
         }
+
+        message.react("✅")
     }
 }
 

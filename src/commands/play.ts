@@ -31,8 +31,13 @@ export class NewCommand extends Command {
                 let urls = await Promise.all(search_strings.map(async search_string => (await distube.search(search_string, {limit: 1}))[0].url))
                 customPlaylist = await distube.createCustomPlaylist(urls, {member: message.member ?? undefined, properties: {message: message}})
             } else {
-                Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Can only play tracks, albums, playlists and artists from Deezer" })
-                    .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
+                Embeds.embedBuilderMessage({
+                    client,
+                    message,
+                    color: "RED",
+                    title: "Can only play tracks, albums, playlists and artists from Deezer",
+                    deleteAfter: 10000
+                })
                 return
             }
         }
