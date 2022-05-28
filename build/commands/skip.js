@@ -41,6 +41,7 @@ class NewCommand extends command_1.Command {
         this.enabled = true;
         this.cooldown = 0;
         this.cooldowns = {};
+        this.needsUserInVC = true;
     }
     async execute(message, args, client, distube) {
         let queue = distube.getQueue(message.guild.id);
@@ -58,7 +59,7 @@ class NewCommand extends command_1.Command {
                     // If skip is greater than queue length, send error message
                 }
                 else {
-                    Embeds.embedBuilderMessage(client, message, "RED", "Can't skip song at position " + skip + " because it doesn't exist")
+                    Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Can't skip song at position " + skip + " because it doesn't exist" })
                         .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                     return;
                 }

@@ -47,7 +47,7 @@ class NewCommand extends command_1.Command {
         let hours = Math.floor(client.uptime / 3600000) % 24;
         let minutes = Math.floor(client.uptime / 60000) % 60;
         let seconds = Math.floor(client.uptime / 1000) % 60;
-        Embeds.embedBuilderMessage(client, message, "#fffff0", "UPTIME:", `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\``);
+        Embeds.embedBuilderMessage({ client, message, color: "#fffff0", title: "UPTIME:", description: `\`${days}d\` \`${hours}h\` \`${minutes}m\` \`${seconds}s\n\`` });
         message.react("✅");
     }
 }

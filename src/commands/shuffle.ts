@@ -17,6 +17,7 @@ class NewCommand extends Command {
     public enabled: boolean = true
     public cooldown: number = 0
     public cooldowns: Dict = {}
+    public needsUserInVC: boolean = true
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         await distube.shuffle(message)

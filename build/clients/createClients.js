@@ -14,13 +14,14 @@ const discord_js_1 = require("discord.js");
    */
 async function createClients(config) {
     var _a, _b, _c;
-    let clients = [];
+    let clientPairs = [];
     for (let token of config.userConfig.tokens) {
         // Discord client
         let discord = new discord_js_1.Client({
             messageCacheLifetime: 0,
             messageSweepInterval: 0,
-            intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_MESSAGES, discord_js_1.Intents.FLAGS.GUILD_VOICE_STATES]
+            intents: [discord_js_1.Intents.FLAGS.GUILDS, discord_js_1.Intents.FLAGS.GUILD_MESSAGES, discord_js_1.Intents.FLAGS.GUILD_VOICE_STATES, discord_js_1.Intents.FLAGS.DIRECT_MESSAGES],
+            partials: ["CHANNEL"]
         });
         discord.login(token);
         // Distube instance
@@ -66,8 +67,8 @@ async function createClients(config) {
             console.log(`Client "${discord.user.tag}" is disconnected`);
             discord.user.setPresence({ status: "invisible" });
         });
-        clients.push({ discord: discord, distube: distube });
+        clientPairs.push({ discord: discord, distube: distube });
     }
-    return clients;
+    return clientPairs;
 }
 exports.createClients = createClients;

@@ -43,12 +43,12 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
     }
     async execute(message, args, client, distube, config) {
-        var _a;
+        var _a, _b, _c;
         let embed = new Discord.MessageEmbed()
             .setColor("#fffff0")
             .setTitle("**COMMANDS**\n")
             .setAuthor({ name: message.author.tag.split("#")[0], iconURL: message.author.displayAvatarURL({ dynamic: true }) })
-            .setFooter({ text: client.user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            .setFooter({ text: ((_a = client.user) === null || _a === void 0 ? void 0 : _a.username) + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: (_b = client.user) === null || _b === void 0 ? void 0 : _b.displayAvatarURL({ dynamic: true }) });
         // Create embed for each command
         config.commands.forEach(command => {
             let aliases = command.aliases.map(alias => `\`${alias}\``).join("**/**");
@@ -56,8 +56,10 @@ class NewCommand extends command_1.Command {
             embed.addField(`\`${command.usage}\`` + aliases, command.description, true);
         });
         // Add embed with all filters
-        let filters = await config.getFilters(message.guild.id);
-        embed.addField("**FILTERS**", (_a = Object.keys(filters).map((filter) => `\`${filter}\``).join(" ")) !== null && _a !== void 0 ? _a : "None");
+        if (message.guild) {
+            let filters = await config.getFilters(message.guild.id);
+            embed.addField("**FILTERS**", (_c = Object.keys(filters).map((filter) => `\`${filter}\``).join(" ")) !== null && _c !== void 0 ? _c : "None");
+        }
         message.channel.send({ embeds: [embed] });
     }
 }

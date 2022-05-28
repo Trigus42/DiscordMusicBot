@@ -18,6 +18,7 @@ class NewCommand extends Command {
     public enabled: boolean = true
     public cooldown: number = 0
     public cooldowns: Dict = {}
+    public needsUserInVC: boolean = true
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let queue = distube.getQueue(message.guild.id)
@@ -33,7 +34,7 @@ class NewCommand extends Command {
                     queue.songs.splice(skip, 1)
                 // If skip is greater than queue length, send error message
                 } else {
-                    Embeds.embedBuilderMessage(client, message, "RED", "Can't skip song at position " + skip + " because it doesn't exist")
+                    Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Can't skip song at position " + skip + " because it doesn't exist" })
                         .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000))
                     return
                 }

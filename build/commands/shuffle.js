@@ -17,6 +17,7 @@ class NewCommand extends command_1.Command {
         this.enabled = true;
         this.cooldown = 0;
         this.cooldowns = {};
+        this.needsUserInVC = true;
     }
     async execute(message, args, client, distube) {
         await distube.shuffle(message);

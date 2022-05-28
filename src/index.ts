@@ -21,7 +21,7 @@ function start(): void {
 
 async function main(): Promise<void> {
     // Create discord.js and distube client pairs
-    const clients = await createClients(config)
+    const clientPairs = await createClients(config)
 
     // Read commands from commands directory
     config.commands = new Collection() as Collection<string, Command>
@@ -35,6 +35,6 @@ async function main(): Promise<void> {
         config.commands.set(command.name, command)
     }
 
-    registerDistubeEventListeners(clients, config)
-    registerDiscordEventListeners(clients, config)
+    registerDistubeEventListeners(clientPairs, config)
+    registerDiscordEventListeners(clientPairs, config)
 }

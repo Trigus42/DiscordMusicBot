@@ -18,10 +18,9 @@ class NewCommand extends Command {
     public cooldown: number = 0
     public cooldowns: Dict = {}
 
-    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
-        const m = await message.channel.send("Pong!")
-        const ping =  m.createdTimestamp - message.createdTimestamp
-        m.edit(`Pong! Latency: ${ping}ms`)
+    public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube) {
+        const ping =  Date.now() - message.createdTimestamp
+        await message.channel.send(`Pong! Latency: ${ping}ms`)
 
         message.react("✅")
     }

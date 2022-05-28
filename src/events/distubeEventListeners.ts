@@ -24,35 +24,40 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
             }
         })
         .on("addList", (queue, playlist) => {
-            try {
-                Embeds.embedBuilder(distube.client, playlist.user, queue.textChannel, "#fffff0", "Added a Playlist", `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\` \n\nRequested by: ${playlist.user}`, playlist.thumbnail)
-                return
-            } catch (error) {
-                console.error(error)
-            }
+            Embeds.embedBuilder({
+                client: distube.client, 
+                user: playlist.user, 
+                channel: queue.textChannel!, 
+                color: "#fffff0", 
+                title: "Added a Playlist", 
+                description: 
+                    `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\`` +
+                    `\n\nRequested by: ${playlist.user}`, thumbnail: playlist.thumbnail
+            })
         })
         .on("searchResult", (message, results) => {
-            try {
-                let i = 0
-                Embeds.embedBuilderMessage(distube.client, message, "#fffff0", "", `**Choose an option from below**\n${results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n")}\n*Enter anything else or wait 60 seconds to cancel*`)
-                return
-            } catch (error) {
-                console.error(error)
-            }
+            let i = 0
+            Embeds.embedBuilderMessage({
+                client: distube.client,
+                message, 
+                color: "#fffff0",
+                title: "",
+                description:
+                    `**Choose an option from below**\n` +
+                    results.map(song => `**${++i}**. [${song.name}](${song.url}) - \`${song.formattedDuration}\``).join("\n") +
+                    `\n*Enter anything else or wait 60 seconds to cancel*`
+            })
         })
         .on("searchCancel", (message) => {
-            try {
-                message.reactions.removeAll()
-                message.react("❌")
-            } catch (error) {
-                console.error(error)
-            }
-            try {
-                Embeds.embedBuilderMessage(distube.client, message, "RED", "Searching canceled", "")
-                return
-            } catch (error) {
-                console.error(error)
-            }
+            message.reactions.resolve("✅")?.users.remove(distube.client.user?.id)
+            message.react("❌")
+            Embeds.embedBuilderMessage({
+                client: distube.client,
+                message,
+                color: "RED",
+                title: "Searching canceled",
+                description: ""
+            })
         })
         .on("error", (channel, error) => {
             try {
@@ -65,7 +70,7 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
             console.log(error)
 
             try {
-                Embeds.embedBuilder(distube.client, channel.lastMessage.member.user, channel, "RED", "An error encountered:", "```"+error+"```")
+                Embeds.embedBuilder({ client: distube.client, user: channel.lastMessage.member.user, channel, color: "RED", title: "An error encountered:", description: "```" + error + "```" })
                 return
             } catch (error) {
                 console.error(error)
@@ -73,14 +78,14 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
         })
         .on("finish", async queue => {
             try {
-                Embeds.embedBuilder(distube.client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "There are no more songs left").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+                Embeds.embedBuilder({ client: distube.client, user: queue.textChannel.lastMessage.member.user, channel: queue.textChannel, color: "RED", title: "There are no more songs left" }).then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
             } catch (error) {
                 console.error(error)
             }
         })
         .on("empty", queue => {
             try {
-                Embeds.embedBuilder(distube.client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Left the channel cause it got empty").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+                Embeds.embedBuilder({ client: distube.client, user: queue.textChannel.lastMessage.member.user, channel: queue.textChannel, color: "RED", title: "Left the channel cause it got empty" }).then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
                 return
             } catch (error) {
                 console.error(error)
@@ -88,7 +93,7 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
         })
         .on("noRelated", queue => {
             try {
-                Embeds.embedBuilder(distube.client, queue.textChannel.lastMessage.member.user, queue.textChannel, "RED", "Can't find related video to play. Stop playing music.").then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
+                Embeds.embedBuilder({ client: distube.client, user: queue.textChannel.lastMessage.member.user, channel: queue.textChannel, color: "RED", title: "Can't find related video to play. Stop playing music." }).then(msg => setTimeout(() => msg.delete().catch(console.error), 60000))
                 return
             } catch (error) {
                 console.error(error)

@@ -13,14 +13,15 @@ import { Client, Intents } from "discord.js"
    *
    */
 export async function createClients(config: Config) {
-    let clients: {discord: Client, distube: DisTube}[] = []
+    let clientPairs: {discord: Client, distube: DisTube}[] = []
     for (let token of config.userConfig.tokens) {
 
         // Discord client
         let discord = new Client({
             messageCacheLifetime: 0,
             messageSweepInterval: 0,
-            intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES]
+            intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.DIRECT_MESSAGES],
+            partials: ["CHANNEL"]
         })
         discord.login(token)
 
@@ -71,8 +72,8 @@ export async function createClients(config: Config) {
             discord.user.setPresence({ status: "invisible" })
         })
         
-        clients.push({discord: discord, distube: distube})
+        clientPairs.push({discord: discord, distube: distube})
     }
 
-    return clients
+    return clientPairs
 }

@@ -1,6 +1,7 @@
 export interface UserConfig {
     tokens: string[],
     prefix: string,
+    mainClientId?: string,
     ownerId?: string,
     spotify?: {
         clientId: string,

@@ -19,9 +19,8 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
-        const m = await message.channel.send("Pong!");
-        const ping = m.createdTimestamp - message.createdTimestamp;
-        m.edit(`Pong! Latency: ${ping}ms`);
+        const ping = Date.now() - message.createdTimestamp;
+        await message.channel.send(`Pong! Latency: ${ping}ms`);
         message.react("✅");
     }
 }

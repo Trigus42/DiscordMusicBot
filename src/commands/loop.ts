@@ -18,19 +18,20 @@ class NewCommand extends Command {
     public enabled: boolean = true
     public cooldown: number = 0
     public cooldowns: Dict = {}
+    public needsUserInVC: boolean = true
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
         let queue = distube.getQueue(message)
 
         if (0 <= Number(args[0]) && Number(args[0]) <= 2) {
             distube.setRepeatMode(message, parseInt(args[0]))
-            await Embeds.embedBuilderMessage(client, message, "#fffff0", "Repeat mode set to:", `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}`)
+            await Embeds.embedBuilderMessage({ client, message, color: "#fffff0", title: "Repeat mode set to:", description: `${args[0].replace("0", "OFF").replace("1", "Repeat song").replace("2", "Repeat Queue")}` })
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
             message.react("✅")
             return
         }
         else {
-            Embeds.embedBuilderMessage(client, message, "RED", "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat the entire queue)*")
+            Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat the entire queue)*" })
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
             message.react("❌")
             return

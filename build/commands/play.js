@@ -42,18 +42,14 @@ class NewCommand extends command_1.Command {
         this.adminOnly = false;
         this.ownerOnly = false;
         this.needsQueue = false;
+        this.needsUserInVC = true;
         this.hidden = false;
         this.enabled = true;
         this.cooldown = 0;
         this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
-        // Check if user in voice channel or bot in voice channel
-        if (!message.member.voice.channel) {
-            Embeds.embedBuilderMessage(client, message, "RED", "You are not in a voice channel")
-                .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
-            return;
-        }
+        var _a, _b, _c;
         let customPlaylist;
         if (args[0].includes("deezer.com")) {
             let type = args[0].split("/").slice(-2, -1)[0];
@@ -61,10 +57,10 @@ class NewCommand extends command_1.Command {
                 let tracks = await deezer_1.default.prototype.tracks(args[0]);
                 let search_strings = await Promise.all(tracks.map(async (track) => track[0] + " - " + track[1]));
                 let urls = await Promise.all(search_strings.map(async (search_string) => (await distube.search(search_string, { limit: 1 }))[0].url));
-                customPlaylist = await distube.createCustomPlaylist(urls, { member: message.member, properties: { message: message } });
+                customPlaylist = await distube.createCustomPlaylist(urls, { member: (_a = message.member) !== null && _a !== void 0 ? _a : undefined, properties: { message: message } });
             }
             else {
-                Embeds.embedBuilderMessage(client, message, "RED", "Can only play tracks, albums, playlists and artists from Deezer")
+                Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Can only play tracks, albums, playlists and artists from Deezer" })
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
                 return;
             }
@@ -72,11 +68,11 @@ class NewCommand extends command_1.Command {
         // Replace default client with the correct client
         let channel = await client.channels.fetch(message.member.voice.channel.id);
         message.react("✅");
-        await distube.play(channel, customPlaylist !== null && customPlaylist !== void 0 ? customPlaylist : args.join(" "), {
+        await distube.play(channel, (_b = customPlaylist) !== null && _b !== void 0 ? _b : args.join(" "), {
             position: Number.isInteger(Number(args[1])) ? Number(args[1]) : -1,
             textChannel: message.channel,
             message: message,
-            member: message.member
+            member: (_c = message.member) !== null && _c !== void 0 ? _c : undefined,
         });
     }
 }

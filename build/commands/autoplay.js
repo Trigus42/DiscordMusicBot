@@ -43,7 +43,7 @@ class NewCommand extends command_1.Command {
         this.cooldowns = {};
     }
     async execute(message, args, client, distube) {
-        await Embeds.embedBuilderMessage(client, message, "#fffff0", `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}`)
+        await Embeds.embedBuilderMessage({ client, message, color: "#fffff0", title: `Autoplay is now ${distube.toggleAutoplay(message) ? "ON" : "OFF"}` })
             .then(msg => setTimeout(() => msg.delete().catch(console.error), 5000));
         message.react("✅");
     }

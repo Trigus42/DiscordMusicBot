@@ -24,7 +24,7 @@ class NewCommand extends Command {
             .setColor("#fffff0")
             .setTitle("**COMMANDS**\n")
             .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.author.displayAvatarURL({dynamic:true})})
-            .setFooter({text: client.user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user.displayAvatarURL({dynamic:true})})
+            .setFooter({text: client.user?.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user?.displayAvatarURL({dynamic:true})})
 
         // Create embed for each command
         config.commands.forEach(command => {
@@ -38,8 +38,10 @@ class NewCommand extends Command {
         })
 
         // Add embed with all filters
-        let filters = await config.getFilters(message.guild.id)
-        embed.addField("**FILTERS**", Object.keys(filters).map((filter) => `\`${filter}\``).join(" ") ?? "None")
+        if (message.guild) {
+            let filters = await config.getFilters(message.guild.id)
+            embed.addField("**FILTERS**", Object.keys(filters).map((filter) => `\`${filter}\``).join(" ") ?? "None")
+        }
 
         message.channel.send({ embeds: [embed] })
     }

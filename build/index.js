@@ -41,7 +41,7 @@ function start() {
 }
 async function main() {
     // Create discord.js and distube client pairs
-    const clients = await (0, createClients_1.createClients)(config);
+    const clientPairs = await (0, createClients_1.createClients)(config);
     // Read commands from commands directory
     config.commands = new discord_js_1.Collection();
     let commandsPath = path.join(__dirname, 'commands');
@@ -53,6 +53,6 @@ async function main() {
             return;
         config.commands.set(command.name, command);
     }
-    (0, distubeEventListeners_1.registerDistubeEventListeners)(clients, config);
-    (0, discordEventListeners_1.registerDiscordEventListeners)(clients, config);
+    (0, distubeEventListeners_1.registerDistubeEventListeners)(clientPairs, config);
+    (0, discordEventListeners_1.registerDiscordEventListeners)(clientPairs, config);
 }

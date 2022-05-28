@@ -36,12 +36,12 @@ class NewCommand extends Command {
                 distube.filters[message.guild.id + args[0]] = filter
                 queue.setFilter(message.guild.id + args[0])
             } else {
-                Embeds.embedBuilderMessage(client, message, "RED", "Filter not found")
+                Embeds.embedBuilderMessage({ client, message, color: "RED", title: "Filter not found" })
                     .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
                 return
             }
         } else {
-            Embeds.embedBuilderMessage(client, message, "RED", "There is nothing playing")
+            Embeds.embedBuilderMessage({ client, message, color: "RED", title: "There is nothing playing" })
                 .then(msg => setTimeout(() => msg.delete().catch(console.error), 10000))
             message.react("❌")
             return

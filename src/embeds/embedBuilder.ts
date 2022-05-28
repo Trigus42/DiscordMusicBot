@@ -1,15 +1,14 @@
 import * as Discord from "discord.js"
-import DisTube from "distube"
 
 /**
  *  Build and send embed in the channel of the message
  */
-export function embedBuilderMessage(client: Discord.Client, message: Discord.Message, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string): Promise<Discord.Message> {
+export function embedBuilderMessage({ client, message, color, title, description, thumbnail }: { client: Discord.Client; message: Discord.Message; color: Discord.ColorResolvable; title?: string; description?: string; thumbnail?: string }): Promise<Discord.Message> {
     try {
         let embed = new Discord.MessageEmbed()
             .setColor(color)
-            .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member.user.displayAvatarURL({ dynamic: true })})
-            .setFooter({text: client.user.username, iconURL: client.user.displayAvatarURL()})
+            .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member?.user.displayAvatarURL({ dynamic: true })})
+            .setFooter({text: client.user?.username ?? "", iconURL: client.user?.displayAvatarURL()})
 
         if (title) {embed.setTitle(title)}
         if (description) {embed.setDescription(description)}
@@ -24,12 +23,12 @@ export function embedBuilderMessage(client: Discord.Client, message: Discord.Mes
 /**
  *  Build and send embed in the channel of the queue
  */
-export function embedBuilder(client: Discord.Client, user: Discord.User, channel: Discord.TextChannel|Discord.GuildTextBasedChannel, color: Discord.ColorResolvable, title?: string, description?: string, thumbnail?: string) {
+export function embedBuilder({ client, channel, user, color, title, description, thumbnail }: { client: Discord.Client; channel: Discord.TextChannel | Discord.GuildTextBasedChannel; user?: Discord.User; color?: Discord.ColorResolvable; title?: string; description?: string; thumbnail?: string }) {
     let embed = new Discord.MessageEmbed()
-        .setColor(color)
-        .setAuthor({name: user.tag.split("#")[0], iconURL: user.displayAvatarURL({ dynamic: true })})
-        .setFooter({text: client.user.username, iconURL: client.user.displayAvatarURL()})
+        .setColor(color ?? "#fffff0")
+        .setFooter({text: client.user?.username ?? "", iconURL: client.user?.displayAvatarURL()})
 
+    if (user) embed.setAuthor({name: user.tag.split("#")[0], iconURL: user.displayAvatarURL({ dynamic: true })})
     if (title) embed.setTitle(title)
     if (description) embed.setDescription(description)
     if (thumbnail) embed.setThumbnail(thumbnail)
