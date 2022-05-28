@@ -57,13 +57,13 @@ exports.embedBuilderMessage = embedBuilderMessage;
 /**
  *  Build and send embed in the channel of the queue
  */
-async function embedBuilder({ client, channel, user, color, title, description, thumbnail, deleteAfter }) {
+async function embedBuilder({ client, channel, author, color, title, description, thumbnail, deleteAfter }) {
     var _a, _b, _c;
     let embed = new Discord.MessageEmbed()
         .setColor(color !== null && color !== void 0 ? color : "#fffff0")
         .setFooter({ text: (_b = (_a = client.user) === null || _a === void 0 ? void 0 : _a.username) !== null && _b !== void 0 ? _b : "", iconURL: (_c = client.user) === null || _c === void 0 ? void 0 : _c.displayAvatarURL() });
-    if (user)
-        embed.setAuthor({ name: user.tag.split("#")[0], iconURL: user.displayAvatarURL({ dynamic: true }) });
+    if (author)
+        embed.setAuthor({ name: author.tag.split("#")[0], iconURL: author.displayAvatarURL({ dynamic: true }) });
     if (title)
         embed.setTitle(title);
     if (description)

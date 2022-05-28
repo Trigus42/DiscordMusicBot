@@ -15,7 +15,7 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
         .on("addList", (queue, playlist) => {
             Embeds.embedBuilder({
                 client: distube.client, 
-                user: playlist.user, 
+                author: playlist.user, 
                 channel: queue.textChannel!, 
                 color: "#fffff0", 
                 title: "Added a Playlist", 
@@ -52,12 +52,16 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
             console.log(error)
             channel.lastMessage?.reactions.resolve("✅")?.users.remove(distube.client.user?.id)
             channel.lastMessage?.react("❌")
-            Embeds.embedBuilder({ client: distube.client, user: channel.lastMessage?.member?.user, channel, color: "RED", title: "An error occurred:"})
+            Embeds.embedBuilder({
+                client: distube.client,
+                channel,
+                color: "RED",
+                title: "An error occurred:"
+            })
         })
         .on("finish", async queue => {
             Embeds.embedBuilder({ 
                 client: distube.client,
-                user: queue.textChannel?.lastMessage?.member?.user, 
                 channel: queue.textChannel!, 
                 color: "RED", 
                 title: "There are no more songs left",
@@ -67,7 +71,6 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
         .on("empty", queue => {
             Embeds.embedBuilder({
                 client: distube.client,
-                user: queue.textChannel?.lastMessage?.member?.user,
                 channel: queue.textChannel!,
                 color: "RED",
                 title: "Left the channel cause it got empty",
@@ -77,7 +80,6 @@ export function registerDistubeEventListeners(clients: {discord: Discord.Client,
         .on("noRelated", queue => {
             Embeds.embedBuilder({ 
                 client: distube.client,
-                user: queue.textChannel?.lastMessage?.member?.user,
                 channel: queue.textChannel!,
                 color: "RED",
                 title: "Can't find related video to play. Stop playing music.",
