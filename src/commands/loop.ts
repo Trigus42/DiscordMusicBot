@@ -5,7 +5,7 @@ import * as Embeds from "../embeds"
 import { Dict } from "../interfaces"
 import { Config } from "../config"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "loop"
 	public description = "Set loop mode to off|song|queue"
 	public aliases: string[] = []
@@ -21,7 +21,7 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message)
 
 		if (0 <= Number(args[0]) && Number(args[0]) <= 2) {
@@ -55,4 +55,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

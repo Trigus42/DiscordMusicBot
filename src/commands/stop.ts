@@ -5,7 +5,7 @@ import { Dict } from "../interfaces"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "stop"
 	public description = "Stop playing music and clear the queue"
 	public aliases: string[] = []
@@ -21,7 +21,7 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message.guildId!)
 		if (queue) await queue.stop()
 		if (config.userConfig.actionMessages) {
@@ -37,4 +37,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

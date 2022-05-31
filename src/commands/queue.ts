@@ -5,7 +5,7 @@ import * as DisTube from "distube"
 import * as Embeds from "../embeds"
 import { Dict } from "../interfaces"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "queue"
 	public description = "Show the current queue"
 	public aliases: string[] = ["qu"]
@@ -69,4 +69,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

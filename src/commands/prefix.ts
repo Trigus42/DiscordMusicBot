@@ -5,7 +5,7 @@ import * as Embeds from "../embeds"
 import { Config } from "../config"
 import { Dict } from "../interfaces"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "prefix"
 	public description = "Changes the prefix of the bot"
 	public aliases: string[] = []
@@ -20,7 +20,7 @@ class NewCommand extends Command {
 	public cooldown = 0
 	public cooldowns: Dict = {}
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		// If no arguments are given, return current prefix
 		if (!args[0]){
 			Embeds.embedBuilderMessage({
@@ -57,4 +57,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

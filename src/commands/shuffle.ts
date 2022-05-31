@@ -5,7 +5,7 @@ import { Dict } from "../interfaces"
 import * as Embeds from "../embeds"
 import { Config } from "../config"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "shuffle"
 	public description = "Shuffle the queue"
 	public aliases: string[] = ["mix"]
@@ -21,7 +21,7 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		await distube.shuffle(message)
 		if (config.userConfig.actionMessages) {
 			Embeds.embedBuilderMessage({
@@ -36,4 +36,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

@@ -5,7 +5,7 @@ import { Dict } from "../interfaces"
 import { Config } from "../config"
 import { statusEmbed } from "../embeds"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "pause"
 	public description = "Pause the current song"
 	public aliases: string[] = []
@@ -21,11 +21,11 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		distube.pause(message)
 		statusEmbed(distube.getQueue(message.guildId!), config)
 		message.react("✅")
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

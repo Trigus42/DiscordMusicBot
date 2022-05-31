@@ -5,7 +5,7 @@ import * as Embeds from "../embeds"
 import { default as Deezer } from "../apis/deezer"
 import { Dict } from "../interfaces"
 
-export class NewCommand extends Command {
+export class TLCommand extends Command {
 	public name = "play"
 	public description = "Add a song or playlist to the queue"
 	public aliases: string[] = ["p"]
@@ -56,4 +56,4 @@ export class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

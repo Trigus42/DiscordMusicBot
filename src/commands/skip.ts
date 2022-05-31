@@ -5,7 +5,7 @@ import * as Embeds from "../embeds"
 import { Dict } from "../interfaces"
 import { Config } from "../config"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "skip"
 	public description = "Skip song at optional queue position or current song"
 	public aliases: string[] = ["s"]
@@ -21,7 +21,7 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message.guildId!)
 		// If queue is empty after skipping, stop playing
 		if (!queue.autoplay && queue.songs.length <= 1) {
@@ -74,4 +74,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

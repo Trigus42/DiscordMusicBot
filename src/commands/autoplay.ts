@@ -5,7 +5,7 @@ import * as Discord from "discord.js"
 import { Dict } from "../interfaces"
 import { Config } from "../config"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "autoplay"
 	public description = "Toggle autoplay"
 	public aliases: string[] = ["ap"]
@@ -20,7 +20,7 @@ class NewCommand extends Command {
 	public cooldown = 0
 	public cooldowns: Dict = {}
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		message.react("✅")
 		const autoplayStatus = distube.toggleAutoplay(message) ? "ON" : "OFF"
 
@@ -39,4 +39,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

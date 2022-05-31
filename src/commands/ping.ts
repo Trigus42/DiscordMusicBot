@@ -3,7 +3,7 @@ import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import { Dict } from "../interfaces"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "ping"
 	public description = "Displays the bot's ping"
 	public aliases: string[] = []
@@ -26,4 +26,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

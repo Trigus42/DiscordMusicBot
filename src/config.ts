@@ -3,6 +3,9 @@ import { Sequelize, DataTypes, Model } from "sequelize"
 import { UserConfig, Dict } from "./interfaces"
 import { Command } from "./classes/command"
 import { Collection } from "discord.js"
+import { Playlist } from "./classes/playlist"
+import * as DisTube from "distube"
+import * as Discord from "discord.js"
 
 export class Config {
 	path: string
@@ -12,6 +15,7 @@ export class Config {
 	filters: Dict
 	commands: Collection<string, Command> = new Collection()
 	startTimes: Collection<string, number> = new Collection()
+	clientPairs: {discord: Discord.Client, distube: DisTube.DisTube}[] = []
 
 	/*
     * Constructor function to initialize database connection
@@ -123,6 +127,29 @@ export class Config {
 		}, {sequelize: this.db})
 
 		StatusEmbed.sync()
+
+		class Playlist extends Model {
+			declare userId: string
+			declare name: string
+			declare tracks: string
+		}
+        
+		Playlist.init({
+			name: {
+				type: DataTypes.STRING,
+				primaryKey: true,
+			},
+			userId: {
+				type: DataTypes.STRING,
+				primaryKey: true
+			},
+			tracks: {
+				type: DataTypes.STRING,
+				defaultValue: null,
+			}
+		}, {sequelize: this.db})
+
+		Playlist.sync()
 	}
 
 	async addGuild(guildId: string): Promise<void> {
@@ -216,5 +243,39 @@ export class Config {
 			guildId: guildId,
 			prefix: prefix
 		})
+	}
+
+	async getPlaylist(userId: string, name: string): Promise<Playlist> {
+		const playlist = await this.db.models.Playlist.findOne({
+			where: {
+				userId: userId,
+				name: name
+			}
+		}).catch(() => null)
+
+		if (!playlist) {
+			return new Playlist(name, [], userId, this.db)
+		} else {
+			return new Playlist(name, JSON.parse(playlist.getDataValue("tracks")), userId, this.db)
+		}
+	}
+
+	async getPlaylists(userId: string): Promise<Playlist[]> {
+		const playlists = await this.db.models.Playlist.findAll({
+			where: {
+				userId: userId
+			}
+		})
+
+		if (!playlists) {
+			return []
+		} else {
+			return playlists.map(playlist => new Playlist(
+				playlist.getDataValue("name"),
+				JSON.parse(playlist.getDataValue("tracks")),
+				userId,
+				this.db
+			))
+		}
 	}
 }

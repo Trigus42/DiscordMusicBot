@@ -5,7 +5,7 @@ import { Dict } from "../interfaces"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "help"
 	public description = "Prints help message for all commands or a specific command"
 	public aliases: string[] = ["h"]
@@ -20,7 +20,7 @@ class NewCommand extends Command {
 	public cooldown = 0
 	public cooldowns: Dict = {}
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const embed = new Discord.MessageEmbed()
 		// If no arguments are given, print the help message
 		if (args.length === 0) {
@@ -72,4 +72,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

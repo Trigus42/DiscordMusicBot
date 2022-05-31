@@ -5,7 +5,7 @@ import { Dict } from "../interfaces"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "seek"
 	public description = "Seek to a specific time in the current song"
 	public aliases: string[] = []
@@ -21,7 +21,7 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		// Get time in seconds from HH:MM:SS time_string
 		const time_array = args[0].split(":")
 		let time_seconds = 0
@@ -45,4 +45,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

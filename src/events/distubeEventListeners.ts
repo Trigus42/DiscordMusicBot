@@ -3,8 +3,8 @@ import * as Embeds from "../embeds/index"
 import { Config } from "../config"
 import * as Discord from "discord.js"
 
-export function registerDistubeEventListeners(clients: {discord: Discord.Client, distube: DisTube}[], config: Config) {
-	for (const {discord, distube} of clients) {
+export function registerDistubeEventListeners(config: Config) {
+	for (const {discord, distube} of config.clientPairs) {
 		distube
 			.on("playSong", (queue, song) => {
 				Embeds.statusEmbed(queue, config, song)

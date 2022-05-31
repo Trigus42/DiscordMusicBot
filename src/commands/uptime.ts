@@ -5,7 +5,7 @@ import * as Discord from "discord.js"
 import { Config } from "../config"
 import { Dict } from "../interfaces"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "uptime"
 	public description = "Prints the bot\'s uptime"
 	public aliases: string[] = []
@@ -20,7 +20,7 @@ class NewCommand extends Command {
 	public cooldown = 0
 	public cooldowns: Dict = {}
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const days = Math.floor(client.uptime / 86400000)
 		const hours = Math.floor(client.uptime / 3600000) % 24
 		const minutes = Math.floor(client.uptime / 60000) % 60
@@ -30,4 +30,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()

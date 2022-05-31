@@ -5,7 +5,7 @@ import { Dict } from "../interfaces"
 import * as Embeds from "../embeds"
 import { Config } from "../config"
 
-class NewCommand extends Command {
+class TLCommand extends Command {
 	public name = "move"
 	public description = "Move a song from one position to another in the queue"
 	public verboseDescription = 
@@ -25,7 +25,7 @@ class NewCommand extends Command {
 	public cooldowns: Dict = {}
 	public needsUserInVC = true
 
-	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube, config: Config) {
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message)
 
 		if (isNaN(Number(args[0])) || isNaN(Number(args[1])) || Number(args[0]) < 0 || Number(args[1]) > queue.songs.length) {
@@ -66,4 +66,4 @@ class NewCommand extends Command {
 	}
 }
 
-export default new NewCommand()
+export default new TLCommand()
