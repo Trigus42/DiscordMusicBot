@@ -5,22 +5,22 @@ import { Dict } from "../interfaces"
 import * as Embeds from "../embeds"
 
 export class Command {
-	public name!: string
-	public description = "No description"
-	public verboseDescription: string = null
-	public aliases: string[] = []
-	public needsArgs = false
-	public usage = "No usage"
-	public guildOnly = false
 	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
-	public enabled = false
+	public aliases: string[] = []
+	public argsUsage = ""
 	public cooldown = 0
 	public cooldowns: Dict = {}
+	public description = ""
+	public enabled = false
+	public guildOnly = false
+	public hidden = false
+	public needsArgs = false
+	public needsQueue = false
 	public needsUserInVC = false
+	public onlyExecSubCommands = false
+	public ownerOnly = false
 	public subCommands: Command[] = []
+	public verboseDescription: string = null
 
 	public async handler(message: Discord.Message, args: string[], receivingClientPair: {discord: Discord.Client, distube: DisTube.DisTube}, config: Config) {
 		if (!this.enabled) return
@@ -35,6 +35,10 @@ export class Command {
 		}
 	
 		// Check if the command can be used in the current context
+		if (this.onlyExecSubCommands) {
+			Embeds.embedBuilderMessage({client: receivingClientPair.discord, message, color: "RED", description: "Use one of the subcommands"})
+			return
+		}
 		if (this.guildOnly && !message.guild) {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "This Command can only be used in a server" })
 			return
@@ -48,7 +52,7 @@ export class Command {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You need to be in a voice channel to use this command" })
 			return
 		} else if (this.needsArgs && !args.length) {
-			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You didn't provide any arguments for the ${this.name} command` })
+			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You didn't provide any arguments for the ${this.aliases[0]} command` })
 			return
 		} else if (this.cooldown > 0) {
 			if (message.author.id in this.cooldowns) {
@@ -109,6 +113,4 @@ export class Command {
 	public async execute(message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config): Promise<void> {
 		throw new Error("Method not implemented.")
 	}
-
-	constructor() {}
 }

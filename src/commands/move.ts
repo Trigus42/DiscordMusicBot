@@ -6,24 +6,17 @@ import * as Embeds from "../embeds"
 import { Config } from "../config"
 
 class TLCommand extends Command {
-	public name = "move"
 	public description = "Move a song from one position to another in the queue"
+	public aliases: string[] = ["move", "mv"]
+	public argsUsage = "<from> <to>"
+	public enabled = true
+	public guildOnly = true
+	public needsArgs = true
+	public needsUserInVC = true
 	public verboseDescription = 
 		"This command moves a song from one position to another in the queue. " +
 		"The song a the `<from>` position will be moved to the `<to>` position, and the song that was previously at the `<to>` position will be moved back by one.\n" +
 		"If the song is moved to position `0`, the current playback progress is saved, the new song is played and the playback is resumed later."
-	public aliases: string[] = ["mv"]
-	public needsArgs = true
-	public usage = "move <from> <to>"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = true
-	public hidden = false
-	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message)

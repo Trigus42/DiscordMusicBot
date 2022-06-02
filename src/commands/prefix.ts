@@ -6,19 +6,12 @@ import { Config } from "../config"
 import { Dict } from "../interfaces"
 
 class TLCommand extends Command {
-	public name = "prefix"
-	public description = "Changes the prefix of the bot"
-	public aliases: string[] = []
-	public needsArgs = false
-	public usage = "prefix <NEW PREFIX>"
-	public guildOnly = true
 	public adminOnly = true
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public aliases: string[] = ["prefix"]
+	public argsUsage = "<NEW PREFIX>"
+	public description = "Changes the prefix of the bot"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		// If no arguments are given, return current prefix

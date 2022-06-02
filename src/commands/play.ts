@@ -6,20 +6,13 @@ import { default as Deezer } from "../apis/deezer"
 import { Dict } from "../interfaces"
 
 export class TLCommand extends Command {
-	public name = "play"
+	public aliases: string[] = ["play", "p"]
+	public argsUsage = "[url]"
 	public description = "Add a song or playlist to the queue"
-	public aliases: string[] = ["p"]
-	public needsArgs = true
-	public usage = "play [url]"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public needsUserInVC = true
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
+	public needsArgs = true
+	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
 		let customPlaylist: DisTube.Playlist

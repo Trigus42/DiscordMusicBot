@@ -6,19 +6,11 @@ import { Config } from "../config"
 import * as Embeds from "../embeds"
 
 class TLCommand extends Command {
-	public name = "stop"
+	public aliases: string[] = ["stop"]
 	public description = "Stop playing music and clear the queue"
-	public aliases: string[] = []
-	public needsArgs = false
-	public usage = "stop"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = true
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
+	public needsQueue = true
 	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {

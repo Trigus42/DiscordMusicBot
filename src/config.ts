@@ -32,7 +32,6 @@ export class Config {
 		// Load user config
 		if (userConfig) {
 			if (typeof userConfig === "string") {
-				// eslint-disable-next-line detect-non-literal-fs-filename
 				this.userConfig = JSON.parse(fs.readFileSync(userConfig, "utf8")) as UserConfig
 			} else {
 				this.userConfig = userConfig
@@ -44,7 +43,6 @@ export class Config {
 		// Load filters
 		if (filters) {
 			if (typeof filters === "string") {
-				// eslint-disable-next-line detect-non-literal-fs-filename
 				this.filters = JSON.parse(fs.readFileSync(filters, "utf8"))
 			} else {
 				this.filters = filters

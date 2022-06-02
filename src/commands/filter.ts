@@ -6,19 +6,12 @@ import * as Embeds from "../embeds"
 import { Dict } from "../interfaces"
 
 class TLCommand extends Command {
-	public name = "filter"
+	public aliases: string[] = ["filter", "f"]
+	public argsUsage = "[add|del] <name> [filter]"
 	public description = "Toggle or add/delete ([custom](https://ffmpeg.org/ffmpeg-filters.html)) filters"
-	public aliases: string[] = []
-	public needsArgs = true
-	public usage = "filter [add|del] <name> [filter]"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
+	public needsArgs = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message.guildId!)

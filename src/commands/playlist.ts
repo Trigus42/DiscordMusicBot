@@ -6,37 +6,29 @@ import { Config } from "../config"
 import { embedBuilderMessage } from "../embeds"
 
 class TLCommand extends Command {
-	public name = "playlist"
-	public description = ""
 	public aliases: string[] = ["playlist", "pl"]
-	public needsArgs = true
-	public usage = "playlist <command> <playlist name> [args]"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public argsUsage = "<command> <playlist> [args]"
+	public description = ""
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public subCommands: Command[] = [new PlaylistAddCommand(), new PlaylistRemoveCommand(), new PlaylistDeleteCommand(), new PlaylistPlayCommand(), new PlaylistListCommand()]
+	public needsArgs = true
+	public onlyExecSubCommands = true
+	public subCommands: Command[] = [
+		new PlaylistAddCommand(),
+		new PlaylistRemoveCommand(),
+		new PlaylistDeleteCommand(),
+		new PlaylistPlayCommand(),
+		new PlaylistListCommand(),
+		new PlaylistShowCommand()
+	]
 }
 
 class PlaylistAddCommand extends Command {
-	public name = "playlist add"
-	public description = "Add one or multiple songs to a playlist"
 	public aliases: string[] = ["add", "a"]
-	public needsArgs = true
-	public usage = "playlist add <playlist name> <track> [track] [track]..."
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public argsUsage = "<playlist> <track> [tracks...]"
+	public description = "Add one or multiple songs to a playlist"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public subCommands: Command[] = []
+	public needsArgs = true
+	public subCommands: Command[] = [new PlaylistAddFromCommand()]
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const numberPlaylists = await config.db.models.Playlist.count({
@@ -59,9 +51,9 @@ class PlaylistAddCommand extends Command {
 		const playlist = await config.getPlaylist(message.author.id, args[0])
 
 		// Validate tracks
-		let tracks: string[] = []
-		let invalidTracks: string[] = []
-		for (let track of args.slice(1)) {
+		const tracks: string[] = []
+		const invalidTracks: string[] = []
+		for (const track of args.slice(1)) {
 			if (distube.extractorPlugins.find(plugin => plugin.validate(track))) {
 				tracks.push(track)
 			} else {
@@ -83,21 +75,46 @@ class PlaylistAddCommand extends Command {
 	}
 }
 
-class PlaylistRemoveCommand extends Command {
-	public name = "playlist remove"
-	public description = "Remove song at specified index from playlist"
-	public aliases: string[] = ["remove", "rem", "r"]
-	public needsArgs = true
-	public usage = "playlist remove <playlist name> <index>"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+class PlaylistAddFromCommand extends Command {
+	public aliases: string[] = ["from"]
+	public argsUsage = "<playlist> <url>"
+	public description = "Add a Spotify/YouTube playlist to your playlist"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public subCommands: Command[] = []
+	public needsArgs = true
+
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
+		const playlist = await config.getPlaylist(message.author.id, args[0])
+
+		const tracks = await distube.extractorPlugins.find(plugin => plugin.validate(args[1]))?.resolve(args[1], {})
+
+		if (tracks instanceof DisTube.Playlist) {
+			playlist.addTracks(tracks.songs.map(song => song.url))
+			embedBuilderMessage({
+				client,
+				message,
+				color: "#fffff0",
+				title: `${playlist.tracks.length > 1 ? "Updated" : "Created"} playlist ${playlist.name}`,
+				description: `Added ${tracks.songs.length} track${tracks.songs.length != 1 ? "s" : ""} to playlist.`
+			})
+		} else {
+			embedBuilderMessage({
+				client,
+				message,
+				color: "RED",
+				title: "Invalid playlist",
+				description: "Could not resolve the url to a playlist."
+			})
+			return
+		}
+	}
+}
+
+class PlaylistRemoveCommand extends Command {
+	public aliases: string[] = ["remove", "rem", "r"]
+	public argsUsage = "<playlist> <index>"
+	public description = "Remove song at specified index from playlist"
+	public enabled = true
+	public needsArgs = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		if (isNaN(Number(args[0]))) {
@@ -125,20 +142,11 @@ class PlaylistRemoveCommand extends Command {
 }
 
 class PlaylistDeleteCommand extends Command {
-	public name = "playlist delete"
-	public description = "Delete a playlist"
 	public aliases: string[] = ["delete", "del", "d"]
-	public needsArgs = true
-	public usage = "playlist delete <playlist name>"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public argsUsage = "<playlist>"
+	public description = "Delete a playlist"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public subCommands: Command[] = []
+	public needsArgs = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const playlist = await config.getPlaylist(message.author.id, args[0])
@@ -153,20 +161,12 @@ class PlaylistDeleteCommand extends Command {
 }
 
 class PlaylistPlayCommand extends Command {
-	public name = "playlist play"
-	public description = "Add a playlist to queue"
 	public aliases: string[] = ["play", "p"]
-	public needsArgs = true
-	public usage = "playlist play <playlist name>"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public argsUsage = "<playlist>"
+	public description = "Add a playlist to queue"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public subCommands: Command[] = []
+	public guildOnly = true
+	public needsArgs = true
 	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
@@ -205,20 +205,9 @@ class PlaylistPlayCommand extends Command {
 }
 
 class PlaylistListCommand extends Command {
-	public name = "playlist list"
-	public description = "List all your playlists"
 	public aliases: string[] = ["list", "l"]
-	public needsArgs = false
-	public usage = "playlist list"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public description = "List all your playlists"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
-	public subCommands: Command[] = []
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const playlists = await config.getPlaylists(message.author.id)
@@ -240,6 +229,37 @@ class PlaylistListCommand extends Command {
 			title: "Playlists",
 			description: playlists.map(playlist => `**${playlist.name}** - ${playlist.tracks.length} track${playlist.tracks.length != 1 ? "s" : ""}`).join("\n")
 		})
+	}
+}
+
+class PlaylistShowCommand extends Command {
+	public aliases: string[] = ["show", "s"]
+	public argsUsage = "<playlist>"
+	public description = "Show playlist"
+	public enabled = true
+
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
+		const playlist = await config.getPlaylist(message.author.id, args[0])
+
+		if (playlist.tracks.length == 0) {
+			embedBuilderMessage({
+				client,
+				message,
+				color: "#fffff0",
+				title: "No tracks in playlist",
+				description: "Playlist is empty"
+			})
+			return
+		}
+
+		const embed = new Discord.MessageEmbed()
+			.setColor("#fffff0")
+			.setTitle(`${playlist.name}`)
+
+		embed.addField("Index", playlist.tracks.map((value, index) => `**${index}**`).join("\n"), true)
+		embed.addField("Link", playlist.tracks.map((value, index) => `**${value}**`).join("\n"), true)
+
+		message.channel.send({ embeds: [embed] })
 	}
 }
 

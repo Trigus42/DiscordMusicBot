@@ -6,19 +6,10 @@ import * as Embeds from "../embeds"
 import { Dict } from "../interfaces"
 
 class TLCommand extends Command {
-	public name = "queue"
+	public aliases: string[] = ["queue", "qu"]
 	public description = "Show the current queue"
-	public aliases: string[] = ["qu"]
-	public needsArgs = false
-	public usage = "queue"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = true
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public needsQueue = true
 	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {

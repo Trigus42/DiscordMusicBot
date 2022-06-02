@@ -6,19 +6,13 @@ import { Config } from "../config"
 import * as Embeds from "../embeds"
 
 class TLCommand extends Command {
-	public name = "seek"
+	public aliases: string[] = ["seek"]
+	public argsUsage = "<HH:MM:SS>"
 	public description = "Seek to a specific time in the current song"
-	public aliases: string[] = []
-	public needsArgs = true
-	public usage = "seek <HH:MM:SS>"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = true
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
+	public needsArgs = true
+	public needsQueue = true
 	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {

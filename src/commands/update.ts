@@ -6,19 +6,11 @@ import { Config } from "../config"
 import { Dict } from "../interfaces"
 
 class TLCommand extends Command {
-	public name = "update"
+	public aliases: string[] = ["update"]
 	public description = "Update playback status"
-	public aliases: string[] = []
-	public needsArgs = false
-	public usage = "update"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = true
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
+	public needsQueue = true
 	public needsUserInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {

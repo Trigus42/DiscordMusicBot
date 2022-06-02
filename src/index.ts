@@ -1,7 +1,7 @@
 import { Collection } from "discord.js"
 import { Command } from "./classes/command"
 import { Config } from "./config"
-import { createClients } from "./clients/createClients"
+import { createClients } from "./createClients"
 import { registerDistubeEventListeners } from "./events/distubeEventListeners"
 import { registerDiscordEventListeners } from "./events/discordEventListeners"
 import * as fs from "fs"
@@ -32,7 +32,7 @@ async function main(): Promise<void> {
 		const filePath = path.join(commandsPath, file)
 		const command = (await import(filePath)).default as Command
 		if (!command.enabled) return
-		config.commands.set(command.name, command)
+		config.commands.set(command.aliases[0], command)
 	}
 
 	registerDistubeEventListeners(config)

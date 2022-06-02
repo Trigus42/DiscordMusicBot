@@ -6,19 +6,9 @@ import { Config } from "../config"
 import { Dict } from "../interfaces"
 
 class TLCommand extends Command {
-	public name = "uptime"
-	public description = "Prints the bot\'s uptime"
-	public aliases: string[] = []
-	public needsArgs = false
-	public usage = "uptime"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
+	public aliases: string[] = ["uptime"]
+	public description = "Prints the bot's uptime"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const days = Math.floor(client.uptime / 86400000)

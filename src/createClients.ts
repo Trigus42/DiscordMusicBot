@@ -1,7 +1,7 @@
 import { SpotifyPlugin } from "@distube/spotify"
 import { YtDlpPlugin } from "@distube/yt-dlp"
 import { DisTube } from "distube"
-import { Config } from "../config"
+import { Config } from "./config"
 
 import { Client, Intents } from "discord.js"
 
@@ -39,7 +39,8 @@ export async function createClients(config: Config) {
 			plugins: 
                 [config.userConfig.spotify ? (new SpotifyPlugin({api: {
                 	clientId: config.userConfig.spotify.clientId,
-                	clientSecret: config.userConfig.spotify.clientSecret},
+                	clientSecret: config.userConfig.spotify.clientSecret
+                },
                 parallel: true,
                 emitEventsAfterFetching: true
                 }), new YtDlpPlugin()) : new YtDlpPlugin(), 

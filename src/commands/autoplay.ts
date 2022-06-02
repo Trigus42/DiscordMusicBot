@@ -6,19 +6,11 @@ import { Dict } from "../interfaces"
 import { Config } from "../config"
 
 class TLCommand extends Command {
-	public name = "autoplay"
-	public description = "Toggle autoplay"
 	public aliases: string[] = ["ap"]
-	public needsArgs = false
-	public usage = "autoplay"
-	public guildOnly = true
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = true
-	public hidden = false
+	public description = "Toggle autoplay"
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+	public guildOnly = true
+	public needsQueue = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		message.react("✅")

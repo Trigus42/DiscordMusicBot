@@ -1,24 +1,31 @@
 import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
-import { Dict } from "../interfaces"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
 
 class TLCommand extends Command {
-	public name = "help"
+	public aliases: string[] = ["help", "h"]
+	public argsUsage = "[command]"
 	public description = "Prints help message for all commands or a specific command"
-	public aliases: string[] = ["h"]
-	public needsArgs = false
-	public usage = "help [command]"
-	public guildOnly = false
-	public adminOnly = false
-	public ownerOnly = false
-	public needsQueue = false
-	public hidden = false
 	public enabled = true
-	public cooldown = 0
-	public cooldowns: Dict = {}
+
+	private resolveCommand (args: string[], config: Config, command?: Command): Command {
+		if (!command) {
+			command = config.commands.find(command => command.aliases.includes(args[0]))
+		}
+
+		// If there are sub-commands, resolve the sub-command
+		if (command.subCommands.length > 0) {
+			const subCommand = command.subCommands.find(subCommand => subCommand.aliases.includes(args[1]))
+			if (subCommand) {
+				return this.resolveCommand(args.slice(1), config, subCommand)
+			}
+		}
+
+		// If there are no sub-commands, return the command
+		return command
+	}
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const embed = new Discord.MessageEmbed()
@@ -30,15 +37,13 @@ class TLCommand extends Command {
 				.setAuthor({name: message.author.tag.split("#")[0], iconURL: message.author.displayAvatarURL({dynamic:true})})
 				.setFooter({text: client.user?.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user?.displayAvatarURL({dynamic:true})})
 
-			// Create embed for each command
+			// Create field for each command
 			config.commands.forEach(command => {
-				let aliases = command.aliases.map(alias => `\`${alias}\``).join("**/**")
-				aliases = aliases ? "**/**" + aliases : ""
 				embed.addField(
-					`\`${command.usage}\`` + aliases,
-					command.description,
+					`\`${command.aliases[0]}\`` + ((!command.onlyExecSubCommands && command.argsUsage.length != 0) ? ` \`${command.argsUsage}\`` : ""),
+					command.description.length > 0 ? command.description : `Use \`help ${command.aliases[0]}\` for more information`,
 					true
-				)
+				)!
 			})
 
 			// Add embed with all filters
@@ -48,7 +53,7 @@ class TLCommand extends Command {
 			}
 		} else {
 			// If arguments are given, print the help message for the specified command
-			const command = config.commands.find(cmd => cmd.name === args[0] || cmd.aliases.includes(args[0]))
+			const command = this.resolveCommand(args, config)
 			if (!command) {
 				Embeds.embedBuilderMessage({
 					client: client,
@@ -62,10 +67,14 @@ class TLCommand extends Command {
 
 			embed
 				.setColor("#fffff0")
-				.setTitle(`**Command**: **"${command.name}**"`)
+				.setTitle(`**Command**: **"${command.aliases[0]}**"`)
 				.addField("**Aliases**", command.aliases.length > 0 ? command.aliases.map(alias => `\`${alias}\``)?.join("**/**") : "None", false)
-				.addField("**Usage**", `\`${command.usage}\``, false)
-				.addField("**Description**", command.verboseDescription ?? command.description, false)
+				.addField("**Usage**", `\`${command.argsUsage}\``, false)
+				.addField("**Description**", command.verboseDescription ?? (command.description.length > 0 ? command.description : `Use \`help ${command.aliases[0]}\` for more information`), false)
+
+			if (command.subCommands.length > 0) {
+				embed.addField("**Sub-commands**", command.subCommands.map(subCommand => `\`${subCommand.aliases[0]}\``).join("**/**"), false)
+			}
 		}
 
 		message.channel.send({ embeds: [embed] })
