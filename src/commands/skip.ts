@@ -11,7 +11,7 @@ class TLCommand extends Command {
 	public description = "Skip song at optional queue position or current song"
 	public enabled = true
 	public guildOnly = true
-	public needsArgs = true
+	public needsArgs = false
 	public needsQueue = true
 	public needsUserInVC = true
 
