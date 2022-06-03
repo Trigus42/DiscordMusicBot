@@ -7,11 +7,15 @@ import { Dict } from "../interfaces"
 
 class TLCommand extends Command {
 	public aliases: string[] = ["filter", "f"]
-	public argsUsage = "[add|del] <name> [filter]"
-	public description = "Toggle or add/delete ([custom](https://ffmpeg.org/ffmpeg-filters.html)) filters"
+	public argsUsage = "<name>"
+	public description = "Toggle filters"
 	public enabled = true
 	public guildOnly = true
 	public needsArgs = true
+	public subCommands: Command[] = [
+		new AddFilterCommand(),
+		new DelFilterCommand(),
+	]
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message.guildId!)
@@ -56,5 +60,35 @@ class TLCommand extends Command {
 		message.react("✅")
 	}
 }
+
+class AddFilterCommand extends Command {
+	public aliases = ["add", "a"]
+	public argsUsage = "<name> <filter_params>"
+	public description = "Add a filter"
+	public enabled = true
+	public guildOnly = true
+	public needsArgs = true
+
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
+		await config.setFilter(message.guildId!, args[0], args[1])
+		message.react("✅")
+	}
+}
+
+
+class DelFilterCommand extends Command {
+	public aliases = ["del", "d"]
+	public argsUsage = "<name>"
+	public description = "Delete a filter"
+	public enabled = true
+	public guildOnly = true
+	public needsArgs = true
+
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
+		await config.deleteFilter(message.guildId!, args[0])
+		message.react("✅")
+	}
+}
+
 
 export default new TLCommand()

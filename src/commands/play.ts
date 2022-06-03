@@ -7,7 +7,7 @@ import { Dict } from "../interfaces"
 
 export class TLCommand extends Command {
 	public aliases: string[] = ["play", "p"]
-	public argsUsage = "[url]"
+	public argsUsage = "<url> [position]"
 	public description = "Add a song or playlist to the queue"
 	public enabled = true
 	public guildOnly = true

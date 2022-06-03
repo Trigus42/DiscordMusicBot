@@ -24,7 +24,6 @@ async function sendStatusEmbed(queue: DisTube.Queue, config: Config, song?: DisT
 		.addField("Autoplay:", `\`${queue.autoplay ? "✅" : "❌"}\``, true)
 		.addField("Filter:", `\`${filters.length !== 0 ? filters : "❌"}\``, true)
 		.setFooter({text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL()})
-	if (song.user) {embed.setAuthor({name: song.user.tag.split("#")[0], iconURL: song.user.displayAvatarURL({ dynamic: true })})}
 	if (song.thumbnail) {embed.setThumbnail(song.thumbnail)}
 
 	// Send new playing message

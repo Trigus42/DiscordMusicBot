@@ -16,8 +16,7 @@ export function registerDistubeEventListeners(config: Config) {
 			})
 			.on("addList", (queue, playlist) => {
 				Embeds.embedBuilder({
-					client: distube.client, 
-					author: playlist.user, 
+					client: distube.client,
 					channel: queue.textChannel!, 
 					color: "#fffff0", 
 					title: "Added a Playlist", 

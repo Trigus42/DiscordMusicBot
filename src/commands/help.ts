@@ -34,14 +34,13 @@ class TLCommand extends Command {
 			embed
 				.setColor("#fffff0")
 				.setTitle("**COMMANDS**\n")
-				.setAuthor({name: message.author.tag.split("#")[0], iconURL: message.author.displayAvatarURL({dynamic:true})})
 				.setFooter({text: client.user?.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user?.displayAvatarURL({dynamic:true})})
 
 			// Create field for each command
 			config.commands.forEach(command => {
 				embed.addField(
 					`\`${command.aliases[0]}\`` + ((!command.onlyExecSubCommands && command.argsUsage.length != 0) ? ` \`${command.argsUsage}\`` : ""),
-					command.description.length > 0 ? command.description : `Use \`help ${command.aliases[0]}\` for more information`,
+					command.description.length > 0 ? (command.subCommands.length > 0 ? command.description + `; Use \`help ${command.aliases[0]}\` to view sub-commands` : command.description) : `Use \`help ${command.aliases[0]}\` for more information`,
 					true
 				)!
 			})
