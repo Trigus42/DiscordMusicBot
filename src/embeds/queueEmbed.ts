@@ -7,17 +7,18 @@ import * as DisTube from "distube"
 export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discord.MessageEmbed[]  {
 	const embeds = []
 
-	// Create embeds (one per 10 songs)
-	for (let i = 0; i < queue.songs.length; i += 10) {
-		// Get next 10 songs
-		const current = queue.songs.slice(i, i+10)
-
+	let i = 0
+	while (i < queue.songs.length) {
 		// Create string of each song ("**Index** - [Title](Link)")
 		const infos: [string[], string[], string[]] = [[], [], []]
 
-		for (let j = 0; j < current.length; j++) {
-			infos[0].push(`${j+i}`)
-			infos[1].push(`[${current[j].name}](${current[j].url})`)
+		while(i < queue.songs.length) {
+			// Discord embeds have a maximum of 1024 characters. This checks if the current embed is getting too big
+			if (infos.reduce((a, b) => a + (b).join("\n").length, 0) >= 850) break
+
+			infos[0].push(`${i}`)
+			infos[1].push(`[${queue.songs[i].name}](${queue.songs[i].url})`)
+			i += 1
 		}
 
 		// Create and add embed

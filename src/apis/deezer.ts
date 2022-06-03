@@ -59,26 +59,29 @@ export default class Deezer {
 	/**
    * Return array of songs from url containing the title and artist.
   */
-	async tracks(url: string, limit=500): Promise<Array<Array<string>>> {
+	async tracks(url: string, limit=500): Promise<Array<{title: string, artist: string, link: string, thumbnail_url: string}>> {
 		const type = url.split("/").slice(-2,-1)[0]
 		const id = url.split("/").slice(-1)[0]
 
 		switch (type) {
 		case "track": {
 			const res = await axios.get(`https://api.deezer.com/track/${id}`)
-			return [[res.data.title, res.data.artist.name]]
+			return [{title: res.data.title, artist: res.data.artist.name, link: res.data.link, thumbnail_url: res.data.album.cover_xl}]
 		}
 		case "album": {
 			const res = await axios.get(`https://api.deezer.com/album/${id}?limit=${limit}`)
-			return res.data.tracks.data.map((track: { title: any; artist: { name: any }; album: { title: any } }) => [track.title, track.artist.name])
+			return res.data.tracks.data.map((track: any) => ({title: track.title, artist: track.artist.name, link: track.link, thumbnail_url: track.album.cover_xl}))
 		}
 		case "playlist": {
 			const res = await axios.get(`https://api.deezer.com/playlist/${id}?limit=${limit}`)
-			return res.data.tracks.data.map((track: { title: any; artist: { name: any }; album: { title: any } }) => [track.title, track.artist.name])
+			if (!res.data) {
+				throw new Error("Playlist not found")
+			}
+			return res.data.tracks.data.map((track: any) => ({title: track.title, artist: track.artist.name, link: track.link, thumbnail_url: track.album.cover_xl}))
 		}
 		case "artist": {
 			const res = await axios.get(`https://api.deezer.com/artist/${id}/top?limit=${limit}`)
-			return res.data.data.map((track: { title: any; artist: { name: any }; album: { title: any } }) => [track.title, track.artist.name])
+			return res.data.data.map((track: any) => ({title: track.title, artist: track.artist.name, link: track.link, thumbnail_url: track.album.cover_xl}))
 		}
 		default: throw new Error("Type not supported")
 		}
