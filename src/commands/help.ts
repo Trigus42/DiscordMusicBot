@@ -34,7 +34,7 @@ class TLCommand extends Command {
 			embed
 				.setColor("#fffff0")
 				.setTitle("**COMMANDS**\n")
-				.setFooter({text: client.user?.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: client.user?.displayAvatarURL({dynamic:true})})
+				.setFooter({text: "Syntax:  \"<>\": required, \"[]\": optional"})
 
 			// Create field for each command
 			config.commands.forEach(command => {

@@ -36,7 +36,7 @@ export class Command {
 	
 		// Check if the command can be used in the current context
 		if (this.onlyExecSubCommands) {
-			Embeds.embedBuilderMessage({client: receivingClientPair.discord, message, color: "RED", description: "Use one of the subcommands"})
+			Embeds.embedBuilderMessage({client: receivingClientPair.discord, message, color: "RED", title: "Use one of the subcommands"})
 			return
 		}
 		if (this.guildOnly && !message.guild) {

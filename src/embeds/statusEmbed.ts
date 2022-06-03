@@ -23,7 +23,6 @@ async function sendStatusEmbed(queue: DisTube.Queue, config: Config, song?: DisT
 		.addField("Loop:", `  \`${queue.repeatMode ? queue.repeatMode === 2 ? "Queue" : "Song" : "❌"}\``, true)
 		.addField("Autoplay:", `\`${queue.autoplay ? "✅" : "❌"}\``, true)
 		.addField("Filter:", `\`${filters.length !== 0 ? filters : "❌"}\``, true)
-		.setFooter({text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL()})
 	if (song.thumbnail) {embed.setThumbnail(song.thumbnail)}
 
 	// Send new playing message

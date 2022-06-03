@@ -57,7 +57,7 @@ export function registerDistubeEventListeners(config: Config) {
 					client: distube.client,
 					channel,
 					color: "RED",
-					title: "An error occurred:"
+					title: "An error occurred"
 				})
 			})
 			.on("finish", async queue => {

@@ -36,15 +36,17 @@ export async function createClients(config: Config) {
 			leaveOnStop: true,
 			leaveOnFinish: false,
 			leaveOnEmpty: true,
-			plugins: 
-                [config.userConfig.spotify ? (new SpotifyPlugin({api: {
-                	clientId: config.userConfig.spotify.clientId,
-                	clientSecret: config.userConfig.spotify.clientSecret
-                },
-                parallel: true,
-                emitEventsAfterFetching: true
-                }), new YtDlpPlugin()) : new YtDlpPlugin(), 
-                ]
+			plugins: config.userConfig.spotify ? [
+				new SpotifyPlugin({
+					api: {
+                		clientId: config.userConfig.spotify.clientId,
+                		clientSecret: config.userConfig.spotify.clientSecret},
+            		parallel: true,
+                	emitEventsAfterFetching: true}),
+				new YtDlpPlugin()
+			] : [
+				new YtDlpPlugin()
+			]
 		})
 
 		// Log when the bot is ready

@@ -15,8 +15,6 @@ export async function songEmbed(queue: DisTube.Queue, song?: DisTube.Song, title
 		.addField("Start:", `<t:${Math.floor(Date.now()/1000) + queue.duration - song.duration}:R>`, true)
 		.addField("Duration:", `\`${song.formattedDuration}\``, true)
 		.addField("Requested by:", `${song.user}`, true)
-		.setFooter({text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL()})
-	if (song.user) {embed.setAuthor({name: song.user.tag.split("#")[0], iconURL: song.user.displayAvatarURL({ dynamic: true })})}
 	if (song.thumbnail) {embed.setThumbnail(song.thumbnail)}
 
 	const embedMessage = await queue.textChannel.send({embeds: [embed]})

@@ -27,7 +27,6 @@ export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discor
 			.setDescription(`**Current Song: [\`${queue.songs[0].name}\`](${queue.songs[0].url})**`)
 			.addField("Index", infos[0].join("\n"), true)
 			.addField("Song", infos[1].join("\n"), true)
-			.setFooter({text: queue.client.user.username, iconURL: queue.client.user.displayAvatarURL()})
 		embeds.push(embed)
 	}
 

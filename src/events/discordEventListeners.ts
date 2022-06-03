@@ -20,7 +20,7 @@ export function registerDiscordEventListeners(config: Config) {
 
 			// Ignore messages that don't start with the prefix or mention the bot
 			if (receivingClientPair.discord.user?.id && message.mentions.members?.has(receivingClientPair.discord.user.id)) {
-				message.reply({ embeds: [new Discord.MessageEmbed().setAuthor({name: `${message.author.username}`, iconURL: message.author.displayAvatarURL({ dynamic: true })}).setDescription(`My Prefix is "${prefix}". To get started; type ${prefix}help`)]})
+				message.reply({ embeds: [new Discord.MessageEmbed().setTitle(`My Prefix is "${prefix}". To get started; type ${prefix}help`)]})
 				return
 			} else if (!message.content.startsWith(prefix)) return
 
