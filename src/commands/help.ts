@@ -1,31 +1,83 @@
+import { Command } from "../classes/command"
+import * as DisTube from "distube"
 import * as Discord from "discord.js"
+import { Config } from "../config"
+import * as Embeds from "../embeds"
 
-export async function help(message: Discord.Message, prefix: string, filters: Object) {
-    let helpEmbed = new Discord.MessageEmbed()
-        .setColor("#fffff0")
-        .setTitle("**COMMANDS**\n")
-        .setAuthor({name: message.author.tag.split("#")[0], iconURL: message.member.user.displayAvatarURL({dynamic:true})})
-        .setFooter({text: message.client.user.username + " | Syntax:  \"<>\": required, \"[]\": optional", iconURL: message.client.user.displayAvatarURL({dynamic:true})})
-        .addField(`\`${prefix}autoplay\` **/** \`${prefix}ap\``, "Enables autoplay", true)
-        .addField(`\`${prefix}filter <add/del> <NAME> [OPTIONS]\``, "Add/delete [custom filters](https://ffmpeg.org/ffmpeg-filters.html)", true)
-        .addField(`\`${prefix}help\` **/** \`${prefix}h\``, "List of all commands", true)
-        .addField(`\`${prefix}jump <POSITION>\``, "Jumps to a song in queue", true)
-        .addField(`\`${prefix}loop <0/1/2>\``, "Loop (off / song / queue)", true)
-        .addField(`\`${prefix}move <FROM> <TO>\` **/** \`${prefix}mv\``, "Moves a song from one position to another", true)
-        .addField(`\`${prefix}pause\``, "Pauses the song", true)
-        .addField(`\`${prefix}ping\``, "Gives you the ping", true)
-        .addField(`\`${prefix}play <URL/NAME> [POSITION]\` **/** \`${prefix}p\``, "Add song to queue", true)
-        .addField(`\`${prefix}prefix <NEW PREFIX>\``, "Change prefix", true)
-        .addField(`\`${prefix}queue\` **/** \`${prefix}qu\``, "Shows current queue", true)
-        .addField(`\`${prefix}resume\` **/** \`${prefix}r\``, "Resume the song", true)
-        .addField(`\`${prefix}seek <HH:MM:SS>\``, "Moves in the song to HH:MM:SS", true)
-        .addField(`\`${prefix}shuffle\` **/** \`${prefix}mix\``, "Shuffles the queue", true)
-        .addField(`\`${prefix}skip [POSITION]\` **/** \`${prefix}s\``, "Skips current song or song at POSITION", true)
-        .addField(`\`${prefix}status\``, "Update playing message", true)
-        .addField(`\`${prefix}stop\``, "Stops playing", true)
-        .addField(`\`${prefix}uptime\``, "Shows you the bot's uptime", true)
-        .addField(`\`${prefix}volume <VOLUME>\` **/** \`${prefix}vol\``, "Changes volume", true)
-        .addField("**FILTERS**", Object.keys(filters).map((filter) => `\`${prefix}${filter}\``).join(" "))
+class TLCommand extends Command {
+	public aliases: string[] = ["help", "h"]
+	public argsUsage = "[command]"
+	public description = "Prints help message for all commands or a specific command"
+	public enabled = true
 
-    return message.channel.send({ embeds: [helpEmbed] })
+	private resolveCommand (args: string[], config: Config, command?: Command): Command {
+		if (!command) {
+			command = config.commands.find(command => command.aliases.includes(args[0]))
+		}
+
+		// If there are sub-commands, resolve the sub-command
+		if (command.subCommands.length > 0) {
+			const subCommand = command.subCommands.find(subCommand => subCommand.aliases.includes(args[1]))
+			if (subCommand) {
+				return this.resolveCommand(args.slice(1), config, subCommand)
+			}
+		}
+
+		// If there are no sub-commands, return the command
+		return command
+	}
+
+	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
+		const embed = new Discord.MessageEmbed()
+		// If no arguments are given, print the help message
+		if (args.length === 0) {
+			embed
+				.setColor("#fffff0")
+				.setTitle("**COMMANDS**\n")
+				.setFooter({text: "Syntax:  \"<>\": required, \"[]\": optional"})
+
+			// Create field for each command
+			config.commands.forEach(command => {
+				embed.addField(
+					`\`${command.aliases[0]}\`` + ((!command.onlyExecSubCommands && command.argsUsage.length != 0) ? ` \`${command.argsUsage}\`` : ""),
+					command.description.length > 0 ? (command.subCommands.length > 0 ? command.description + `; Use \`help ${command.aliases[0]}\` to view sub-commands` : command.description) : `Use \`help ${command.aliases[0]}\` for more information`,
+					true
+				)!
+			})
+
+			// Add embed with all filters
+			if (message.guild) {
+				const filters = await config.getFilters(message.guild.id)
+				embed.addField("**FILTERS**", Object.keys(filters).map((filter) => `\`${filter}\``).join(" ") ?? "None")
+			}
+		} else {
+			// If arguments are given, print the help message for the specified command
+			const command = this.resolveCommand(args, config)
+			if (!command) {
+				Embeds.embedBuilderMessage({
+					client: client,
+					message: message,
+					description: "Command not found",
+					color: "RED",
+					deleteAfter: 10000
+				})
+				return
+			}
+
+			embed
+				.setColor("#fffff0")
+				.setTitle(`**Command**: **"${command.aliases[0]}**"`)
+				.addField("**Aliases**", command.aliases.length > 0 ? command.aliases.map(alias => `\`${alias}\``)?.join("**/**") : "None", false)
+				.addField("**Usage**", `\`${command.argsUsage}\``, false)
+				.addField("**Description**", command.verboseDescription ?? (command.description.length > 0 ? command.description : `Use \`help ${command.aliases[0]}\` for more information`), false)
+
+			if (command.subCommands.length > 0) {
+				embed.addField("**Sub-commands**", command.subCommands.map(subCommand => `\`${subCommand.aliases[0]}\``).join("**/**"), false)
+			}
+		}
+
+		message.channel.send({ embeds: [embed] })
+	}
 }
+
+export default new TLCommand()

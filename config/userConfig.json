@@ -1,0 +1,11 @@
+{
+    "tokens": [],
+    "prefix": ".",
+    "mainClientId": "",
+    "ownerId": "",
+    "spotify": {
+        "clientId": "",
+        "clientSecret": ""
+    },
+    "youtubeCookie": ""
+}
