@@ -7,8 +7,19 @@ export function registerDiscordEventListeners(config: Config) {
 			// Ignore messages from bots and webhooks
 			if (message.author.bot || message.webhookId) return
 
-			// If the message is from a guild, check if this client is the main client
-			if (message.guild && config.clientPairs.length > 1 && !(config.userConfig.mainClientId === message.client.user?.id)) return
+			const clientIds = config.clientPairs.map(clientPair => clientPair.discord.user.id)
+
+			// Drop message if
+			if (
+				// The message is from a guild
+				message.guild &&
+				// And this bot uses multiple clients
+				config.clientPairs.length > 1 &&
+				// And in the guild the message was sent from, there are multiple bot clients
+				message.guild.presences.cache.filter(presence => clientIds.includes(presence.member.id)) &&
+				// And this is not the main client
+				!(config.userConfig.mainClientId === message.client.user?.id)
+			) return
 
 			// Get guild prefix if message is in guild; For DMs use default prefix
 			let prefix: string

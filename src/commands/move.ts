@@ -15,7 +15,7 @@ class TLCommand extends Command {
 	public needsUserInVC = true
 	public verboseDescription = 
 		"This command moves a song from one position to another in the queue. " +
-		"The song a the `<from>` position will be moved to the `<to>` position, and the song that was previously at the `<to>` position will be moved back by one.\n" +
+		"The song at the `<from>` position will be moved to the `<to>` position, and the song that was previously at the `<to>` position will be moved back by one.\n" +
 		"If the song is moved to position `0`, the current playback progress is saved, the new song is played and the playback is resumed later."
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
