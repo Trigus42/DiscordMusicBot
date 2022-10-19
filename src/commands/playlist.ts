@@ -41,7 +41,7 @@ class PlaylistAddCommand extends Command {
 			embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "Too many playlists",
 				description: "You can only have 100 playlists at a time."
 			})
@@ -100,7 +100,7 @@ class PlaylistAddFromCommand extends Command {
 			embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "Invalid playlist",
 				description: "Could not resolve the url to a playlist."
 			})
@@ -121,7 +121,7 @@ class PlaylistRemoveCommand extends Command {
 			embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "Invalid index",
 				description: "Index must be a number"
 			})
@@ -176,7 +176,7 @@ class PlaylistPlayCommand extends Command {
 			embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "No tracks in playlist",
 				description: "Playlist is empty"
 			})
@@ -252,12 +252,12 @@ class PlaylistShowCommand extends Command {
 			return
 		}
 
-		const embed = new Discord.MessageEmbed()
+		const embed = new Discord.EmbedBuilder()
 			.setColor("#fffff0")
 			.setTitle(`${playlist.name}`)
 
-		embed.addField("Index", playlist.tracks.map((value, index) => `**${index}**`).join("\n"), true)
-		embed.addField("Link", playlist.tracks.map((value, index) => `**${value}**`).join("\n"), true)
+		embed.addFields({name: "Index", value: playlist.tracks.map((value, index) => `**${index}**`).join("\n")})
+		embed.addFields({name: "Link", value: playlist.tracks.map((value, index) => `**${value}**`).join("\n")})
 
 		message.channel.send({ embeds: [embed] })
 	}

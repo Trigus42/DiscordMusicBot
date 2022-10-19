@@ -8,7 +8,8 @@ export class Command {
 	public adminOnly = false
 	public aliases: string[] = []
 	public argsUsage = ""
-	public cooldown = 0
+	// Cooldown in ms; Default is 500 ms
+	public cooldown: number
 	public cooldowns: Dict = {}
 	public description = ""
 	public enabled = false
@@ -36,35 +37,34 @@ export class Command {
 	
 		// Check if the command can be used in the current context
 		if (this.onlyExecSubCommands) {
-			Embeds.embedBuilderMessage({client: receivingClientPair.discord, message, color: "RED", title: "Use one of the subcommands"})
+			Embeds.embedBuilderMessage({client: receivingClientPair.discord, message, color: "Red", title: "Use one of the subcommands"})
 			return
 		}
 		if (this.guildOnly && !message.guild) {
-			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "This Command can only be used in a server" })
+			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "This Command can only be used in a server" })
 			return
 		} else if (this.ownerOnly && !(message.author.id === config.userConfig.ownerId)) {
-			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You don't have permission for this command" })
+			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "You don't have permission for this command" })
 			return
-		} else if (this.adminOnly && !message.member?.permissions.has(Discord.Permissions.FLAGS.ADMINISTRATOR) && !(message.author.id === config.userConfig.ownerId)) {
-			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You don't have permission for this command" })
+		} else if (this.adminOnly && !message.member?.permissions.has(Discord.PermissionFlagsBits.Administrator) && !(message.author.id === config.userConfig.ownerId)) {
+			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "You don't have permission for this command" })
 			return
 		} else if ((this.needsUserInVC || this.needsQueue) && !message.member?.voice.channel) {
-			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "You need to be in a voice channel to use this command" })
+			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "You need to be in a voice channel to use this command" })
 			return
 		} else if (this.needsArgs && !args.length) {
-			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You didn't provide any arguments for the ${this.aliases[0]} command` })
+			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: `You didn't provide any arguments for the ${this.aliases[0]} command` })
 			return
-		} else if (this.cooldown > 0) {
-			if (message.author.id in this.cooldowns) {
-				const expirationTime = this.cooldowns[message.author.id]
-				if (expirationTime > Date.now()) {
-					const timeLeft = (expirationTime - Date.now()) / 1000
-					Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: `You can use this command again in ${timeLeft.toFixed(1)} seconds` })
-					return
-				}
-			} else {
-				this.cooldowns[message.author.id] = Date.now() + this.cooldown
+		} else if (message.author.id in this.cooldowns) {
+			const expirationTime = this.cooldowns[message.author.id]
+			if (expirationTime > Date.now()) {
+				const timeLeft = (expirationTime - Date.now()) / 1000
+				Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: `You can use this command again in ${timeLeft.toFixed(1)} seconds` })
+				return
 			}
+		} else {
+			// 500 ms default cooldown for all commands
+			this.cooldowns[message.author.id] = Date.now() + (this.cooldown >= 0 ? this.cooldown : 500)
 		}
 	
 		// Guilds
@@ -81,7 +81,7 @@ export class Command {
 				)
 	
 				if (!chosenClientPair) {
-					Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "There are no available clients", description: "Please try again later or free up one of the clients" })
+					Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "There are no available clients", description: "Please try again later or free up one of the clients" })
 					return
 				}
 	
@@ -93,7 +93,7 @@ export class Command {
 				}
 	
 				if (this.needsQueue && !chosenClientPair.distube.getQueue(message.guildId)) {
-					Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "RED", title: "There is nothing playing in the queue" })
+					Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "There is nothing playing in the queue" })
 					return
 				}
 	

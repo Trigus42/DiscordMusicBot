@@ -22,7 +22,7 @@ export class TLCommand extends Command {
 					Embeds.embedBuilderMessage({
 						client,
 						message,
-						color: "RED",
+						color: "Red",
 						title: "Cannot find playlist. Maybe it's private?",
 						deleteAfter: 10000
 					})
@@ -38,7 +38,7 @@ export class TLCommand extends Command {
 				Embeds.embedBuilderMessage({
 					client,
 					message,
-					color: "RED",
+					color: "Red",
 					title: "Can only play tracks, albums, playlists and artists from Deezer",
 					deleteAfter: 10000
 				})
@@ -51,7 +51,7 @@ export class TLCommand extends Command {
 			Embeds.embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "Can only play tracks, albums, playlists and artists from Deezer",
 				deleteAfter: 10000
 			})

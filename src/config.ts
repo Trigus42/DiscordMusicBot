@@ -16,6 +16,7 @@ export class Config {
 	commands: Collection<string, Command> = new Collection()
 	startTimes: Collection<string, number> = new Collection()
 	clientPairs: {discord: Discord.Client, distube: DisTube.DisTube}[] = []
+	timeLastPlayStart: Dict = {}
 
 	/*
     * Constructor function to initialize database connection

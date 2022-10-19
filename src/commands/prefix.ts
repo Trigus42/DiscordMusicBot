@@ -31,7 +31,7 @@ class TLCommand extends Command {
 			Embeds.embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "The prefix can't have whitespaces"
 			})
 		}

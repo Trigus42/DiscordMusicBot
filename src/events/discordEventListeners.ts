@@ -2,7 +2,7 @@ import * as Discord from "discord.js"
 import { Config } from "../config"
 
 export function registerDiscordEventListeners(config: Config) {
-	config.clientPairs.forEach(receivingClientPair => {
+	config.clientPairs.forEach(async receivingClientPair => {
 		receivingClientPair.discord.on("messageCreate", async message => {
 			// Ignore messages from bots and webhooks
 			if (message.author.bot || message.webhookId) return
@@ -29,9 +29,12 @@ export function registerDiscordEventListeners(config: Config) {
 				prefix = config.userConfig.prefix
 			}
 
+			// Get message content
+			await message.fetch(true)
+
 			// Ignore messages that don't start with the prefix or mention the bot
 			if (receivingClientPair.discord.user?.id && message.mentions.members?.has(receivingClientPair.discord.user.id)) {
-				message.reply({ embeds: [new Discord.MessageEmbed().setTitle(`My Prefix is "${prefix}". To get started; type ${prefix}help`)]})
+				message.reply({ embeds: [new Discord.EmbedBuilder().setTitle(`My Prefix is "${prefix}". To get started; type ${prefix}help`)]})
 				return
 			} else if (!message.content.startsWith(prefix)) return
 
@@ -44,7 +47,7 @@ export function registerDiscordEventListeners(config: Config) {
 			const command = config.commands.find(command => command.aliases.includes(commandName))
 			if (!command) return
 
-			command.handler(message, args, receivingClientPair, config)
+			command.handler(message, args, receivingClientPair, config).catch(error => {console.error(error)})
 		})
 	})
 }

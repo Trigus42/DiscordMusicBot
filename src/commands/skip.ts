@@ -42,7 +42,7 @@ class TLCommand extends Command {
 					Embeds.embedBuilderMessage({
 						client,
 						message,
-						color: "RED",
+						color: "Red",
 						title: "Can't skip song at position " + skip + " because it doesn't exist",
 						deleteAfter: 10000
 					})

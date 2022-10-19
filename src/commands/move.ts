@@ -26,7 +26,7 @@ class TLCommand extends Command {
 			Embeds.embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "Invalid song number",
 				deleteAfter: 10000
 			})

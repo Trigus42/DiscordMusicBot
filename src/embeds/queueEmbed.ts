@@ -4,7 +4,7 @@ import * as DisTube from "distube"
 /**
  *  Build and return array of embeds for the queue
  */
-export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discord.MessageEmbed[]  {
+export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discord.EmbedBuilder[]  {
 	const embeds = []
 
 	let i = 0
@@ -22,12 +22,14 @@ export function queueEmbed(queue: DisTube.Queue, client: Discord.Client): Discor
 		}
 
 		// Create and add embed
-		const embed = new Discord.MessageEmbed()
+		const embed = new Discord.EmbedBuilder()
 			.setTitle(`Queue: \`${queue.voiceChannel.name}\``)
 			.setColor("#fffff0")
 			.setDescription(`**Current Song: [\`${queue.songs[0].name}\`](${queue.songs[0].url})**`)
-			.addField("Index", infos[0].join("\n"), true)
-			.addField("Song", infos[1].join("\n"), true)
+			.addFields(
+				{name: "Index", value: infos[0].join("\n"), inline: true},
+				{name: "Song", value: infos[1].join("\n"), inline: true}
+			)
 		embeds.push(embed)
 	}
 

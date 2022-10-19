@@ -3,7 +3,7 @@ import { YtDlpPlugin } from "@distube/yt-dlp"
 import { DisTube } from "distube"
 import { Config } from "./config"
 
-import { Client, Intents } from "discord.js"
+import { ActivityType, Client, IntentsBitField, Partials } from "discord.js"
 
 /**
    * Returns an array of available discord client and distube instance pairs.
@@ -18,16 +18,18 @@ export async function createClients(config: Config) {
 
 		// Discord client
 		const discord = new Client({
-			messageCacheLifetime: 0,
-			messageSweepInterval: 0,
-			intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.DIRECT_MESSAGES],
-			partials: ["CHANNEL"]
+			intents: [
+				IntentsBitField.Flags.Guilds,
+				IntentsBitField.Flags.GuildMessages,
+				IntentsBitField.Flags.GuildVoiceStates,
+				IntentsBitField.Flags.DirectMessages
+			],
+			partials: [Partials.Channel]
 		})
 		discord.login(token)
 
 		// Distube instance
 		const distube = new DisTube(discord, {
-			youtubeDL: false,
 			youtubeCookie: config.userConfig.youtubeCookie ?? undefined,
 			youtubeIdentityToken: config.userConfig.youtubeIdentityToken ?? undefined,
 			nsfw: config.userConfig.nsfw ?? false,
@@ -57,7 +59,7 @@ export async function createClients(config: Config) {
 				activities: [
 					{
 						name: "Music",
-						type: "PLAYING",
+						type: ActivityType.Playing,
 					}
 				]
 			})

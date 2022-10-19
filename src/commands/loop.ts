@@ -40,7 +40,7 @@ class TLCommand extends Command {
 			Embeds.embedBuilderMessage({
 				client,
 				message,
-				color: "RED",
+				color: "Red",
 				title: "Please use a number between **0** and **2**   |   *(0: disabled, 1: Repeat a song, 2: Repeat the entire queue)*", 
 				deleteAfter: 10000
 			})

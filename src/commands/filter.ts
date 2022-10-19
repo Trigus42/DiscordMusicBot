@@ -22,16 +22,21 @@ class TLCommand extends Command {
 		// Add filter
 		if (args[0] === "add") { 
 			await config.setFilter(message.guildId!, args[1], args[2])
-			// Delete filter
+		// Delete filter
 		} else if (args[0] === "del") {
 			await config.deleteFilter(message.guildId!, args[1])
-			// Apply filter
+		// Apply filter
 		} else {
 			// Check if filter exists
 			const filter = await config.getFilter(message.guildId!, args[0])
 			if (filter) {
+				// Toggle filter
 				distube.filters[message.guildId + args[0]] = filter
-				queue.setFilter(message.guildId + args[0])
+				if (queue.filters.has(message.guildId + args[0])) {
+					queue.filters.remove(message.guildId + args[0])
+				} else {
+					queue.filters.add(message.guildId + args[0])
+				}
 
 				if (config.userConfig.actionMessages) {
 					Embeds.embedBuilderMessage({
@@ -50,7 +55,7 @@ class TLCommand extends Command {
 				Embeds.embedBuilderMessage({
 					client,
 					message,
-					color: "RED",
+					color: "Red",
 					title: "Filter not found",
 					deleteAfter: 10000
 				})

@@ -28,7 +28,7 @@ class TLCommand extends Command {
 	}
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
-		const embed = new Discord.MessageEmbed()
+		const embed = new Discord.EmbedBuilder()
 		// If no arguments are given, print the help message
 		if (args.length === 0) {
 			embed
@@ -38,17 +38,16 @@ class TLCommand extends Command {
 
 			// Create field for each command
 			config.commands.forEach(command => {
-				embed.addField(
-					`\`${command.aliases[0]}\`` + ((!command.onlyExecSubCommands && command.argsUsage.length != 0) ? ` \`${command.argsUsage}\`` : ""),
-					command.description.length > 0 ? (command.subCommands.length > 0 ? command.description + `; Use \`help ${command.aliases[0]}\` to view sub-commands` : command.description) : `Use \`help ${command.aliases[0]}\` for more information`,
-					true
-				)!
+				embed.addFields({
+					name: `\`${command.aliases[0]}\`` + ((!command.onlyExecSubCommands && command.argsUsage.length != 0) ? ` \`${command.argsUsage}\`` : ""),
+					value: command.description.length > 0 ? (command.subCommands.length > 0 ? command.description + `; Use \`help ${command.aliases[0]}\` to view sub-commands` : command.description) : `Use \`help ${command.aliases[0]}\` for more information`,
+				})
 			})
 
 			// Add embed with all filters
 			if (message.guild) {
 				const filters = await config.getFilters(message.guild.id)
-				embed.addField("**FILTERS**", Object.keys(filters).map((filter) => `\`${filter}\``).join(" ") ?? "None")
+				embed.addFields({name: "**FILTERS**", value: Object.keys(filters).map((filter) => `\`${filter}\``).join(" ") ?? "None"})
 			}
 		} else {
 			// If arguments are given, print the help message for the specified command
@@ -58,7 +57,7 @@ class TLCommand extends Command {
 					client: client,
 					message: message,
 					description: "Command not found",
-					color: "RED",
+					color: "Red",
 					deleteAfter: 10000
 				})
 				return
@@ -67,12 +66,13 @@ class TLCommand extends Command {
 			embed
 				.setColor("#fffff0")
 				.setTitle(`**Command**: **"${command.aliases[0]}**"`)
-				.addField("**Aliases**", command.aliases.length > 0 ? command.aliases.map(alias => `\`${alias}\``)?.join("**/**") : "None", false)
-				.addField("**Usage**", `\`${command.argsUsage}\``, false)
-				.addField("**Description**", command.verboseDescription ?? (command.description.length > 0 ? command.description : `Use \`help ${command.aliases[0]}\` for more information`), false)
-
+				.addFields(
+					{name: "**Aliases**", value: command.aliases.length > 0 ? command.aliases.map(alias => `\`${alias}\``)?.join("**/**") : "None"},
+					{name: "**Usage**", value: `\`${command.argsUsage}\``},
+					{name: "**Description**", value: command.verboseDescription ?? (command.description.length > 0 ? command.description : `Use \`help ${command.aliases[0]}\` for more information`)}
+				)
 			if (command.subCommands.length > 0) {
-				embed.addField("**Sub-commands**", command.subCommands.map(subCommand => `\`${subCommand.aliases[0]}\``).join("**/**"), false)
+				embed.addFields({name: "**Sub-commands**", value: command.subCommands.map(subCommand => `\`${subCommand.aliases[0]}\``).join("**/**")})
 			}
 		}
 
