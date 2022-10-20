@@ -1,6 +1,6 @@
 import { SpotifyPlugin } from "@distube/spotify"
 import { YtDlpPlugin } from "@distube/yt-dlp"
-import { DisTube } from "distube"
+import { DisTube, StreamType } from "distube"
 import { Config } from "./config"
 
 import { ActivityType, Client, IntentsBitField, Partials } from "discord.js"
@@ -38,6 +38,7 @@ export async function createClients(config: Config) {
 			leaveOnStop: true,
 			leaveOnFinish: false,
 			leaveOnEmpty: true,
+			streamType: StreamType.OPUS,
 			plugins: config.userConfig.spotify ? [
 				new SpotifyPlugin({
 					api: {

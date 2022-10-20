@@ -41,6 +41,7 @@ class TLCommand extends Command {
 				embed.addFields({
 					name: `\`${command.aliases[0]}\`` + ((!command.onlyExecSubCommands && command.argsUsage.length != 0) ? ` \`${command.argsUsage}\`` : ""),
 					value: command.description.length > 0 ? (command.subCommands.length > 0 ? command.description + `; Use \`help ${command.aliases[0]}\` to view sub-commands` : command.description) : `Use \`help ${command.aliases[0]}\` for more information`,
+					inline: true
 				})
 			})
 

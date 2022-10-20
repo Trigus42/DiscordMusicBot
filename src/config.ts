@@ -6,11 +6,13 @@ import { Collection } from "discord.js"
 import { Playlist } from "./classes/playlist"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
+import * as path from "path"
 
 export class Config {
-	path: string
+	dbPath: string
 	db: Sequelize
 
+	configDir: string
 	userConfig: UserConfig
 	filters: Dict
 	commands: Collection<string, Command> = new Collection()
@@ -18,38 +20,44 @@ export class Config {
 	clientPairs: {discord: Discord.Client, distube: DisTube.DisTube}[] = []
 	timeLastPlayStart: Dict = {}
 
-	/*
+	/**
     * Constructor function to initialize database connection
+	* @param {String} [configDir="config"] - Path of config directory
+	* @param {String|Sequelize} [db="db.sqlite"] - Path of db file or Sequelize object
+	* @param {UserConfig|string} [userConfig="userConfig.json"] - Path of userConfig file or UserConfig object
+	* @param {Dict|string} [filters=filters.json] - Path of filters file or Dict object
+	* @returns {Config} Config object
     */
-	constructor (filename?: string, userConfig?: UserConfig|string, filters?: Dict|string) {
-		// Connect to database
-		this.path = filename ?? "./config/db.sqlite"
-		this.db = new Sequelize({
-			dialect: "sqlite",
-			storage: this.path,
-			logging: false
-		})
+	constructor (configDir?: string, db?: string|Sequelize, userConfig?: UserConfig|string, filters?: Dict|string) {
+		// Default args
+		this.configDir = configDir ? path.normalize(configDir) : "config"
+		db = !db ? path.join(this.configDir, "db.sqlite") : db
+		filters = !filters ? path.join(this.configDir, "filters.json") : filters
+		userConfig = !userConfig ? path.join(this.configDir, "userConfig.json") : userConfig
 
 		// Load user config
-		if (userConfig) {
-			if (typeof userConfig === "string") {
-				this.userConfig = JSON.parse(fs.readFileSync(userConfig, "utf8")) as UserConfig
-			} else {
-				this.userConfig = userConfig
-			}
-		} else {
-			this.userConfig = JSON.parse(fs.readFileSync("./config/userConfig.json", "utf8")) as UserConfig
+		if (typeof userConfig === "string") {
+			fs.mkdirSync(path.dirname(userConfig), {recursive: true})
+			this.userConfig = JSON.parse(fs.readFileSync(path.normalize(userConfig), "utf8")) as UserConfig
+		} else if (typeof userConfig === "object") {
+			this.userConfig = userConfig
 		}
 
 		// Load filters
-		if (filters) {
-			if (typeof filters === "string") {
-				this.filters = JSON.parse(fs.readFileSync(filters, "utf8"))
-			} else {
-				this.filters = filters
-			}
-		} else {
-			this.filters = JSON.parse(fs.readFileSync("./config/filters.json", "utf8"))
+		if (typeof filters === "string") {
+			fs.mkdirSync(path.dirname(filters), {recursive: true})
+			this.filters = JSON.parse(fs.readFileSync(path.normalize(filters), "utf8")) as Dict
+		} else if (typeof filters === "object"){
+			this.filters = filters
+		}
+
+		// Connect to database
+		if (typeof db === "string") {
+			fs.mkdirSync(path.dirname(db), {recursive: true})
+			this.db = new Sequelize({dialect: "sqlite", storage: path.normalize(db), logging: false})
+			this.dbPath = path.normalize(db)
+		} else if (typeof filters === "object"){
+			this.db = db
 		}
 
 		// Don't allow modification of user config
