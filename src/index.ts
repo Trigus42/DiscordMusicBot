@@ -6,16 +6,33 @@ import { registerDistubeEventListeners } from "./events/distubeEventListeners"
 import { registerDiscordEventListeners } from "./events/discordEventListeners"
 import * as fs from "fs"
 import * as path from "path"
-import * as os from "os"
+
+function exit(event: any, config: Config) {
+	console.warn(event)
+	console.log("Shutting down!")
+	config.clientPairs.forEach(clientPair => {clientPair.discord.destroy()})
+	config.db.close()
+	process.exit(1)
+}
 
 async function main(): Promise<void> {
 	// Create config object
 	const config = new Config(process.env.CONFIG_DIR, process.env.DB_PATH, process.env.USER_CONFIG_PATH, process.env.FILTERS_PATH)
 
-	// Create discord.js and distube client pairs
-	config.clientPairs = await createClients(config)
+	// Graceful shutdown
+	Object.keys({
+		'SIGHUP': 1,
+		'SIGINT': 2,
+		'SIGTERM': 15
+	}).forEach((signal) => {
+		process.on(signal, event => exit(event, config))
+	})
+	process.on('uncaughtException', error => exit(error, config))
 
-	// Read commands from commands directory
+	// Create discord.js and distube client pairs
+	config.clientPairs = await createClients(config.userConfig.tokens, config.userConfig)
+
+	// Load commands from commands directory
 	config.commands = new Collection() as Collection<string, Command>
 	const commandsPath = path.join(__dirname, "commands")
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith(".ts") || file.endsWith(".js"))
@@ -27,6 +44,7 @@ async function main(): Promise<void> {
 		config.commands.set(command.aliases[0], command)
 	}
 
+	// Drop privileges in docker or warn if root
 	if (process.getuid() == 0 || process.getgid() == 0) {
 		if (process.env.HOST == "docker") {
 			try {
@@ -42,6 +60,7 @@ async function main(): Promise<void> {
 		}
 	}
 
+	// Start listeners
 	registerDistubeEventListeners(config)
 	registerDiscordEventListeners(config)
 }

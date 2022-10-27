@@ -1,20 +1,21 @@
 import { SpotifyPlugin } from "@distube/spotify"
 import { YtDlpPlugin } from "@distube/yt-dlp"
 import { DisTube, StreamType } from "distube"
-import { Config } from "./config"
 
 import { ActivityType, Client, IntentsBitField, Partials } from "discord.js"
+import { UserConfig } from "./interfaces"
 
 /**
    * Returns an array of available discord client and distube instance pairs.
    *
-   * @param config - Bot config object
+   * @param tokens - List of Discord bot tokens
+   * @param userConfig - UserConfig object
    * @returns Client pair array (client, distube)
    *
-   */
-export async function createClients(config: Config) {
+*/
+export async function createClients(tokens: string[], userConfig?: UserConfig) {
 	const clientPairs: {discord: Client, distube: DisTube}[] = []
-	for (const token of config.userConfig.tokens) {
+	for (const token of tokens) {
 
 		// Discord client
 		const discord = new Client({
@@ -30,20 +31,19 @@ export async function createClients(config: Config) {
 
 		// Distube instance
 		const distube = new DisTube(discord, {
-			youtubeCookie: config.userConfig.youtubeCookie ?? undefined,
-			youtubeIdentityToken: config.userConfig.youtubeIdentityToken ?? undefined,
-			nsfw: config.userConfig.nsfw ?? false,
-			customFilters: config.filters,
+			youtubeCookie: userConfig.youtubeCookie ?? undefined,
+			youtubeIdentityToken: userConfig.youtubeIdentityToken ?? undefined,
+			nsfw: userConfig.nsfw ?? false,
 			searchSongs: 10, 
 			leaveOnStop: true,
 			leaveOnFinish: false,
 			leaveOnEmpty: true,
 			streamType: StreamType.OPUS,
-			plugins: config.userConfig.spotify ? [
+			plugins: userConfig.spotify ? [
 				new SpotifyPlugin({
 					api: {
-                		clientId: config.userConfig.spotify.clientId,
-                		clientSecret: config.userConfig.spotify.clientSecret},
+                		clientId: userConfig.spotify.clientId,
+                		clientSecret: userConfig.spotify.clientSecret},
             		parallel: true,
                 	emitEventsAfterFetching: true}),
 				new YtDlpPlugin()

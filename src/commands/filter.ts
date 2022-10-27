@@ -12,7 +12,7 @@ class TLCommand extends Command {
 	public enabled = true
 	public guildOnly = true
 	public needsArgs = true
-	public subCommands: Command[] = [
+	public subCommands = [
 		new AddFilterCommand(),
 		new DelFilterCommand(),
 	]

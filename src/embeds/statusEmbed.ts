@@ -65,51 +65,37 @@ export async function statusEmbed(queue: DisTube.Queue, config: Config, song?: D
 
 		// Collect button interactions
 		const collector = embedMessage.createMessageComponentCollector()
-		collector.on("collect", async (interaction: any) => {
+		collector.on("collect", async (interaction) => {
 			// Needed for some reason, otherwise you get the message "This interaction failed" although it works fine
 			interaction.deferUpdate()
-
-			// Check if user is in the voice channel
-			if (!queue.voiceChannel.members.has(interaction.member.user.id)) {return}
 
 			switch (interaction.customId) {
 				case "playpause":
 					if (queue.playing) {
-						queue.pause()
-						statusEmbed(queue, config, song, "Paused")
+						config.commands.get("pause").handler(embedMessage, [], {discord: queue.client, distube: queue.distube}, config, interaction.member)
 					} else {
-						queue.resume()
-						statusEmbed(queue, config, song)
+						config.commands.get("resume").handler(embedMessage, [], {discord: queue.client, distube: queue.distube}, config, interaction.member)
 					}
 					return
 
 				case "tracknext":
-					if (!queue.autoplay && queue.songs.length <= 1) {
-						queue.stop()
-						queue.emit("finish", queue)
-					} else {
-						await queue.skip()
-					}
+					config.commands.get("skip").handler(embedMessage, [], {discord: queue.client, distube: queue.distube}, config, interaction.member)
 					return
 
 				case "trackback":
-					queue.previous().catch(error => {
-						queue.seek(0)
-					})
+					config.commands.get("jump").handler(embedMessage, ["-1"], {discord: queue.client, distube: queue.distube}, config, interaction.member)
 					return
 
 				case "seek_backward":
 					var seektime = queue.currentTime - 10
 					if (seektime < 0) {seektime = 0}
-					queue.seek(Number(seektime))
-					statusEmbed(queue, config, song)
+					config.commands.get("seek").handler(embedMessage, [seektime.toString()], {discord: queue.client, distube: queue.distube}, config, interaction.member)
 					return
 
 				case "seek_forward":
 					var seektime = queue.currentTime + 10
 					if (seektime >= queue.songs[0].duration) { seektime = queue.songs[0].duration - 1 }
-					queue.seek(Number(seektime))
-					statusEmbed(queue, config, song)
+					config.commands.get("seek").handler(embedMessage, [seektime.toString()], {discord: queue.client, distube: queue.distube}, config, interaction.member)
 					return
 			}
 		})

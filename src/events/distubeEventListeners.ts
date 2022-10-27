@@ -16,6 +16,7 @@ export function registerDistubeEventListeners(config: Config) {
 				Embeds.statusEmbed(queue, config, song)
 				const start = config.startTimes.get(song.member.guild.id + song.member.voice.channelId + song.id)
 				if (start) queue.seek(start)
+				config.startTimes.delete(song.member.guild.id + song.member.voice.channelId + song.id)
 			})
 			.on("addSong", async (queue, song) => {
 				Embeds.songEmbed(queue, song)
@@ -29,41 +30,6 @@ export function registerDistubeEventListeners(config: Config) {
 					description: 
                     `Playlist: [\`${playlist.name}\`](${playlist.url})  -  \`${playlist.songs.length} songs\`` +
                     `\n\nRequested by: ${playlist.user}`, thumbnail: playlist.thumbnail
-				})
-			})
-			.on("searchResult", async (message, results) => {
-				let resultListStr
-				try {
-					resultListStr = (results as DisTube.SearchResultVideo[]).map(
-						result => `**${++i}**. [${result.name}](${result.url}) - \`${result.formattedDuration}\``
-					).join("\n")
-				} catch (error) {
-					resultListStr = results.map(
-						result => `**${++i}**. [${result.name}](${result.url})`
-					).join("\n")
-				}
-
-				let i = 0
-				Embeds.embedBuilderMessage({
-					client: distube.client,
-					message, 
-					color: "#fffff0",
-					title: "",
-					description:
-                    "**Choose an option from below**\n" +
-                    resultListStr +
-                    "\n*Enter anything else or wait 60 seconds to cancel*"
-				})
-			})
-			.on("searchCancel", async message => {
-				message.reactions.resolve("✅")?.users.remove(distube.client.user?.id)
-				message.react("❌")
-				Embeds.embedBuilderMessage({
-					client: distube.client,
-					message,
-					color: "Red",
-					title: "Searching canceled",
-					description: ""
 				})
 			})
 			.on("error", async (channel, error) => {
@@ -90,7 +56,7 @@ export function registerDistubeEventListeners(config: Config) {
 				})
 			})
 			.on("empty", async queue => {
-				Embeds.embedBuilder({
+				Embeds.embedBuilder({	
 					client: distube.client,
 					channel: queue.textChannel!,
 					color: "Red",

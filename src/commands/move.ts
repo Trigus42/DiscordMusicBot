@@ -1,7 +1,6 @@
 import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
-import { Dict } from "../interfaces"
 import * as Embeds from "../embeds"
 import { Config } from "../config"
 
@@ -21,7 +20,7 @@ class TLCommand extends Command {
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message)
 
-		if (isNaN(Number(args[0])) || isNaN(Number(args[1])) || Math.abs(Number(args[0])) > queue.songs.length || Math.abs(Number(args[0])) > queue.songs.length) {
+		if (isNaN(Number(args[0])) || isNaN(Number(args[1])) || Number(args[0])+1 > queue.songs.length || Number(args[0]) < -queue.songs.length) {
 			message.react("❌")
 			Embeds.embedBuilderMessage({
 				client,

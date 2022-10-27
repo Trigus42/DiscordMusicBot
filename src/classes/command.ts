@@ -23,14 +23,18 @@ export class Command {
 	public subCommands: Command[] = []
 	public verboseDescription: string = null
 
-	public async handler(message: Discord.Message, args: string[], receivingClientPair: {discord: Discord.Client, distube: DisTube.DisTube}, config: Config) {
+	public async handler(message: Discord.Message, args: string[], receivingClientPair: {discord: Discord.Client, distube: DisTube.DisTube}, config: Config, member?: Discord.GuildMember) {
 		if (!this.enabled) return
+
+		// Defaults
+		member = member ?? message.member
+		const author = member.user ?? message.author 
 	
 		// Handle subcommands
 		if (this.subCommands.length > 0 && args[0]) {
 			const subCommand = this.subCommands.find(subCommand => subCommand.aliases.includes(args[0]))
 			if (subCommand) {
-				subCommand.handler(message, args.slice(1), receivingClientPair, config)
+				subCommand.handler(message, args.slice(1), receivingClientPair, config, member)
 				return
 			}
 		}
@@ -43,20 +47,20 @@ export class Command {
 		if (this.guildOnly && !message.guild) {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "This Command can only be used in a server" })
 			return
-		} else if (this.ownerOnly && !(message.author.id === config.userConfig.ownerId)) {
+		} else if (this.ownerOnly && !(author.id === config.userConfig.ownerId)) {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "You don't have permission for this command" })
 			return
-		} else if (this.adminOnly && !message.member?.permissions.has(Discord.PermissionFlagsBits.Administrator) && !(message.author.id === config.userConfig.ownerId)) {
+		} else if (this.adminOnly && !member?.permissions.has(Discord.PermissionFlagsBits.Administrator) && !(author.id === config.userConfig.ownerId)) {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "You don't have permission for this command" })
 			return
-		} else if ((this.needsUserInVC || this.needsQueue) && !message.member?.voice.channel) {
+		} else if ((this.needsUserInVC || this.needsQueue) && !member?.voice.channel) {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "You need to be in a voice channel to use this command" })
 			return
 		} else if (this.needsArgs && !args.length) {
 			Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: `You didn't provide any arguments for the ${this.aliases[0]} command` })
 			return
-		} else if (message.author.id in this.cooldowns) {
-			const expirationTime = this.cooldowns[message.author.id]
+		} else if (author.id in this.cooldowns) {
+			const expirationTime = this.cooldowns[author.id]
 			if (expirationTime > Date.now()) {
 				const timeLeft = (expirationTime - Date.now()) / 1000
 				Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: `You can use this command again in ${timeLeft.toFixed(1)} seconds` })
@@ -64,7 +68,7 @@ export class Command {
 			}
 		} else {
 			// 500 ms default cooldown for all commands
-			this.cooldowns[message.author.id] = Date.now() + (this.cooldown >= 0 ? this.cooldown : 500)
+			this.cooldowns[author.id] = Date.now() + (this.cooldown >= 0 ? this.cooldown : 500)
 		}
 	
 		// Guilds
@@ -74,7 +78,7 @@ export class Command {
 				// Get pair of client and distube for the members voice channel or use a new pair if member is in a new voice channel
 				const chosenClientPair = config.clientPairs.find(clientPair =>
 					clientPair.distube.getQueue(message.guildId!) ? // Check if client has a queue
-						clientPair.distube.getQueue(message.guildId!)?.voiceChannel?.id === message.member!.voice.channel!.id : false // Check if client queue is in the same voice channel as the message author
+						clientPair.distube.getQueue(message.guildId!)?.voiceChannel?.id === member!.voice.channel!.id : false // Check if client queue is in the same voice channel as the message author
 				) ?? config.clientPairs.find(clientPair => // If no client has been found, use a new client
 					!clientPair.distube.getQueue(message.guildId!) // Check if client has no queue
 					&& clientPair.discord.guilds.fetch().then(guilds => guilds.has(message.guildId!)) // Check if client is in the same guild as the message author
@@ -92,7 +96,7 @@ export class Command {
 					queue.textChannel = message.channel as Discord.TextChannel
 				}
 	
-				if (this.needsQueue && !chosenClientPair.distube.getQueue(message.guildId)) {
+				if (this.needsQueue && (!chosenClientPair.distube.getQueue(message.guildId) || !(chosenClientPair.distube.getQueue(message.guildId).songs.length > 0))) {
 					Embeds.embedBuilderMessage({ client: receivingClientPair.discord, message, color: "Red", title: "There is nothing playing in the queue" })
 					return
 				}
