@@ -2,7 +2,7 @@ import { Collection } from "discord.js"
 import { Command } from "./classes/command"
 import { Config } from "./config"
 import { createClients } from "./createClients"
-import { registerDistubeEventListeners } from "./events/distubeEventListeners"
+import { registerPlayerEventListeners } from "./events/playerEventListeners"
 import { registerDiscordEventListeners } from "./events/discordEventListeners"
 import * as fs from "fs"
 import * as path from "path"
@@ -10,7 +10,7 @@ import * as path from "path"
 function exit(event: any, config: Config) {
 	console.warn(event)
 	console.log("Shutting down!")
-	config.clientPairs.forEach(clientPair => {clientPair.discord.destroy()})
+	config.clients.forEach(client => {client.destroy()})
 	config.db.close()
 	process.exit(1)
 }
@@ -29,8 +29,8 @@ async function main(): Promise<void> {
 	})
 	process.on('uncaughtException', error => exit(error, config))
 
-	// Create discord.js and distube client pairs
-	config.clientPairs = await createClients(config.userConfig.tokens, config.userConfig)
+	// Create clients
+	config.clients = await createClients(config.userConfig.tokens)
 
 	// Load commands from commands directory
 	config.commands = new Collection() as Collection<string, Command>
@@ -61,7 +61,7 @@ async function main(): Promise<void> {
 	}
 
 	// Start listeners
-	registerDistubeEventListeners(config)
+	registerPlayerEventListeners(config)
 	registerDiscordEventListeners(config)
 }
 

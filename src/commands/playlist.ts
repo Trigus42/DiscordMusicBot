@@ -1,7 +1,7 @@
 import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
-import { Dict } from "../interfaces"
+import { Dict } from "../interfaces/structs"
 import { Config } from "../config"
 import { embedBuilderMessage } from "../embeds"
 
@@ -167,7 +167,7 @@ class PlaylistPlayCommand extends Command {
 	public enabled = true
 	public guildOnly = true
 	public needsArgs = true
-	public needsUserInVC = true
+	public needsClientInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const playlist = await config.getPlaylist(message.author.id, args[0])

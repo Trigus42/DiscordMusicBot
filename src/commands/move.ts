@@ -11,7 +11,7 @@ class TLCommand extends Command {
 	public enabled = true
 	public guildOnly = true
 	public needsArgs = true
-	public needsUserInVC = true
+	public needsClientInVC = true
 	public verboseDescription = 
 		"This command moves a song from one position to another in the queue. " +
 		"The song at the `<from>` position will be moved to the `<to>` position, and the song that was previously at the `<to>` position will be moved back by one.\n" +

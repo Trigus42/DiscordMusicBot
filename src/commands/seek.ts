@@ -1,7 +1,7 @@
 import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
-import { Dict } from "../interfaces"
+import { Dict } from "../interfaces/structs"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
 
@@ -12,8 +12,8 @@ class TLCommand extends Command {
 	public enabled = true
 	public guildOnly = true
 	public needsArgs = true
-	public needsQueue = true
-	public needsUserInVC = true
+	public needsNonEmptyQueue = true
+	public needsClientInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		// Get time in seconds from HH:MM:SS time_string

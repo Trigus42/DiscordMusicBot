@@ -3,7 +3,7 @@ import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
-import { Dict } from "../interfaces"
+import { Dict } from "../interfaces/structs"
 
 class TLCommand extends Command {
 	public aliases: string[] = ["filter", "f"]

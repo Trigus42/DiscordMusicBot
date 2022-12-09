@@ -1,10 +1,10 @@
 import * as fs from "fs"
 import { Sequelize, DataTypes, Model } from "sequelize"
-import { UserConfig, Dict } from "./interfaces"
+import { UserConfig, Dict } from "./interfaces/structs"
 import { Command } from "./classes/command"
 import { Collection } from "discord.js"
 import { Playlist } from "./classes/playlist"
-import * as DisTube from "distube"
+import { Player } from "./player"
 import * as Discord from "discord.js"
 import * as path from "path"
 
@@ -17,7 +17,8 @@ export class Config {
 	filters: Dict
 	commands: Collection<string, Command> = new Collection()
 	startTimes: Collection<string, number> = new Collection()
-	clientPairs: {discord: Discord.Client, distube: DisTube.DisTube}[] = []
+	clients: Discord.Client[] = []
+	activeQueues: Map<string, Player[]> = new Map<string, Player[]>()
 	timeLastPlayStart: Dict = {}
 
 	/**

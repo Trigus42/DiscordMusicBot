@@ -8,8 +8,8 @@ class TLCommand extends Command {
 	public aliases: string[] = ["queue", "qu"]
 	public description = "Show the current queue"
 	public enabled = true
-	public needsQueue = true
-	public needsUserInVC = true
+	public needsNonEmptyQueue = true
+	public needsClientInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube: DisTube.DisTube) {
 		const queue = distube.getQueue(message)

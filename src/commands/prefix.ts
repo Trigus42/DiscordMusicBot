@@ -3,7 +3,7 @@ import * as DisTube from "distube"
 import * as Discord from "discord.js"
 import * as Embeds from "../embeds"
 import { Config } from "../config"
-import { Dict } from "../interfaces"
+import { Dict } from "../interfaces/structs"
 
 class TLCommand extends Command {
 	public adminOnly = true

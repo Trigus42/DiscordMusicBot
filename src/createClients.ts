@@ -1,20 +1,15 @@
-import { SpotifyPlugin } from "@distube/spotify"
-import { YtDlpPlugin } from "@distube/yt-dlp"
-import { DisTube, StreamType } from "distube"
-
 import { ActivityType, Client, IntentsBitField, Partials } from "discord.js"
-import { UserConfig } from "./interfaces"
+import { UserConfig } from "./interfaces/structs"
 
 /**
-   * Returns an array of available discord client and distube instance pairs.
+   * Returns an array of available discord clients
    *
    * @param tokens - List of Discord bot tokens
-   * @param userConfig - UserConfig object
-   * @returns Client pair array (client, distube)
+   * @returns Client array
    *
 */
-export async function createClients(tokens: string[], userConfig?: UserConfig) {
-	const clientPairs: {discord: Client, distube: DisTube}[] = []
+export async function createClients(tokens: string[]) {
+	const clients: Client[] = []
 	for (const token of tokens) {
 
 		// Discord client
@@ -28,29 +23,6 @@ export async function createClients(tokens: string[], userConfig?: UserConfig) {
 			partials: [Partials.Channel]
 		})
 		discord.login(token)
-
-		// Distube instance
-		const distube = new DisTube(discord, {
-			youtubeCookie: userConfig.youtubeCookie ?? undefined,
-			youtubeIdentityToken: userConfig.youtubeIdentityToken ?? undefined,
-			nsfw: userConfig.nsfw ?? false,
-			searchSongs: 10, 
-			leaveOnStop: true,
-			leaveOnFinish: false,
-			leaveOnEmpty: true,
-			streamType: StreamType.OPUS,
-			plugins: userConfig.spotify ? [
-				new SpotifyPlugin({
-					api: {
-                		clientId: userConfig.spotify.clientId,
-                		clientSecret: userConfig.spotify.clientSecret},
-            		parallel: true,
-                	emitEventsAfterFetching: true}),
-				new YtDlpPlugin()
-			] : [
-				new YtDlpPlugin()
-			]
-		})
 
 		// Log when the bot is ready
 		discord.on("ready", async () => {
@@ -78,8 +50,8 @@ export async function createClients(tokens: string[], userConfig?: UserConfig) {
 			discord.user?.setPresence({ status: "invisible" })
 		})
         
-		clientPairs.push({discord: discord, distube: distube})
+		clients.push(discord)
 	}
 
-	return clientPairs
+	return clients
 }

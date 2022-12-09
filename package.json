@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "![image](https://user-images.githubusercontent.com/59501676/171850080-4e151cec-13b7-49c6-ba51-827adcbb4cfc.png)",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
@@ -25,13 +26,14 @@
     "@distube/yt-dlp": "^1.1.3",
     "axios": "^1.1.3",
     "discord.js": "^14.6.0",
-    "distube": "^4.0.4",
+    "got": "^12.5.3",
     "opusscript": "^0.0.8",
     "patch-package": "^6.4.7",
     "sequelize": "^6.25.2",
     "sodium": "^3.0.2",
     "sqlite3": "^5.1.2",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "youtube-dl-exec": "^2.1.10"
   },
   "devDependencies": {
     "@types/node": "^18.11.1",

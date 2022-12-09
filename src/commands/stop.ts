@@ -1,7 +1,7 @@
 import { Command } from "../classes/command"
 import * as DisTube from "distube"
 import * as Discord from "discord.js"
-import { Dict } from "../interfaces"
+import { Dict } from "../interfaces/structs"
 import { Config } from "../config"
 import * as Embeds from "../embeds"
 
@@ -10,8 +10,8 @@ class TLCommand extends Command {
 	public description = "Stop playing music and clear the queue"
 	public enabled = true
 	public guildOnly = true
-	public needsQueue = true
-	public needsUserInVC = true
+	public needsNonEmptyQueue = true
+	public needsClientInVC = true
 
 	public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message.guildId!)

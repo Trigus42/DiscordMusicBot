@@ -10,8 +10,8 @@ class TLCommand extends Command {
 	public enabled = true
 	public guildOnly = true
 	public needsArgs = false
-	public needsQueue = true
-	public needsUserInVC = true
+	public needsNonEmptyQueue = true
+	public needsClientInVC = true
 
     public async execute (message: Discord.Message, args: string[], client: Discord.Client, distube?: DisTube.DisTube, config?: Config) {
 		const queue = distube.getQueue(message)
